@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using mixpanel;
 using Nekoyume.Battle;
 using Nekoyume.BlockChain;
 using Nekoyume.Game.Character;
@@ -604,7 +603,7 @@ namespace Nekoyume.Game
             var characterSheet = Game.instance.TableSheets.CharacterSheet;
             var costumeStatSheet = Game.instance.TableSheets.CostumeStatSheet;
             var cp = CPHelper.GetCPV2(States.Instance.CurrentAvatarState, characterSheet, costumeStatSheet);
-            var props = new Value
+            var props = new Dictionary<string, object>
             {
                 ["StageId"] = log.stageId,
                 ["ClearedWave"] = log.clearedWaveNumber,

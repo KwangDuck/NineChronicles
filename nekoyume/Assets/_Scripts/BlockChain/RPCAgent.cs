@@ -513,5 +513,14 @@ namespace Nekoyume.BlockChain
 
         public bool IsTxStaged(TxId txId) =>
             _service.IsTransactionStaged(txId.ToByteArray()).ResponseAsync.Result;
+
+        public IObservable<ActionBase.ActionEvaluation<T>> RequestAction<T>(T action) where T : GameAction
+        {
+            // TODO: implementation
+            return Observable.Return(new ActionBase.ActionEvaluation<T>
+            {
+                Action = action
+            });
+        }
     }
 }

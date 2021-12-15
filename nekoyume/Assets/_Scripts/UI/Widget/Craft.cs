@@ -255,7 +255,10 @@ namespace Nekoyume.UI
             }
 
             var stageId = row.UnlockStage;
-            SharedModel.NotifiedRow.Value = clearedStage >= stageId ? row : null;
+            if (SharedModel.NotifiedRow != null)
+            {
+                SharedModel.NotifiedRow.Value = clearedStage >= stageId ? row : null;
+            }            
         }
 
         private void CombinationEquipmentAction(SubRecipeView.RecipeInfo recipeInfo)

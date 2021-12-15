@@ -80,7 +80,7 @@ namespace Nekoyume.UI
 
         public async void ShowAsync(RectTransform target, Address avatarAddress)
         {
-            var (exist, avatarState) = await States.TryGetAvatarStateAsync(avatarAddress);
+            var (exist, avatarState) = States.TryGetAvatarState(avatarAddress);
             if (!exist)
             {
                 return;

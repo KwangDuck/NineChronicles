@@ -10,7 +10,6 @@ using TMPro;
 using UnityEngine.UI;
 using Nekoyume.Model.State;
 using System.Collections;
-using mixpanel;
 using Nekoyume.Game;
 using Nekoyume.Helper;
 using Nekoyume.L10n;
@@ -96,14 +95,12 @@ namespace Nekoyume.UI
             Find<GrayLoadingScreen>().Show();
 
             Game.Game.instance.ActionManager
-                .CreateAvatar(_selectedIndex, nickName, _hair,
-                    _lens, _ear, _tail)
+                .CreateAvatar(_selectedIndex, nickName, _hair, _lens, _ear, _tail)
                 .Subscribe(async eval =>
                     {
-                        var avatarState = await States.Instance.SelectAvatarAsync(_selectedIndex);
+                        var avatarState = States.Instance.SelectAvatar(_selectedIndex);
                         StartCoroutine(CreateAndLoginAnimation(avatarState));
-                        ActionRenderHandler.RenderQuest(avatarState.address,
-                            avatarState.questList.completedQuestIds);
+                        ActionRenderHandler.RenderQuest(avatarState.address, avatarState.questList.completedQuestIds);
                     },
                     e =>
                     {
@@ -129,7 +126,7 @@ namespace Nekoyume.UI
         public async void LoginClick()
         {
             btnLogin.SetActive(false);
-            var avatarState = await States.Instance.SelectAvatarAsync(_selectedIndex);
+            var avatarState = States.Instance.SelectAvatar(_selectedIndex);
             OnDidAvatarStateLoaded(avatarState);
             AudioController.PlayClick();
         }
@@ -155,7 +152,7 @@ namespace Nekoyume.UI
             }
             else
             {
-                await States.Instance.SelectAvatarAsync(_selectedIndex);
+                States.Instance.SelectAvatar(_selectedIndex);
                 player = new Player(
                     States.Instance.CurrentAvatarState,
                     tableSheets.CharacterSheet,

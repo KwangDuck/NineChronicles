@@ -109,7 +109,7 @@ namespace Nekoyume.State
 
             foreach (var pair in AgentState.avatarAddresses)
             {
-                await AddOrReplaceAvatarStateAsync(pair.Value, pair.Key);
+                AddOrReplaceAvatarState(pair.Value, pair.Key);
             }
         }
 
@@ -125,100 +125,30 @@ namespace Nekoyume.State
             AgentStateSubject.OnNextGold(GoldBalanceState.Gold);
         }
 
-        public async UniTask<AvatarState> AddOrReplaceAvatarStateAsync(
-            Address avatarAddress,
-            int index,
-            bool initializeReactiveState = true)
+        public AvatarState AddOrReplaceAvatarState(Address avatarAddress, int index, bool initializeReactiveState = true)
         {
-            var (exist, avatarState) = await TryGetAvatarStateAsync(avatarAddress, true);
+            var (exist, avatarState) = TryGetAvatarState(avatarAddress, true);
             if (exist)
             {
-                await AddOrReplaceAvatarStateAsync(avatarState, index, initializeReactiveState);
+                AddOrReplaceAvatarState(avatarState, index, initializeReactiveState);
             }
 
             return null;
         }
 
-        public static async UniTask<(bool exist, AvatarState avatarState)> TryGetAvatarStateAsync(Address address) =>
-            await TryGetAvatarStateAsync(address, false);
-
-
-        public static async UniTask<(bool exist, AvatarState avatarState)> TryGetAvatarStateAsync(Address address, bool allowBrokenState)
+        public static (bool exist, AvatarState avatarState) TryGetAvatarState(Address address, bool allowBrokenState = true)
         {
-            AvatarState avatarState = null;
-            bool exist = false;
-            try
-            {
-                avatarState = await GetAvatarStateAsync(address, allowBrokenState);
-                exist = true;
-            }
-            catch (Exception e)
-            {
-                Debug.LogWarning($"{e.GetType().FullName}: {e.Message} address({address.ToHex()})\n{e.StackTrace}");
-            }
-
-            return (exist, avatarState);
+            var state = States.Instance.AvatarStates.Values.FirstOrDefault(state => address.Equals(state.address));
+            return (state != null, state);
         }
 
-        private static async UniTask<AvatarState> GetAvatarStateAsync(Address address, bool allowBrokenState)
-        {
-            var agent = Game.Game.instance.Agent;
-            var avatarStateValue = await agent.GetStateAsync(address);
-            if (!(avatarStateValue is Bencodex.Types.Dictionary dict))
-            {
-                Debug.LogWarning("Failed to get AvatarState");
-                throw new FailedLoadStateException($"Failed to get AvatarState: {address.ToHex()}");
-            }
-
-            if (dict.ContainsKey(LegacyNameKey))
-            {
-                return new AvatarState(dict);
-            }
-
-            foreach (var key in new[]
-            {
-                LegacyInventoryKey,
-                LegacyWorldInformationKey,
-                LegacyQuestListKey,
-            })
-            {
-                var address2 = address.Derive(key);
-                var value = await agent.GetStateAsync(address2);
-                if (value is null)
-                {
-                    if (allowBrokenState &&
-                        dict.ContainsKey(key))
-                    {
-                        dict = new Bencodex.Types.Dictionary(dict.Remove((Text)key));
-                    }
-
-                    continue;
-                }
-
-                dict = dict.SetItem(key, value);
-            }
-
-            return new AvatarState(dict);
-        }
-
-        /// <summary>
-        /// 아바타 상태를 할당한다.
-        /// 로컬 세팅을 거친 상태가 최종적으로 할당된다.
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="index"></param>
-        /// <param name="initializeReactiveState"></param>
-        public async UniTask<AvatarState> AddOrReplaceAvatarStateAsync(AvatarState state, int index, bool initializeReactiveState = true)
+        public AvatarState AddOrReplaceAvatarState(AvatarState state, int index, bool initializeReactiveState = true)
         {
             if (state is null)
             {
-                Debug.LogWarning($"[{nameof(States)}.{nameof(AddOrReplaceAvatarStateAsync)}] {nameof(state)} is null.");
+                Debug.LogWarning($"[{nameof(States)}.{nameof(AddOrReplaceAvatarState)}] {nameof(state)} is null.");
                 return null;
             }
-
-            if (AgentState is null || !AgentState.avatarAddresses.ContainsValue(state.address))
-                throw new Exception(
-                    $"`AgentState` is null or not found avatar's address({state.address}) in `AgentState`");
 
             state = LocalLayer.Instance.Modify(state);
 
@@ -230,26 +160,15 @@ namespace Nekoyume.State
             {
                 _avatarStates.Add(index, state);
             }
-
-            if (index == CurrentAvatarKey)
-            {
-                return await UniTask.Run(async () => await SelectAvatarAsync(index, initializeReactiveState));
-            }
-
             return state;
         }
 
-        /// <summary>
-        /// 인자로 받은 인덱스의 아바타 상태를 제거한다.
-        /// </summary>
-        /// <param name="index"></param>
-        /// <exception cref="KeyNotFoundException"></exception>
         public void RemoveAvatarState(int index)
         {
-            if (!_avatarStates.ContainsKey(index))
-                throw new KeyNotFoundException($"{nameof(index)}({index})");
-
-            _avatarStates.Remove(index);
+            if (_avatarStates.ContainsKey(index))
+            {
+                _avatarStates.Remove(index);
+            }
 
             if (index == CurrentAvatarKey)
             {
@@ -257,14 +176,7 @@ namespace Nekoyume.State
             }
         }
 
-        /// <summary>
-        /// 인자로 받은 인덱스의 아바타 상태를 선택한다.
-        /// </summary>
-        /// <param name="index"></param>
-        /// <param name="initializeReactiveState"></param>
-        /// <returns></returns>
-        /// <exception cref="KeyNotFoundException"></exception>
-        public async UniTask<AvatarState> SelectAvatarAsync(int index, bool initializeReactiveState = true)
+        public AvatarState SelectAvatar(int index, bool initializeReactiveState = true)
         {
             if (!_avatarStates.ContainsKey(index))
             {
@@ -281,30 +193,18 @@ namespace Nekoyume.State
             if (isNew)
             {
                 _combinationSlotStates.Clear();
-                await UniTask.Run(async () =>
+
+                var (exist, curAvatarState) = TryGetAvatarState(avatarState.address);
+                if (exist)
                 {
-                    var (exist, curAvatarState) = await TryGetAvatarStateAsync(avatarState.address);
-                    if (!exist)
-                    {
-                        return;
-                    }
-
-                    await SetCombinationSlotStatesAsync(curAvatarState);
-                    await AddOrReplaceAvatarStateAsync(curAvatarState, CurrentAvatarKey);
-                });
-            }
-
-            if (Game.Game.instance.Agent is RPCAgent agent)
-            {
-                agent.UpdateSubscribeAddresses();
+                    SetCombinationSlotStates(curAvatarState);
+                    AddOrReplaceAvatarState(curAvatarState, CurrentAvatarKey);
+                }
             }
 
             return CurrentAvatarState;
         }
 
-        /// <summary>
-        /// 아바타 상태 선택을 해지한다.
-        /// </summary>
         public void DeselectAvatar()
         {
             CurrentAvatarKey = -1;
@@ -312,7 +212,7 @@ namespace Nekoyume.State
             UpdateCurrentAvatarState(null);
         }
 
-        private async UniTask SetCombinationSlotStatesAsync(AvatarState avatarState)
+        private void SetCombinationSlotStates(AvatarState avatarState)
         {
             if (avatarState is null)
             {
@@ -330,9 +230,9 @@ namespace Nekoyume.State
                         i
                     )
                 );
-                var stateValue = await Game.Game.instance.Agent.GetStateAsync(slotAddress);
-                var state = new CombinationSlotState((Dictionary) stateValue);
-                UpdateCombinationSlotState(i, state);
+                //var stateValue = await Game.Game.instance.Agent.GetStateAsync(slotAddress);
+                //var state = new CombinationSlotState((Dictionary)stateValue);
+                //UpdateCombinationSlotState(i, state);
             }
         }
 
@@ -371,7 +271,7 @@ namespace Nekoyume.State
         /// <summary>
         /// `CurrentAvatarKey`에 따라서 `CurrentAvatarState`를 업데이트 한다.
         /// </summary>
-        private void UpdateCurrentAvatarState(AvatarState state, bool initializeReactiveState = true)
+        public void UpdateCurrentAvatarState(AvatarState state, bool initializeReactiveState = true)
         {
             CurrentAvatarState = state;
 

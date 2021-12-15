@@ -83,7 +83,7 @@ namespace Nekoyume.BlockChain
             var avatarAddress = States.Instance.AgentState.avatarAddresses[index];
             if (evaluation.OutputStates.TryGetAvatarStateV2(agentAddress, avatarAddress, out var avatarState))
             {
-                await UpdateAvatarState(avatarState, index);
+                UpdateAvatarState(avatarState, index);
             }
         }
 
@@ -119,8 +119,10 @@ namespace Nekoyume.BlockChain
             States.Instance.SetGoldBalanceState(goldBalanceState);
         }
 
-        private static UniTask UpdateAvatarState(AvatarState avatarState, int index) =>
-            States.Instance.AddOrReplaceAvatarStateAsync(avatarState, index);
+        private static void UpdateAvatarState(AvatarState avatarState, int index)
+        {
+            States.Instance.AddOrReplaceAvatarState(avatarState, index);
+        }            
 
         public async UniTask UpdateCurrentAvatarStateAsync(AvatarState avatarState)
         {
@@ -150,7 +152,7 @@ namespace Nekoyume.BlockChain
                 }
             }
 
-            await UpdateAvatarState(avatarState, States.Instance.CurrentAvatarKey);
+            UpdateAvatarState(avatarState, States.Instance.CurrentAvatarKey);
         }
     }
 }

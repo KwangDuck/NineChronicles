@@ -9,7 +9,6 @@ using Nekoyume.UI.Module;
 using Nekoyume.Model.BattleStatus;
 using UnityEngine;
 using Random = UnityEngine.Random;
-using mixpanel;
 using Nekoyume.L10n;
 using Nekoyume.Model.Mail;
 using Nekoyume.Model.State;
@@ -139,7 +138,7 @@ namespace Nekoyume.UI
             Game.Game.instance.ActionManager.HackAndSlash(player, worldId, stageId, 1).Subscribe();
             LocalLayerModifier.ModifyAvatarActionPoint(States.Instance.CurrentAvatarState.address,
                 - requiredCost);
-            var props = new Value
+            var props = new Dictionary<string, object>
             {
                 ["StageID"] = stageId,
             };

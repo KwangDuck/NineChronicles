@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Nekoyume.BlockChain;
@@ -39,15 +39,15 @@ namespace Nekoyume.State
             long createdBlockIndex,
             bool isRendered = false)
         {
-            if (TryGetRegisteredInfo(gameActionId, out var info))
-            {
-                Debug.LogError($"[{nameof(LocalLayerActions)}] Already registered. {gameActionId.ToString()}");
+            //if (TryGetRegisteredInfo(gameActionId, out var info))
+            //{
+            //    Debug.LogError($"[{nameof(LocalLayerActions)}] Already registered. {gameActionId.ToString()}");
 
-                return;
-            }
+            //    return;
+            //}
 
-            info = GetNewInfo(payCostAction, createdBlockIndex, isRendered);
-            _infos.Add(gameActionId, info);
+            //info = GetNewInfo(payCostAction, createdBlockIndex, isRendered);
+            //_infos.Add(gameActionId, info);
         }
 
         /// <summary>
@@ -57,14 +57,14 @@ namespace Nekoyume.State
         /// <param name="isRendered">Set `True` when rendered. Set `False` when unrendered.</param>
         public void SetRendered(Guid gameActionId, bool isRendered)
         {
-            if (!TryGetRegisteredInfo(gameActionId, out var info))
-            {
-                Debug.LogError($"[{nameof(LocalLayerActions)}] There is no registered. {gameActionId.ToString()}");
+            //if (!TryGetRegisteredInfo(gameActionId, out var info))
+            //{
+            //    Debug.LogError($"[{nameof(LocalLayerActions)}] There is no registered. {gameActionId.ToString()}");
 
-                return;
-            }
+            //    return;
+            //}
 
-            info.isRendered = isRendered;
+            //info.isRendered = isRendered;
         }
 
         /// <summary>
@@ -75,10 +75,10 @@ namespace Nekoyume.State
         /// <param name="tableSheets"></param>
         public void PayCost(IAgent agent, States states, TableSheets tableSheets)
         {
-            foreach (var info in _infos.Values.Where(e => !e.isRendered))
-            {
-                info.payCostAction(agent, states, tableSheets);
-            }
+            //foreach (var info in _infos.Values.Where(e => !e.isRendered))
+            //{
+            //    info.payCostAction(agent, states, tableSheets);
+            //}
         }
 
         /// <summary>
@@ -87,25 +87,25 @@ namespace Nekoyume.State
         /// <param name="blockIndex"></param>
         public void UnregisterCreatedBefore(long blockIndex)
         {
-            foreach (var gameActionId in _infos
-                .Where(pair => pair.Value.createdBlockIndex < blockIndex)
-                .Select(pair => pair.Key)
-                .ToArray())
-            {
-                var info = _infos[gameActionId];
-                _infos.Remove(gameActionId);
-                _reusableInfoPool.Push(info);
-            }
+            //foreach (var gameActionId in _infos
+            //    .Where(pair => pair.Value.createdBlockIndex < blockIndex)
+            //    .Select(pair => pair.Key)
+            //    .ToArray())
+            //{
+            //    var info = _infos[gameActionId];
+            //    _infos.Remove(gameActionId);
+            //    _reusableInfoPool.Push(info);
+            //}
         }
 
         public void UnregisterAll()
         {
-            var infos = _infos.Values.ToArray();
-            _infos.Clear();
-            foreach (var info in infos)
-            {
-                _reusableInfoPool.Push(info);
-            }
+            //var infos = _infos.Values.ToArray();
+            //_infos.Clear();
+            //foreach (var info in infos)
+            //{
+            //    _reusableInfoPool.Push(info);
+            //}
         }
 
         private bool TryGetRegisteredInfo(Guid gameActionId, out Info info)

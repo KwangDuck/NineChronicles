@@ -5,7 +5,6 @@ using Nekoyume.Model;
 using Nekoyume.Model.Quest;
 using Nekoyume.UI.Module;
 using UnityEngine;
-using mixpanel;
 using UnityEngine.UI;
 
 namespace Nekoyume.UI

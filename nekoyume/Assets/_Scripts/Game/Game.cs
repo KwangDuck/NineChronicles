@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Amazon.CloudWatchLogs;
-using Amazon.CloudWatchLogs.Model;
 using Bencodex.Types;
 using Lib9c.Formatters;
 using MessagePack;
@@ -26,10 +24,11 @@ using Menu = Nekoyume.UI.Menu;
 
 namespace Nekoyume.Game
 {
-    using Nekoyume.GraphQL;
+    using Libplanet.Crypto;
     using UniRx;
 
-    [RequireComponent(typeof(Agent), typeof(RPCAgent))]
+    //[RequireComponent(typeof(Agent), typeof(RPCAgent))]
+    [RequireComponent(typeof(DummyAgent))]
     public class Game : MonoSingleton<Game>
     {
         [SerializeField]
@@ -68,13 +67,7 @@ namespace Nekoyume.Game
 
         public const string AddressableAssetsContainerPath = nameof(AddressableAssetsContainer);
 
-        public NineChroniclesAPIClient ApiClient => _apiClient;
-
         private CommandLineOptions _options;
-
-        private AmazonCloudWatchLogsClient _logsClient;
-
-        private NineChroniclesAPIClient _apiClient;
 
         private string _msg;
 
@@ -97,15 +90,17 @@ namespace Nekoyume.Game
 
             Debug.Log("[Game] Awake() CommandLineOptions loaded");
 
-            if (_options.RpcClient)
-            {
-                Agent = GetComponent<RPCAgent>();
-                SubscribeRPCAgent();
-            }
-            else
-            {
-                Agent = GetComponent<Agent>();
-            }
+            //if (_options.RpcClient)
+            //{
+            //    Agent = GetComponent<RPCAgent>();
+            //    SubscribeRPCAgent();
+            //}
+            //else
+            //{
+            //    Agent = GetComponent<Agent>();
+            //}
+
+            Agent = GetComponent<DummyAgent>();
 
             States = new States();
             LocalLayer = new LocalLayer();
@@ -147,6 +142,7 @@ namespace Nekoyume.Game
             AudioController.instance.Initialize();
             Debug.Log("[Game] Start() AudioController initialized");
             yield return null;
+
             // Initialize Agent
             var agentInitialized = false;
             var agentInitializeSucceed = false;
@@ -170,8 +166,6 @@ namespace Nekoyume.Game
             Debug.Log("[Game] Start() TableSheets synchronized");
             // Initialize MainCanvas second
             yield return StartCoroutine(MainCanvas.instance.InitializeSecond());
-            // Initialize NineChroniclesAPIClient.
-            _apiClient = new NineChroniclesAPIClient(_options.ApiServerHost);
             // Initialize Rank.SharedModel
             RankPopup.UpdateSharedModel();
             // Initialize Stage
@@ -189,209 +183,8 @@ namespace Nekoyume.Game
             base.OnDestroy();
         }
 
-        private void SubscribeRPCAgent()
-        {
-            if (!(Agent is RPCAgent rpcAgent))
-            {
-                return;
-            }
-
-            Debug.Log("[Game]Subscribe RPCAgent");
-
-            rpcAgent.OnRetryStarted
-                .ObserveOnMainThread()
-                .Subscribe(agent =>
-                {
-                    Debug.Log($"[Game]RPCAgent OnRetryStarted. {rpcAgent.Address.ToHex()}");
-                    OnRPCAgentRetryStarted(agent);
-                })
-                .AddTo(gameObject);
-
-            rpcAgent.OnRetryEnded
-                .ObserveOnMainThread()
-                .Subscribe(agent =>
-                {
-                    Debug.Log($"[Game]RPCAgent OnRetryEnded. {rpcAgent.Address.ToHex()}");
-                    OnRPCAgentRetryEnded(agent);
-                })
-                .AddTo(gameObject);
-
-            rpcAgent.OnPreloadStarted
-                .ObserveOnMainThread()
-                .Subscribe(agent =>
-                {
-                    Debug.Log($"[Game]RPCAgent OnPreloadStarted. {rpcAgent.Address.ToHex()}");
-                    OnRPCAgentPreloadStarted(agent);
-                })
-                .AddTo(gameObject);
-
-            rpcAgent.OnPreloadEnded
-                .ObserveOnMainThread()
-                .Subscribe(agent =>
-                {
-                    Debug.Log($"[Game]RPCAgent OnPreloadEnded. {rpcAgent.Address.ToHex()}");
-                    OnRPCAgentPreloadEnded(agent);
-                })
-                .AddTo(gameObject);
-
-            rpcAgent.OnDisconnected
-                .ObserveOnMainThread()
-                .Subscribe(agent =>
-                {
-                    Debug.Log($"[Game]RPCAgent OnDisconnected. {rpcAgent.Address.ToHex()}");
-                    QuitWithAgentConnectionError(agent);
-                })
-                .AddTo(gameObject);
-        }
-
-        private static void OnRPCAgentRetryStarted(RPCAgent rpcAgent)
-        {
-            Widget.Find<BlockSyncLoadingScreen>().Show();
-        }
-
-        private static void OnRPCAgentRetryEnded(RPCAgent rpcAgent)
-        {
-            var widget = (Widget) Widget.Find<BlockSyncLoadingScreen>();
-            if (widget.IsActive())
-            {
-                widget.Close();
-            }
-        }
-
-        private static void OnRPCAgentPreloadStarted(RPCAgent rpcAgent)
-        {
-            if (Widget.Find<IntroScreen>().IsActive() ||
-                Widget.Find<PreloadingScreen>().IsActive() ||
-                Widget.Find<Synopsis>().IsActive())
-            {
-                // NOTE: 타이틀 화면에서 리트라이와 프리로드가 완료된 상황입니다.
-                // FIXME: 이 경우에는 메인 로비가 아니라 기존 초기화 로직이 흐르도록 처리해야 합니다.
-                return;
-            }
-
-            var needToBackToMain = false;
-            var showLoadingScreen = false;
-            var widget = (Widget) Widget.Find<BlockSyncLoadingScreen>();
-            if (widget.IsActive())
-            {
-                widget.Close();
-            }
-
-            if (Widget.Find<LoadingScreen>().IsActive())
-            {
-                Widget.Find<LoadingScreen>().Close();
-                widget = Widget.Find<QuestPreparation>();
-                if (widget.IsActive())
-                {
-                    widget.Close(true);
-                    needToBackToMain = true;
-                }
-
-                widget = Widget.Find<Menu>();
-                if (widget.IsActive())
-                {
-                    widget.Close(true);
-                    needToBackToMain = true;
-                }
-            }
-            else if (Widget.Find<StageLoadingEffect>().IsActive())
-            {
-                Widget.Find<StageLoadingEffect>().Close();
-
-                if (Widget.Find<BattleResultPopup>().IsActive())
-                {
-                    Widget.Find<BattleResultPopup>().Close(true);
-                }
-
-                needToBackToMain = true;
-                showLoadingScreen = true;
-            }
-            else if (Widget.Find<ArenaBattleLoadingScreen>().IsActive())
-            {
-                Widget.Find<ArenaBattleLoadingScreen>().Close();
-                needToBackToMain = true;
-            }
-            else if (Widget.Find<MimisbrunnrPreparation>().IsActive())
-            {
-                Widget.Find<MimisbrunnrPreparation>().Close(true);
-                needToBackToMain = true;
-            }
-
-            if (!needToBackToMain)
-            {
-                return;
-            }
-
-            BackToMain(showLoadingScreen, new UnableToRenderWhenSyncingBlocksException());
-        }
-        private static void OnRPCAgentPreloadEnded(RPCAgent rpcAgent)
-        {
-            if (Widget.Find<IntroScreen>().IsActive() ||
-                Widget.Find<PreloadingScreen>().IsActive() ||
-                Widget.Find<Synopsis>().IsActive())
-            {
-                // NOTE: 타이틀 화면에서 리트라이와 프리로드가 완료된 상황입니다.
-                // FIXME: 이 경우에는 메인 로비가 아니라 기존 초기화 로직이 흐르도록 처리해야 합니다.
-                return;
-            }
-
-            var needToBackToMain = false;
-            var showLoadingScreen = false;
-            var widget = (Widget) Widget.Find<BlockSyncLoadingScreen>();
-            if (widget.IsActive())
-            {
-                widget.Close();
-            }
-
-            if (Widget.Find<LoadingScreen>().IsActive())
-            {
-                Widget.Find<LoadingScreen>().Close();
-                widget = Widget.Find<QuestPreparation>();
-                if (widget.IsActive())
-                {
-                    widget.Close(true);
-                    needToBackToMain = true;
-                }
-
-                widget = Widget.Find<Menu>();
-                if (widget.IsActive())
-                {
-                    widget.Close(true);
-                    needToBackToMain = true;
-                }
-            }
-            else if (Widget.Find<StageLoadingEffect>().IsActive())
-            {
-                Widget.Find<StageLoadingEffect>().Close();
-
-                if (Widget.Find<BattleResultPopup>().IsActive())
-                {
-                    Widget.Find<BattleResultPopup>().Close(true);
-                }
-
-                needToBackToMain = true;
-                showLoadingScreen = true;
-            }
-            else if (Widget.Find<ArenaBattleLoadingScreen>().IsActive())
-            {
-                Widget.Find<ArenaBattleLoadingScreen>().Close();
-                needToBackToMain = true;
-            }
-            else if (Widget.Find<MimisbrunnrPreparation>().IsActive())
-            {
-                Widget.Find<MimisbrunnrPreparation>().Close(true);
-                needToBackToMain = true;
-            }
-
-            if (!needToBackToMain)
-            {
-                return;
-            }
-
-            BackToMain(showLoadingScreen, new UnableToRenderWhenSyncingBlocksException());
-        }
-
-        private void QuitWithAgentConnectionError(RPCAgent rpcAgent)
+        
+        private void QuitWithAgentConnectionError()
         {
             var screen = Widget.Find<BlockSyncLoadingScreen>();
             if (screen.IsActive())
@@ -400,38 +193,7 @@ namespace Nekoyume.Game
             }
 
             // FIXME 콜백 인자를 구조화 하면 타입 쿼리 없앨 수 있을 것 같네요.
-            IconAndButtonSystem popup;
-            if (Agent is Agent _)
-            {
-                var errorMsg = string.Format(L10nManager.Localize("UI_ERROR_FORMAT"),
-                    L10nManager.Localize("BLOCK_DOWNLOAD_FAIL"));
-
-                popup = Widget.Find<IconAndButtonSystem>();
-                popup.Show(L10nManager.Localize("UI_ERROR"),
-                    errorMsg,
-                    L10nManager.Localize("UI_QUIT"),
-                    false,
-                    IconAndButtonSystem.SystemType.BlockChainError);
-                popup.SetCancelCallbackToExit();
-
-                return;
-            }
-
-            if (rpcAgent is null)
-            {
-                // FIXME: 최신 버전이 뭔지는 Agent.EncounrtedHighestVersion 속성에 들어있으니, 그걸 UI에서 표시해줘야 할 듯?
-                // AppProtocolVersion? newVersion = _agent is Agent agent ? agent.EncounteredHighestVersion : null;
-                return;
-            }
-
-            if (rpcAgent.Connected)
-            {
-                // 무슨 상황이지?
-                Debug.Log($"{nameof(QuitWithAgentConnectionError)}() called. But {nameof(RPCAgent)}.Connected is {rpcAgent.Connected}.");
-                return;
-            }
-
-            popup = Widget.Find<IconAndButtonSystem>();
+            var popup = Widget.Find<IconAndButtonSystem>();
             popup.Show("UI_ERROR", "UI_ERROR_RPC_CONNECTION", "UI_QUIT");
             popup.SetCancelCallbackToExit();
         }
@@ -508,7 +270,7 @@ namespace Nekoyume.Game
             }
             else
             {
-                QuitWithAgentConnectionError(null);
+                QuitWithAgentConnectionError();
             }
         }
 
@@ -527,8 +289,6 @@ namespace Nekoyume.Game
                 Analyzer.Instance.Track("Unity/Player Quit");
                 Analyzer.Instance.Flush();   
             }
-
-            _logsClient?.Dispose();
         }
 
         private IEnumerator CoUpdate()
@@ -652,22 +412,24 @@ namespace Nekoyume.Game
             settings.UpdateSoundSettings();
             settings.UpdatePrivateKey(_options.PrivateKey);
 
-            var loginPopup = Widget.Find<LoginSystem>();
+            //var loginPopup = Widget.Find<LoginSystem>();
 
-            if (Application.isBatchMode)
-            {
-                loginPopup.Show(_options.KeyStorePath, _options.PrivateKey);
-            }
-            else
-            {
-                var intro = Widget.Find<IntroScreen>();
-                intro.Show(_options.KeyStorePath, _options.PrivateKey);
-                yield return new WaitUntil(() => loginPopup.Login);
-            }
+            //if (Application.isBatchMode)
+            //{
+            //    loginPopup.Show(_options.KeyStorePath, _options.PrivateKey);
+            //}
+            //else
+            //{
+            //    var intro = Widget.Find<IntroScreen>();
+            //    intro.Show(_options.KeyStorePath, _options.PrivateKey);
+            //    yield return new WaitUntil(() => loginPopup.Login);
+            //}
+
+            var privateKey = new PrivateKey();
 
             yield return Agent.Initialize(
                 _options,
-                loginPopup.GetPrivateKey(),
+                privateKey,
                 callback
             );
         }
@@ -718,95 +480,6 @@ namespace Nekoyume.Game
             };
 
             confirm.Show("UI_CONFIRM_RESET_KEYSTORE_TITLE", "UI_CONFIRM_RESET_KEYSTORE_CONTENT");
-        }
-
-        private async void UploadLog(string logString, string stackTrace, LogType type)
-        {
-            // Avoid NRE
-            if (Agent.PrivateKey == default)
-            {
-                _msg += logString + "\n";
-                if (!string.IsNullOrEmpty(stackTrace))
-                {
-                    _msg += stackTrace + "\n";
-                }
-            }
-            else
-            {
-                const string groupName = "9c-player-logs";
-                var streamName = _options.AwsSinkGuid;
-                try
-                {
-                    var req = new CreateLogGroupRequest(groupName);
-                    await _logsClient.CreateLogGroupAsync(req);
-                }
-                catch (ResourceAlreadyExistsException)
-                {
-                }
-                catch (ObjectDisposedException)
-                {
-                    return;
-                }
-
-                try
-                {
-                    var req = new CreateLogStreamRequest(groupName, streamName);
-                    await _logsClient.CreateLogStreamAsync(req);
-                }
-                catch (ResourceAlreadyExistsException)
-                {
-                    // ignored
-                }
-
-                PutLog(groupName, streamName, GetMessage(logString, stackTrace));
-            }
-        }
-
-        private async void PutLog(string groupName, string streamName, string msg)
-        {
-            try
-            {
-                var req = new DescribeLogStreamsRequest(groupName)
-                {
-                    LogStreamNamePrefix = streamName
-                };
-                var resp = await _logsClient.DescribeLogStreamsAsync(req);
-                var token = resp.LogStreams.FirstOrDefault(s => s.LogStreamName == streamName)?.UploadSequenceToken;
-                var ie = new InputLogEvent
-                {
-                    Message = msg,
-                    Timestamp = DateTime.UtcNow
-                };
-                var request = new PutLogEventsRequest(groupName, streamName, new List<InputLogEvent> {ie});
-                if (!string.IsNullOrEmpty(token))
-                {
-                    request.SequenceToken = token;
-                }
-                await _logsClient.PutLogEventsAsync(request);
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-        }
-
-        private string GetMessage(string logString, string stackTrace)
-        {
-            var msg = string.Empty;
-            if (!string.IsNullOrEmpty(_msg))
-            {
-                msg = _msg;
-                _msg = string.Empty;
-                return msg;
-            }
-
-            msg += logString + "\n";
-            if (!string.IsNullOrEmpty(stackTrace))
-            {
-                msg += stackTrace;
-            }
-
-            return msg;
         }
     }
 }

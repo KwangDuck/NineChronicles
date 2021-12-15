@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using mixpanel;
 using Nekoyume.Helper;
 using Nekoyume.Model.Item;
 using Nekoyume.UI;
@@ -631,7 +630,7 @@ namespace Nekoyume.Game.Character
 
             if (Level != level)
             {
-                Analyzer.Instance.Track("Unity/User Level Up", new Value
+                Analyzer.Instance.Track("Unity/User Level Up", new Dictionary<string, object>
                 {
                     ["code"] = level,
                 });

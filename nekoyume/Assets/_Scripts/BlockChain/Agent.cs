@@ -63,10 +63,8 @@ namespace Nekoyume.BlockChain
         public Subject<long> BlockIndexSubject { get; } = new Subject<long>();
         public Subject<BlockHash> BlockTipHashSubject { get; } = new Subject<BlockHash>();
 
-        private static IEnumerator _miner;
         private static IEnumerator _txProcessor;
         private static IEnumerator _swarmRunner;
-        private static IEnumerator _autoPlayer;
         private static IEnumerator _logger;
         private const float TxProcessInterval = 3.0f;
         private const int SwarmDialTimeout = 5000;
@@ -297,7 +295,7 @@ namespace Nekoyume.BlockChain
                 var dict = new Dictionary<Address, AvatarState>();
                 foreach (var address in addressList)
                 {
-                    var result = await States.TryGetAvatarStateAsync(address);
+                    var result = States.TryGetAvatarState(address);
                     if (result.exist)
                     {
                         dict[address] = result.avatarState;
@@ -449,18 +447,10 @@ namespace Nekoyume.BlockChain
                 ActionRenderHandler.Instance.Start(ActionRenderer);
                 ActionUnrenderHandler.Instance.Start(ActionRenderer);
 
-                // 그리고 마이닝을 시작한다.
-                StartNullableCoroutine(_miner);
-                StartCoroutine(CoCheckBlockTip());
-
-                StartNullableCoroutine(_autoPlayer);
                 callback(SyncSucceed);
                 LoadQueuedActions();
                 TipChanged += (___, index) => { BlockIndexSubject.OnNext(index); };
             };
-
-            _miner = options.NoMiner ? null : CoMiner();
-            _autoPlayer = options.AutoPlay ? CoAutoPlayer() : null;
 
             if (development)
             {
@@ -468,21 +458,6 @@ namespace Nekoyume.BlockChain
             }
 
             StartSystemCoroutines();
-            StartCoroutine(CoCheckStagedTxs());
-        }
-
-        private IEnumerator CoCheckBlockTip()
-        {
-            while (true)
-            {
-                var current = BlockIndex;
-                yield return new WaitForSeconds(180f);
-                if (BlockIndex == current)
-                {
-                    Widget.Find<IconAndButtonSystem>().ShowByBlockDownloadFail(current);
-                    break;
-                }
-            }
         }
 
         private static string GetHost(CommandLineOptions options)
@@ -836,54 +811,6 @@ namespace Nekoyume.BlockChain
             }
         }
 
-        private IEnumerator CoAutoPlayer()
-        {
-            var avatarIndex = 0;
-            var dummyName = Address.ToHex().Substring(0, 8);
-
-            yield return Game.Game.instance.ActionManager
-                .CreateAvatar(avatarIndex, dummyName)
-                .ToYieldInstruction();
-            var avatarAddress = Address.Derive(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    CreateAvatar2.DeriveFormat,
-                    avatarIndex
-                )
-            );
-            Debug.LogFormat("Autoplay[{0}, {1}]: CreateAvatar", avatarAddress.ToHex(), dummyName);
-
-            yield return States.Instance.SelectAvatarAsync(avatarIndex).ToCoroutine();
-            var waitForSeconds = new WaitForSeconds(TxProcessInterval);
-
-            while (true)
-            {
-                yield return waitForSeconds;
-                yield return Game.Game.instance.ActionManager.HackAndSlash(
-                    new List<Costume>(),
-                    new List<Equipment>(),
-                    new List<Consumable>(),
-                    1,
-                    1,
-                    1).StartAsCoroutine();
-                Debug.LogFormat("Autoplay[{0}, {1}]: HackAndSlash", avatarAddress.ToHex(), dummyName);
-            }
-        }
-
-        private IEnumerator CoMiner()
-        {
-            var miner = new Miner(blocks, _swarm, PrivateKey);
-            var sleepInterval = new WaitForSeconds(15);
-            while (true)
-            {
-                var task = Task.Run(async() => await miner.MineBlockAsync(_cancellationTokenSource.Token));
-                yield return new WaitUntil(() => task.IsCompleted);
-#if UNITY_EDITOR
-                yield return sleepInterval;
-#endif
-            }
-        }
-
         private Transaction<NCAction> MakeTransaction(List<NCAction> actions)
         {
             var polymorphicActions = actions.ToArray();
@@ -955,36 +882,6 @@ namespace Nekoyume.BlockChain
             });
         }
 
-        private IEnumerator CoCheckStagedTxs()
-        {
-            var hasOwnTx = false;
-            while (true)
-            {
-                // 프레임 저하를 막기 위해 별도 스레드로 처리합니다.
-                Task<List<Transaction<NCAction>>> getOwnTxs =
-                    Task.Run(
-                        () => _stagePolicy.Iterate()
-                            .Where(tx => tx.Signer.Equals(Address))
-                            .ToList()
-                    );
-
-                yield return new WaitUntil(() => getOwnTxs.IsCompleted);
-
-                if (!getOwnTxs.IsFaulted)
-                {
-                    List<Transaction<NCAction>> txs = getOwnTxs.Result;
-                    var next = txs.Any();
-                    if (next != hasOwnTx)
-                    {
-                        hasOwnTx = next;
-                        OnHasOwnTx?.Invoke(hasOwnTx);
-                    }
-                }
-
-                yield return new WaitForSeconds(.3f);
-            }
-        }
-
         private string GetLoadingScreenMessage(PreloadState state)
         {
             string localizationKey;
@@ -1030,6 +927,15 @@ namespace Nekoyume.BlockChain
             string format = L10nManager.Localize(localizationKey);
             string text = string.Format(format, count, totalCount);
             return $"{text}  ({state.CurrentPhase} / {PreloadState.TotalPhase})";
+        }
+
+        public IObservable<ActionBase.ActionEvaluation<T>> RequestAction<T>(T action) where T : GameAction
+        {
+            // TODO: implementation
+            return Observable.Return(new ActionBase.ActionEvaluation<T>
+            {
+                Action = action
+            });
         }
     }
 }

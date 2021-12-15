@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using mixpanel;
 using Nekoyume.L10n;
 using UnityEngine;
 
@@ -171,7 +170,7 @@ namespace Nekoyume.UI
         {
             if (_mixpanelTargets.Exists(x => x == id))
             {
-                var props = new Value
+                var props = new Dictionary<string, object>
                 {
                     ["Id"] = id,
                 };

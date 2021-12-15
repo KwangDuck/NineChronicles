@@ -1,8 +1,6 @@
 using System;
 using System.Globalization;
 using Libplanet.Assets;
-using mixpanel;
-using Nekoyume.Action;
 using Nekoyume.EnumType;
 using Nekoyume.Game.Character;
 using Nekoyume.Game.Controller;

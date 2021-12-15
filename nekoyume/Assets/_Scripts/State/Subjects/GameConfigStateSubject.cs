@@ -14,7 +14,7 @@ namespace Nekoyume.State.Subjects
 
         public static void OnNext(GameConfigState state)
         {
-            GameConfigState.OnNext(state);
+            //GameConfigState.OnNext(state);
         }
 
     }

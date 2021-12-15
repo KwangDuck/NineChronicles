@@ -65,5 +65,7 @@ namespace Nekoyume.BlockChain
         Task<FungibleAssetValue> GetBalanceAsync(Address address, Currency currency);
 
         Task<Dictionary<Address, AvatarState>> GetAvatarStates(IEnumerable<Address> addressList);
+
+        IObservable<ActionBase.ActionEvaluation<T>> RequestAction<T>(T action) where T : GameAction;
     }
 }

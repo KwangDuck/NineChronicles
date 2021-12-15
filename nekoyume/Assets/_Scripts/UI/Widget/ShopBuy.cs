@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using mixpanel;
 using Nekoyume.Action;
 using Nekoyume.EnumType;
 using Nekoyume.Game.Character;
@@ -212,10 +211,16 @@ namespace Nekoyume.UI
             };
             Game.Game.instance.ActionManager.Buy(purchaseInfos).Subscribe();
 
-            var countProps = new Value {["Count"] = 1,};
+            var countProps = new Dictionary<string, object>
+            {
+                ["Count"] = 1,
+            };
             Analyzer.Instance.Track("Unity/Number of Purchased Items", countProps);
 
-            var buyProps = new Value {["Price"] = shopItem.Price.Value.GetQuantityString(),};
+            var buyProps = new Dictionary<string, object>
+            {
+                ["Price"] = shopItem.Price.Value.GetQuantityString(),
+            };
             Analyzer.Instance.Track("Unity/Buy", buyProps);
 
             SharedModel.ItemCountAndPricePopup.Value.Item.Value = null;

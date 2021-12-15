@@ -491,7 +491,7 @@ namespace Nekoyume.UI
             var avatarStates = await Game.Game.instance.Agent.GetAvatarStates(addressList);
             foreach (var address in addressList)
             {
-                await States.TryGetAvatarStateAsync(address);
+                States.TryGetAvatarState(address);
             }
             _weeklyCachedInfo = infos
                 .Select(tuple =>

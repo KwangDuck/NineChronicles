@@ -246,7 +246,7 @@ namespace Nekoyume.UI
                     1,
                     false);
                 LocalLayerModifier.RemoveNewAttachmentMail(avatarAddress, mail.id, false);
-                var (exist, avatarState) = await States.TryGetAvatarStateAsync(avatarAddress);
+                var (exist, avatarState) = States.TryGetAvatarState(avatarAddress);
                 if (!exist)
                 {
                     return null;
@@ -256,7 +256,7 @@ namespace Nekoyume.UI
             }).ToObservable().SubscribeOnMainThread().Subscribe(async avatarState =>
             {
                 Debug.Log("CombinationMail LocalLayer task completed");
-                await States.Instance.AddOrReplaceAvatarStateAsync(avatarState, States.Instance.CurrentAvatarKey);
+                States.Instance.AddOrReplaceAvatarState(avatarState, States.Instance.CurrentAvatarKey);
             });
             // ~LocalLayer
 
@@ -360,7 +360,7 @@ namespace Nekoyume.UI
                     1,
                     false);
                 LocalLayerModifier.RemoveNewAttachmentMail(avatarAddress, itemEnhanceMail.id, false);
-                var (exist, avatarState) = await States.TryGetAvatarStateAsync(avatarAddress);
+                var (exist, avatarState) = States.TryGetAvatarState(avatarAddress);
                 if (!exist)
                 {
                     return null;
@@ -370,7 +370,7 @@ namespace Nekoyume.UI
             }).ToObservable().SubscribeOnMainThread().Subscribe(async avatarState =>
             {
                 Debug.Log("ItemEnhanceMail LocalLayer task completed");
-                await States.Instance.AddOrReplaceAvatarStateAsync(avatarState, States.Instance.CurrentAvatarKey);
+                States.Instance.AddOrReplaceAvatarState(avatarState, States.Instance.CurrentAvatarKey);
             });
             // ~LocalLayer
 

@@ -2,8 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using mixpanel;
-using Nekoyume.Action;
 using Nekoyume.BlockChain;
 using Nekoyume.Game;
 using Nekoyume.Game.Controller;
@@ -578,7 +576,7 @@ namespace Nekoyume.UI
             player.DisableHUD();
             ActionRenderHandler.Instance.Pending = true;
 
-            var props = new Value
+            var props = new Dictionary<string, object>
             {
                 ["StageId"] = SharedModel.StageID,
             };
@@ -646,7 +644,7 @@ namespace Nekoyume.UI
 
         private void GoToMain()
         {
-            var props = new Value
+            var props = new Dictionary<string, object>
             {
                 ["StageId"] = Game.Game.instance.Stage.stageId,
             };

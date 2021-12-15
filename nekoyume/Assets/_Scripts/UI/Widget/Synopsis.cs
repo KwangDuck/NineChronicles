@@ -12,7 +12,6 @@ using Spine.Unity;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using mixpanel;
 using Nekoyume.L10n;
 using System.Threading.Tasks;
 using Nekoyume.Helper;
@@ -356,7 +355,7 @@ namespace Nekoyume.UI
             {
                 try
                 {
-                    await States.Instance.SelectAvatarAsync(slotIndex);
+                    States.Instance.SelectAvatar(slotIndex);
                     Game.Event.OnRoomEnter.Invoke(false);
                 }
                 catch (KeyNotFoundException e)

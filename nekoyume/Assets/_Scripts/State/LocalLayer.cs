@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -454,7 +454,7 @@ namespace Nekoyume.State
         public GoldBalanceState Modify(GoldBalanceState state)
         {
             if (state is null ||
-                !state.address.Equals(_agentGoldModifierInfo.Address))
+                !state.address.Equals(_agentGoldModifierInfo?.Address))
             {
                 return state;
             }

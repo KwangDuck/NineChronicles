@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using mixpanel;
 using Nekoyume.Action;
 using Nekoyume.EnumType;
 using Nekoyume.Game.Controller;
@@ -124,7 +123,7 @@ namespace Nekoyume.UI
 
             if (shopItems.SharedModel.WishItemCount > 0)
             {
-                var props = new Value
+                var props = new Dictionary<string, object>
                 {
                     ["Count"] = shopItems.SharedModel.WishItemCount,
                 };
@@ -133,7 +132,7 @@ namespace Nekoyume.UI
 
             foreach (var shopItem in shopItems.SharedModel.GetWishItems)
             {
-                var props = new Value
+                var props = new Dictionary<string, object>
                 {
                     ["Price"] = shopItem.Price.Value.GetQuantityString(),
                 };
