@@ -209,7 +209,7 @@ namespace Nekoyume.UI
             {
                 await GetPurchaseInfo(shopItem.OrderId.Value)
             };
-            Game.Game.instance.ActionManager.Buy(purchaseInfos).Subscribe();
+            Game.Game.instance.ActionManager.BuyAsync(purchaseInfos).Subscribe();
 
             var countProps = new Dictionary<string, object>
             {

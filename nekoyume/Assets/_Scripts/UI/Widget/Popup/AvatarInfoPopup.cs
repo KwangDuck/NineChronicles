@@ -725,7 +725,7 @@ namespace Nekoyume.UI
 
             NotificationSystem.Push(Nekoyume.Model.Mail.MailType.System, L10nManager.Localize("UI_CHARGE_AP"),
                 NotificationCell.NotificationType.Information);
-            Game.Game.instance.ActionManager.ChargeActionPoint(material).Subscribe();
+            Game.Game.instance.ActionManager.ChargeActionPointAsync(material).Subscribe();
 
             var address = States.Instance.CurrentAvatarState.address;
             if (GameConfigStateSubject.ActionPointState.ContainsKey(address))

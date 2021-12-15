@@ -1,31 +1,18 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Numerics;
-using Libplanet;
-using Libplanet.Action;
-using Libplanet.Assets;
-using Libplanet.Tx;
 using Nekoyume.Action;
 using Nekoyume.Game.Character;
 using Nekoyume.Model.Item;
 using Nekoyume.State;
-using Nekoyume.ActionExtensions;
-using Nekoyume.Game;
 using Nekoyume.Model.State;
 using Nekoyume.UI;
-using UnityEngine;
 using Material = Nekoyume.Model.Item.Material;
-using RedeemCode = Nekoyume.Action.RedeemCode;
-
-#if LIB9C_DEV_EXTENSIONS || UNITY_EDITOR
-using Lib9c.DevExtensions.Action;
-#endif
 
 namespace Nekoyume.BlockChain
 {
-    using Cysharp.Threading.Tasks;
+    using Gateway.Protocol;
     using UniRx;
 
     /// <summary>
@@ -33,94 +20,71 @@ namespace Nekoyume.BlockChain
     /// </summary>
     public class ActionManager : IDisposable
     {
-        private static readonly TimeSpan ActionTimeout = TimeSpan.FromSeconds(360f);
-
+        private static readonly TimeSpan ActionTimeout = TimeSpan.FromSeconds(360f);        
         private readonly IAgent _agent;
-
         private Guid _lastBattleActionId;
 
-        private readonly Dictionary<Guid, (TxId txId, long updatedBlockIndex)> _actionIdToTxIdBridge =
-            new Dictionary<Guid, (TxId txId, long updatedBlockIndex)>();
-
-        private readonly List<IDisposable> _disposables = new List<IDisposable>();
-
         public static ActionManager Instance => Game.Game.instance.ActionManager;
-
         public static bool IsLastBattleActionId(Guid actionId) => actionId == Instance._lastBattleActionId;
-
-        private void HandleException(Guid actionId, Exception e)
-        {
-            if (e is TimeoutException)
-            {
-                var txId = _actionIdToTxIdBridge.ContainsKey(actionId)
-                    ? (TxId?)_actionIdToTxIdBridge[actionId].txId
-                    : null;
-                throw new ActionTimeoutException(e.Message, txId, actionId);
-            }
-
-            throw e;
-        }
 
         public ActionManager(IAgent agent)
         {
             _agent = agent ?? throw new ArgumentNullException(nameof(agent));
-            _agent.BlockIndexSubject.Subscribe(blockIndex =>
-            {
-                var actionIds = _actionIdToTxIdBridge
-                    .Where(pair => pair.Value.updatedBlockIndex < blockIndex - 100)
-                    .Select(pair => pair.Key)
-                    .ToArray();
-                foreach (var actionId in actionIds)
-                {
-                    _actionIdToTxIdBridge.Remove(actionId);
-                }
-            }).AddTo(_disposables);
-            _agent.OnMakeTransaction.Subscribe(tuple =>
-            {
-                var (tx, actions) = tuple;
-                var gameActions = actions
-                    .Select(e => e.InnerAction)
-                    .OfType<GameAction>()
-                    .ToArray();
-                foreach (var gameAction in gameActions)
-                {
-                    _actionIdToTxIdBridge[gameAction.Id] = (tx.Id, _agent.BlockIndex);
-                }
-            }).AddTo(_disposables);
         }
 
-        private IObservable<ActionBase.ActionEvaluation<T>> ProcessAction<T>(T gameAction) where T : GameAction
+        public void Dispose()
         {
-            var actionType =
-                (ActionTypeAttribute)Attribute.GetCustomAttribute(typeof(T), typeof(ActionTypeAttribute));
-            Debug.Log($"[{nameof(ActionManager)}] {nameof(ProcessAction)}() called. \"{actionType.TypeIdentifier}\"");
 
-            return _agent.RequestAction(gameAction);
         }
 
-        #region Actions
+        private REQ_Header MakeHeader()
+        {
+            return new REQ_Header
+            {
 
-        public IObservable<ActionBase.ActionEvaluation<CreateAvatar>> CreateAvatar(int index,
+            };
+        }
+
+        ///////////////////////////////////////////////////////////////////////////
+        // login
+        public IObservable<(REQ_Login, RES_Login)> LoginAsync()
+        {
+            var req = new REQ_Login
+            {
+                Header = MakeHeader(),
+            };
+
+            // remote request
+
+            var res = new RES_Login
+            {
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+        // logout
+        public IObservable<(REQ_Logout, RES_Logout)> LogoutAsync()
+        {
+            var req = new REQ_Logout
+            {
+                Header = MakeHeader(),
+            };
+
+            // remote quest
+
+            var res = new RES_Logout{
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+        // create avatar
+        public IObservable<(REQ_CreateAvatar, RES_CreateAvatar)> CreateAvatarAsync(int index,
             string nickName, int hair = 0, int lens = 0, int ear = 0, int tail = 0)
         {
-            // already has index?
-            if (States.Instance.AvatarStates.ContainsKey(index))
-            {
-                throw new Exception($"Already contains {index} in {States.Instance.AvatarStates}");
-            }
-
-            // create avatar
-            var action = new CreateAvatar
-            {
-                index = index,
-                hair = hair,
-                lens = lens,
-                ear = ear,
-                tail = tail,
-                name = nickName,
-            };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
 
             // init dummy avatar
             var avatarState = new AvatarState(
@@ -135,104 +99,147 @@ namespace Nekoyume.BlockChain
             States.Instance.AddOrReplaceAvatarState(avatarState, index);
             States.Instance.SelectAvatar(index);
 
-            // remote request
-            return ProcessAction(action)
-                .Select(eval =>
+            var req = new REQ_CreateAvatar
+            {
+                Header = MakeHeader(),
+                Index = index,
+                Avatar = new ST_Avatar
                 {
-                    var agentAddress = States.Instance.AgentState.address;
-                    var avatarAddress = agentAddress.Derive(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            CreateAvatar2.DeriveFormat,
-                            index
-                        )
-                    );
-                    DialogPopup.DeleteDialogPlayerPrefs(avatarAddress);
+                    Hair = hair,
+                    Lens = lens,
+                    Ear = ear,
+                    Tail = tail,
+                    Nickname = nickName
+                }
+            };
 
-                    return eval;
-                });
+            // remote request
+
+            var res = new RES_CreateAvatar
+            {
+
+            };
+
+            return Observable.Return((req, res));
         }
 
-        public IObservable<ActionBase.ActionEvaluation<MimisbrunnrBattle>> MimisbrunnrBattle(
-            List<Costume> costumes,
-            List<Equipment> equipments,
-            List<Consumable> foods,
-            int worldId,
-            int stageId,
-            int playCount)
+        // retrieve all master data
+        public IObservable<(REQ_RetrieveAllMasterData, RES_RetrieveAllMasterData)> RetrieveAllMasterDataAsync()
+        {
+            var req = new REQ_RetrieveAllMasterData
+            {
+                Header = MakeHeader(),
+            };
+
+            // remote request
+
+            var res = new RES_RetrieveAllMasterData
+            {
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+        // retrieve master data
+        public IObservable<(REQ_RetrieveMasterData, RES_RetrieveMasterData)> RetrieveMasterDataAsync()
+        {
+            var req = new REQ_RetrieveMasterData
+            {
+                Header = MakeHeader(),
+            };
+
+            // remote request
+
+            var res = new RES_RetrieveMasterData
+            {
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+        ///////////////////////////////////////////////////////////////////////////
+        // enter lobby
+        public IObservable<(REQ_EnterLobbyEntryPoint, RES_EnterLobbyEntryPoint)> EnterLobbyEntryPointAsync()
+        {
+            var req = new REQ_EnterLobbyEntryPoint
+            {
+                Header = MakeHeader(),
+            };
+
+            // remote request
+
+            var res = new RES_EnterLobbyEntryPoint
+            {
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+        // daily reward
+        public IObservable<(REQ_DailyReward, RES_DailyReward)> DailyRewardAsync()
+        {
+            var req = new REQ_DailyReward
+            {
+                Header = MakeHeader(),
+            };
+
+            // remote request
+
+            var res = new RES_DailyReward
+            {
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+        // charge action point
+        public IObservable<(REQ_ChargeActionPoint, RES_ChargeActionPoint)> ChargeActionPointAsync(Material material)
         {
             var avatarAddress = States.Instance.CurrentAvatarState.address;
-            costumes ??= new List<Costume>();
-            equipments ??= new List<Equipment>();
-            foods ??= new List<Consumable>();
 
-            var action = new MimisbrunnrBattle
+            LocalLayerModifier.RemoveItem(avatarAddress, material.ItemId);
+            LocalLayerModifier.ModifyAvatarActionPoint(avatarAddress, States.Instance.GameConfigState.ActionPointMax);
+
+            var req = new REQ_ChargeActionPoint
             {
-                costumes = costumes.Select(e => e.ItemId).ToList(),
-                equipments = equipments.Select(e => e.ItemId).ToList(),
-                foods = foods.Select(f => f.ItemId).ToList(),
-                worldId = worldId,
-                stageId = stageId,
-                avatarAddress = avatarAddress,
-                rankingMapAddress = States.Instance.CurrentAvatarState.RankingMapAddress,
-                playCount = playCount,
+                Header = MakeHeader(),
             };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
-            _lastBattleActionId = action.Id;
 
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
+            // remote request
+
+            var res = new RES_ChargeActionPoint
+            {
+
+            };
+
+            return Observable.Return((req, res));
         }
 
-        public IObservable<ActionBase.ActionEvaluation<HackAndSlash>> HackAndSlash(Player player, int worldId, int stageId, int playCount) => HackAndSlash(
-            player.Costumes,
-            player.Equipments,
-            null,
-            worldId,
-            stageId,
-            playCount);
-
-        public IObservable<ActionBase.ActionEvaluation<HackAndSlash>> HackAndSlash(
-            List<Costume> costumes,
-            List<Equipment> equipments,
-            List<Consumable> foods,
-            int worldId,
-            int stageId,
-            int playCount)
+        ///////////////////////////////////////////////////////////////////////////
+        // enter workshop entry point
+        public IObservable<(REQ_EnterWorkshopEntryPoint, RES_EnterWorkshopEntryPoint)> EnterWorkshopEntryPointAsync()
         {
-            Analyzer.Instance.Track("Unity/HackAndSlash", new Dictionary<string, object>
+            var req = new REQ_EnterWorkshopEntryPoint
             {
-                ["WorldId"] = worldId,
-                ["StageId"] = stageId,
-                ["PlayCount"] = playCount,
-            });
-
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-            costumes ??= new List<Costume>();
-            equipments ??= new List<Equipment>();
-            foods ??= new List<Consumable>();
-
-            var action = new HackAndSlash
-            {
-                costumes = costumes.Select(c => c.ItemId).ToList(),
-                equipments = equipments.Select(e => e.ItemId).ToList(),
-                foods = foods.Select(f => f.ItemId).ToList(),
-                worldId = worldId,
-                stageId = stageId,
-                playCount = playCount,
-                avatarAddress = avatarAddress,
-                rankingMapAddress = States.Instance.CurrentAvatarState.RankingMapAddress,
+                Header = MakeHeader(),
             };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);            
-            _lastBattleActionId = action.Id;
 
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
+            // remote request
+
+            var res = new RES_EnterWorkshopEntryPoint
+            {
+
+            };
+
+            return Observable.Return((req, res));
         }
 
-        public IObservable<ActionBase.ActionEvaluation<CombinationConsumable>> CombinationConsumable(
+        // combination consumable
+        public IObservable<(REQ_CombinationConsumable, RES_CombinationConsumable)> CombinationConsumableAsync(
             SubRecipeView.RecipeInfo recipeInfo,
             int slotIndex)
         {
@@ -252,143 +259,60 @@ namespace Nekoyume.BlockChain
                 ["RecipeId"] = recipeInfo.RecipeId,
             });
 
-            var action = new CombinationConsumable
+            var req = new REQ_CombinationConsumable
             {
-                recipeId = recipeInfo.RecipeId,
-                avatarAddress = States.Instance.CurrentAvatarState.address,
-                slotIndex = slotIndex,
+                Header = MakeHeader(),
             };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
 
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
+            // remote request
+
+
+            var res = new RES_CombinationConsumable
+            {
+
+            };
+
+            return Observable.Return((req, res));
         }
 
-        public IObservable<ActionBase.ActionEvaluation<Sell>> Sell(
-            ITradableItem tradableItem,
-            int count,
-            FungibleAssetValue price,
-            ItemSubType itemSubType)
+        // combination equipment
+        public IObservable<(REQ_CombinationEquipment, RES_CombinationEquipment)> CombinationEquipmentAsync(
+            SubRecipeView.RecipeInfo recipeInfo,
+            int slotIndex)
         {
+            Analyzer.Instance.Track("Unity/Create CombinationEquipment", new Dictionary<string, object>
+            {
+                ["RecipeId"] = recipeInfo.RecipeId,
+            });
+
+            var agentAddress = States.Instance.AgentState.address;
             var avatarAddress = States.Instance.CurrentAvatarState.address;
 
-            if (!(tradableItem is TradableMaterial))
+            LocalLayerModifier.ModifyAgentGold(agentAddress, -recipeInfo.CostNCG);
+            LocalLayerModifier.ModifyAvatarActionPoint(agentAddress, -recipeInfo.CostAP);
+
+            foreach (var (material, count) in recipeInfo.Materials)
             {
-                LocalLayerModifier.RemoveItem(avatarAddress, tradableItem.TradableId, tradableItem.RequiredBlockIndex, count);
+                LocalLayerModifier.RemoveItem(avatarAddress, material, count);
             }
 
-            // NOTE: 장착했는지 안 했는지에 상관없이 해제 플래그를 걸어 둔다.
-            LocalLayerModifier.SetItemEquip(avatarAddress, tradableItem.TradableId, false);
-
-            var action = new Sell
+            var req = new REQ_CombinationEquipment
             {
-                sellerAvatarAddress = avatarAddress,
-                tradableId = tradableItem.TradableId,
-                count = count,
-                price = price,
-                itemSubType = itemSubType,
-                orderId = Guid.NewGuid(),
+                Header = MakeHeader(),
             };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
 
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
+            // remote request
+
+            var res = new RES_CombinationEquipment
+            {
+
+            };
+
+            return Observable.Return((req, res));
         }
 
-        public IObservable<ActionBase.ActionEvaluation<SellCancellation>> SellCancellation(
-            Address sellerAvatarAddress,
-            Guid orderId,
-            Guid tradableId,
-            ItemSubType itemSubType)
-        {
-            var action = new SellCancellation
-            {
-                orderId = orderId,
-                tradableId = tradableId,
-                sellerAvatarAddress = sellerAvatarAddress,
-                itemSubType = itemSubType,
-            };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
-
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
-        }
-
-        public IObservable<ActionBase.ActionEvaluation<UpdateSell>> UpdateSell(
-            Guid orderId,
-            ITradableItem tradableItem,
-            int count,
-            FungibleAssetValue price,
-            ItemSubType itemSubType)
-        {
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-
-            if (!(tradableItem is TradableMaterial))
-            {
-                LocalLayerModifier.RemoveItem(avatarAddress, tradableItem.TradableId, tradableItem.RequiredBlockIndex, count);
-            }
-
-            // NOTE: 장착했는지 안 했는지에 상관없이 해제 플래그를 걸어 둔다.
-            LocalLayerModifier.SetItemEquip(avatarAddress, tradableItem.TradableId, false);
-
-            var action = new UpdateSell
-            {
-                orderId = orderId,
-                updateSellOrderId = Guid.NewGuid(),
-                tradableId = tradableItem.TradableId,
-                sellerAvatarAddress = avatarAddress,
-                itemSubType = itemSubType,
-                price = price,
-                count = count,
-            };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
-
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
-        }
-
-        public IObservable<ActionBase.ActionEvaluation<Buy>> Buy(List<PurchaseInfo> purchaseInfos)
-        {
-            var buyerAgentAddress = States.Instance.AgentState.address;
-            foreach (var purchaseInfo in purchaseInfos)
-            {
-                LocalLayerModifier.ModifyAgentGold(buyerAgentAddress, -purchaseInfo.Price);
-            }
-
-            var action = new Buy
-            {
-                buyerAvatarAddress = States.Instance.CurrentAvatarState.address,
-                purchaseInfos = purchaseInfos
-            };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
-        }
-
-        public IObservable<ActionBase.ActionEvaluation<DailyReward>> DailyReward()
-        {
-            var blockCount = Game.Game.instance.Agent.BlockIndex -
-                States.Instance.CurrentAvatarState.dailyRewardReceivedIndex + 1;
-            LocalLayerModifier.IncreaseAvatarDailyRewardReceivedIndex(
-                States.Instance.CurrentAvatarState.address,
-                blockCount);
-
-            var action = new DailyReward
-            {
-                avatarAddress = States.Instance.CurrentAvatarState.address,
-            };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
-        }
-
-        public IObservable<ActionBase.ActionEvaluation<ItemEnhancement>> ItemEnhancement(
+        // item enhancement
+        public IObservable<(REQ_ItemEnhancement, RES_ItemEnhancement)> ItemEnhancementAsync(
             Equipment baseEquipment,
             Equipment materialEquipment,
             int slotIndex,
@@ -410,98 +334,23 @@ namespace Nekoyume.BlockChain
 
             Analyzer.Instance.Track("Unity/Item Enhancement");
 
-            var action = new ItemEnhancement
+            var req = new REQ_ItemEnhancement
             {
-                itemId = baseEquipment.NonFungibleId,
-                materialId = materialEquipment.NonFungibleId,
-                avatarAddress = avatarAddress,
-                slotIndex = slotIndex,
+                Header = MakeHeader(),
             };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
+
+            // remote request
+
+            var res = new RES_ItemEnhancement
+            {
+
+            };
+
+            return Observable.Return((req, res));
         }
 
-        public IObservable<ActionBase.ActionEvaluation<RankingBattle>> RankingBattle(
-            Address enemyAddress,
-            List<Guid> costumeIds,
-            List<Guid> equipmentIds,
-            List<Guid> consumableIds
-        )
-        {
-            if (!ArenaHelper.TryGetThisWeekAddress(out var weeklyArenaAddress))
-            {
-                throw new NullReferenceException(nameof(weeklyArenaAddress));
-            }
-
-            Analyzer.Instance.Track("Unity/Ranking Battle");
-            var action = new RankingBattle
-            {
-                avatarAddress = States.Instance.CurrentAvatarState.address,
-                enemyAddress = enemyAddress,
-                weeklyArenaAddress = weeklyArenaAddress,
-                costumeIds = costumeIds,
-                equipmentIds = equipmentIds,
-                consumableIds = consumableIds
-            };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
-            _lastBattleActionId = action.Id;
-
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
-        }
-
-        public IObservable<ActionBase.ActionEvaluation<PatchTableSheet>> PatchTableSheet(
-            string tableName,
-            string tableCsv)
-        {
-            var action = new PatchTableSheet
-            {
-                TableName = tableName,
-                TableCsv = tableCsv,
-            };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
-        }
-
-        public IObservable<ActionBase.ActionEvaluation<CombinationEquipment>> CombinationEquipment(
-            SubRecipeView.RecipeInfo recipeInfo,
-            int slotIndex)
-        {
-            Analyzer.Instance.Track("Unity/Create CombinationEquipment", new Dictionary<string, object>
-            {
-                ["RecipeId"] = recipeInfo.RecipeId,
-            });
-
-            var agentAddress = States.Instance.AgentState.address;
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-
-            LocalLayerModifier.ModifyAgentGold(agentAddress, -recipeInfo.CostNCG);
-            LocalLayerModifier.ModifyAvatarActionPoint(agentAddress, -recipeInfo.CostAP);
-
-            foreach (var (material, count) in recipeInfo.Materials)
-            {
-                LocalLayerModifier.RemoveItem(avatarAddress, material, count);
-            }
-
-            var action = new CombinationEquipment
-            {
-                avatarAddress = States.Instance.CurrentAvatarState.address,
-                slotIndex = slotIndex,
-                recipeId = recipeInfo.RecipeId,
-                subRecipeId = recipeInfo.SubRecipeId,
-            };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
-        }
-
-        public IObservable<ActionBase.ActionEvaluation<RapidCombination>> RapidCombination(
+        // rapid combination
+        public IObservable<(REQ_RapidCombination, RES_RapidCombination)> RapidCombinationAsync(
             CombinationSlotState state,
             int slotIndex)
         {
@@ -513,63 +362,295 @@ namespace Nekoyume.BlockChain
 
             LocalLayerModifier.RemoveItem(avatarAddress, materialRow.ItemId, cost);
 
-            var action = new RapidCombination
+            var req = new REQ_RapidCombination
             {
-                avatarAddress = avatarAddress,
-                slotIndex = slotIndex
+                Header = MakeHeader(),
             };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
+
+            // remote request
+
+            var res = new RES_RapidCombination
+            {
+
+            };
+
+            return Observable.Return((req, res));
         }
 
-        public IObservable<ActionBase.ActionEvaluation<RedeemCode>> RedeemCode(string code)
+        ///////////////////////////////////////////////////////////////////////////
+        // enter arena entry point
+        public IObservable<(REQ_EnterArenaEntryPoint, RES_EnterArenaEntryPoint)> EnterArenaEntryPointAsync()
         {
-            var action = new RedeemCode(
-                code,
-                States.Instance.CurrentAvatarState.address
-            );
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
+            var req = new REQ_EnterArenaEntryPoint
+            {
+                Header = MakeHeader(),
+            };
+
+            // remote request
+
+            var res = new RES_EnterArenaEntryPoint
+            {
+
+            };
+
+            return Observable.Return((req, res));
         }
 
-        public IObservable<ActionBase.ActionEvaluation<ChargeActionPoint>> ChargeActionPoint(Material material)
+        // ranking battle
+        public IObservable<(REQ_RankingBattle, RES_RankingBattle)> RankingBattleAsync(
+            string enemyAddress,
+            List<Guid> costumeIds,
+            List<Guid> equipmentIds,
+            List<Guid> consumableIds
+        )
+        {
+            if (!ArenaHelper.TryGetThisWeekAddress(out var weeklyArenaAddress))
+            {
+                throw new NullReferenceException(nameof(weeklyArenaAddress));
+            }
+
+            Analyzer.Instance.Track("Unity/Ranking Battle");
+
+            var req = new REQ_RankingBattle
+            {
+                Header = MakeHeader(),
+            };
+
+            var res = new RES_RankingBattle
+            {
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+
+        ///////////////////////////////////////////////////////////////////////////
+        // enter shop entry point
+        public IObservable<(REQ_EnterShopEntryPoint, RES_EnterShopEntryPoint)> EnterShopEntryPointAsync()
+        {
+            var req = new REQ_EnterShopEntryPoint
+            {
+                Header = MakeHeader(),
+            };
+
+            var res = new RES_EnterShopEntryPoint
+            {
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+        // sell
+        public IObservable<(REQ_Sell, RES_Sell)> SellAsync(
+            ITradableItem tradableItem,
+            int count,
+            BigInteger price,
+            ItemSubType itemSubType)
         {
             var avatarAddress = States.Instance.CurrentAvatarState.address;
 
-            LocalLayerModifier.RemoveItem(avatarAddress, material.ItemId);
-            LocalLayerModifier.ModifyAvatarActionPoint(avatarAddress, States.Instance.GameConfigState.ActionPointMax);
-
-            var action = new ChargeActionPoint
+            if (!(tradableItem is TradableMaterial))
             {
-                avatarAddress = avatarAddress
+                LocalLayerModifier.RemoveItem(avatarAddress, tradableItem.TradableId, tradableItem.RequiredBlockIndex, count);
+            }
+
+            // NOTE: 장착했는지 안 했는지에 상관없이 해제 플래그를 걸어 둔다.
+            LocalLayerModifier.SetItemEquip(avatarAddress, tradableItem.TradableId, false);
+            Analyzer.Instance.Track("Unity/Sell");
+
+            var req = new REQ_Sell
+            {
+
             };
-            action.PayCost(Game.Game.instance.Agent, States.Instance, TableSheets.Instance);
-            LocalLayerActions.Instance.Register(action.Id, action.PayCost, _agent.BlockIndex);
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
+
+            var res = new RES_Sell
+            {
+
+            };
+
+            return Observable.Return((req, res));
         }
 
-#if LIB9C_DEV_EXTENSIONS || UNITY_EDITOR
-        public IObservable<ActionBase.ActionEvaluation<CreateTestbed>> CreateTestbed()
+        // sell cancellation
+        public IObservable<(REQ_SellCancellation, RES_SellCancellation)> SellCancellationAsync(
+            string sellerAvatarAddress,
+            Guid orderId,
+            Guid tradableId,
+            ItemSubType itemSubType)
         {
-            var action = new CreateTestbed
-            {
-                weeklyArenaAddress = WeeklyArenaState.DeriveAddress(
-                    (int)Game.Game.instance.Agent.BlockIndex / States.Instance.GameConfigState.WeeklyArenaInterval)
-            };
-            return ProcessAction(action)
-                .DoOnError(e => HandleException(action.Id, e));
-        }
-#endif
-        #endregion
 
-        public void Dispose()
+            var req = new REQ_SellCancellation
+            {
+                Header = MakeHeader(),
+            };
+
+            var res = new RES_SellCancellation
+            {
+
+            };
+
+
+            return Observable.Return((req, res));
+        }
+
+        // update sell
+        public IObservable<(REQ_UpdateSell, RES_UpdateSell)> UpdateSellAsync(
+            Guid orderId,
+            ITradableItem tradableItem,
+            int count,
+            BigInteger price,
+            ItemSubType itemSubType)
         {
-            _disposables.DisposeAllAndClear();
+            var avatarAddress = States.Instance.CurrentAvatarState.address;
+
+            if (!(tradableItem is TradableMaterial))
+            {
+                LocalLayerModifier.RemoveItem(avatarAddress, tradableItem.TradableId, tradableItem.RequiredBlockIndex, count);
+            }
+
+            // NOTE: 장착했는지 안 했는지에 상관없이 해제 플래그를 걸어 둔다.
+            LocalLayerModifier.SetItemEquip(avatarAddress, tradableItem.TradableId, false);
+            Analyzer.Instance.Track("Unity/UpdateSell");
+
+            var req = new REQ_UpdateSell
+            {
+                Header = MakeHeader(),
+            };
+
+            var res = new RES_UpdateSell
+            {
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+        // buy
+        public IObservable<(REQ_Buy, RES_Buy)> BuyAsync(List<PurchaseInfo> purchaseInfos)
+        {
+            var buyerAgentAddress = States.Instance.AgentState.address;
+            foreach (var purchaseInfo in purchaseInfos)
+            {
+                LocalLayerModifier.ModifyAgentGold(buyerAgentAddress, -purchaseInfo.Price);
+            }
+
+            var req = new REQ_Buy
+            {
+                Header = MakeHeader(),
+            };
+
+            var res = new RES_Buy
+            {
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+        ///////////////////////////////////////////////////////////////////////////
+        // enter mimisbrunnr entry point
+        public IObservable<(REQ_EnterMimisbrunnrEntryPoint, RES_EnterMimisbrunnrEntryPoint)> EnterMimisbrunnrEntryPointAsync()
+        {
+            var req = new REQ_EnterMimisbrunnrEntryPoint
+            {
+                Header = MakeHeader(),
+            };
+
+            var res = new RES_EnterMimisbrunnrEntryPoint
+            {
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+        // mimisbrunnr battle
+        public IObservable<(REQ_MimisbrunnrBattle, RES_MimisbrunnrBattle)> MimisbrunnrBattleAsync(
+            List<Costume> costumes,
+            List<Equipment> equipments,
+            List<Consumable> foods,
+            int worldId,
+            int stageId,
+            int playCount)
+        {
+            var avatarAddress = States.Instance.CurrentAvatarState.address;
+            costumes ??= new List<Costume>();
+            equipments ??= new List<Equipment>();
+            foods ??= new List<Consumable>();
+
+            var req = new REQ_MimisbrunnrBattle
+            {
+                Header = MakeHeader(),
+            };
+
+            var res = new RES_MimisbrunnrBattle
+            {
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+        ///////////////////////////////////////////////////////////////////////////
+        // enter world entry point
+        public IObservable<(REQ_EnterWorldEntryPoint, RES_EnterWorldEntryPoint)> EnterWorldEntryPointAsync()
+        {
+            var req = new REQ_EnterWorldEntryPoint
+            {
+                Header = MakeHeader(),
+            };
+
+            var res = new RES_EnterWorldEntryPoint
+            {
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+        // hack and slash
+        public IObservable<(REQ_HackAndSlash, RES_HackAndSlash)> HackAndSlashAsync(Player player, int worldId, int stageId, int playCount) => HackAndSlashAsync(
+            player.Costumes,
+            player.Equipments,
+            null,
+            worldId,
+            stageId,
+            playCount);
+
+        public IObservable<(REQ_HackAndSlash, RES_HackAndSlash)> HackAndSlashAsync(
+            List<Costume> costumes,
+            List<Equipment> equipments,
+            List<Consumable> foods,
+            int worldId,
+            int stageId,
+            int playCount)
+        {
+            Analyzer.Instance.Track("Unity/HackAndSlash", new Dictionary<string, object>
+            {
+                ["WorldId"] = worldId,
+                ["StageId"] = stageId,
+                ["PlayCount"] = playCount,
+
+            });
+
+            var avatarAddress = States.Instance.CurrentAvatarState.address;
+            costumes ??= new List<Costume>();
+            equipments ??= new List<Equipment>();
+            foods ??= new List<Consumable>();
+
+            var req = new REQ_HackAndSlash
+            {
+                Header = MakeHeader(),
+            };
+
+            var res = new RES_HackAndSlash
+            {
+
+            };
+
+            return Observable.Return((req, res));
         }
     }
 }

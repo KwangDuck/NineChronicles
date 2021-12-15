@@ -525,7 +525,7 @@ namespace Nekoyume.UI
             // NOTE: Check mimisbrunnr
             if (SharedModel.WorldID > 10000)
             {
-                yield return Game.Game.instance.ActionManager.MimisbrunnrBattle(
+                yield return Game.Game.instance.ActionManager.MimisbrunnrBattleAsync(
                     player.Costumes,
                     player.Equipments,
                     new List<Consumable>(),
@@ -535,7 +535,7 @@ namespace Nekoyume.UI
             }
             else
             {
-                yield return Game.Game.instance.ActionManager.HackAndSlash(
+                yield return Game.Game.instance.ActionManager.HackAndSlashAsync(
                     player.Costumes,
                     player.Equipments,
                     new List<Consumable>(),
@@ -587,7 +587,7 @@ namespace Nekoyume.UI
             // NOTE: Check mimisbrunnr
             if (SharedModel.WorldID > 10000)
             {
-                yield return Game.Game.instance.ActionManager.MimisbrunnrBattle(
+                yield return Game.Game.instance.ActionManager.MimisbrunnrBattleAsync(
                     player.Costumes,
                     player.Equipments,
                     new List<Consumable>(),
@@ -597,7 +597,7 @@ namespace Nekoyume.UI
             }
             else
             {
-                yield return Game.Game.instance.ActionManager.HackAndSlash(
+                yield return Game.Game.instance.ActionManager.HackAndSlashAsync(
                     player.Costumes,
                     player.Equipments,
                     new List<Consumable>(),

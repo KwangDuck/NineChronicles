@@ -833,7 +833,7 @@ namespace Nekoyume.UI
             _stage.foodCount = consumables.Count;
             ActionRenderHandler.Instance.Pending = true;
 
-            Game.Game.instance.ActionManager.HackAndSlash(
+            Game.Game.instance.ActionManager.HackAndSlashAsync(
                 costumes,
                 equipments,
                 consumables,

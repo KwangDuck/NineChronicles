@@ -284,7 +284,7 @@ namespace Nekoyume.UI
             slots.SetCaching(slotIndex, true, requiredBlockIndex, itemUsable:equipment);
 
             equipmentSubRecipeView.UpdateView();
-            Game.Game.instance.ActionManager.CombinationEquipment(recipeInfo, slotIndex).Subscribe();
+            Game.Game.instance.ActionManager.CombinationEquipmentAsync(recipeInfo, slotIndex).Subscribe();
 
             StartCoroutine(CoCombineNPCAnimation(equipment, requiredBlockIndex));
         }
@@ -305,7 +305,7 @@ namespace Nekoyume.UI
             slots.SetCaching(slotIndex, true, requiredBlockIndex, itemUsable:consumable);
 
             consumableSubRecipeView.UpdateView();
-            Game.Game.instance.ActionManager.CombinationConsumable(recipeInfo, slotIndex).Subscribe();
+            Game.Game.instance.ActionManager.CombinationConsumableAsync(recipeInfo, slotIndex).Subscribe();
 
             StartCoroutine(CoCombineNPCAnimation(consumable, requiredBlockIndex, true));
         }

@@ -919,7 +919,7 @@ namespace Nekoyume.UI
             _stage.IsRepeatStage = repeat;
             _stage.foodCount = consumables.Count;
             ActionRenderHandler.Instance.Pending = true;
-            Game.Game.instance.ActionManager.MimisbrunnrBattle(
+            Game.Game.instance.ActionManager.MimisbrunnrBattleAsync(
                 costumes,
                 equipments,
                 consumables,

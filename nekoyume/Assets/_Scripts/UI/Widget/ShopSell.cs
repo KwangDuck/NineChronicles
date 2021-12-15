@@ -327,8 +327,8 @@ namespace Nekoyume.UI
             var totalPrice = data.TotalPrice.Value;
             var count = data.Count.Value;
             var itemSubType = data.Item.Value.ItemBase.Value.ItemSubType;
-            Game.Game.instance.ActionManager.Sell(tradableItem, count, totalPrice, itemSubType).Subscribe();
-            Analyzer.Instance.Track("Unity/Sell");
+            Game.Game.instance.ActionManager.SellAsync(tradableItem, count, totalPrice.RawValue, itemSubType).Subscribe();
+            
             ResponseSell();
         }
 
@@ -365,13 +365,13 @@ namespace Nekoyume.UI
             }
 
             var itemSubType = data.Item.Value.ItemBase.Value.ItemSubType;
-            Game.Game.instance.ActionManager.UpdateSell(
+            Game.Game.instance.ActionManager.UpdateSellAsync(
                 digest.OrderId,
                 tradableItem,
                 count,
-                totalPrice,
+                totalPrice.RawValue,
                 itemSubType).Subscribe();
-            Analyzer.Instance.Track("Unity/UpdateSell");
+            
             ResponseSell();
         }
 
@@ -475,8 +475,8 @@ namespace Nekoyume.UI
             if (digest != null)
             {
                 Analyzer.Instance.Track("Unity/Sell Cancellation");
-                Game.Game.instance.ActionManager.SellCancellation(
-                    avatarAddress,
+                Game.Game.instance.ActionManager.SellCancellationAsync(
+                    avatarAddress.ToHex(),
                     digest.OrderId,
                     digest.TradableId,
                     subType).Subscribe();

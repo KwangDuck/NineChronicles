@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Nekoyume.BlockChain;
 using Nekoyume.Game;
@@ -122,7 +122,7 @@ namespace Nekoyume.UI
 
             if (_stageId >= GameConfig.MimisbrunnrStartStageId)
             {
-                Game.Game.instance.ActionManager.MimisbrunnrBattle(
+                Game.Game.instance.ActionManager.MimisbrunnrBattleAsync(
                     _costumes,
                     _equipments,
                     _consumables,
@@ -133,7 +133,7 @@ namespace Nekoyume.UI
             }
             else
             {
-                Game.Game.instance.ActionManager.HackAndSlash(
+                Game.Game.instance.ActionManager.HackAndSlashAsync(
                     _costumes,
                     _equipments,
                     _consumables,

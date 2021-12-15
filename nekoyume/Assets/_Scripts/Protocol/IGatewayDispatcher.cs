@@ -460,7 +460,7 @@ namespace Gateway.Protocol
         // login/logout
         UnaryResult<RES_Login> LoginAsync(REQ_Login req);
         UnaryResult<RES_Logout> LogoutAsync(REQ_Logout req);
-        // - create avatar
+        UnaryResult<REQ_CreateAvatar> CreateAvatarAsync(REQ_CreateAvatar req);
         UnaryResult<RES_RetrieveAllMasterData> RetrieveAllMasterDataAsync(REQ_RetrieveAllMasterData req);
         UnaryResult<RES_RetrieveMasterData> RetrieveMasterDataAsync(REQ_RetrieveMasterData req);
 

@@ -95,8 +95,8 @@ namespace Nekoyume.UI
             Find<GrayLoadingScreen>().Show();
 
             Game.Game.instance.ActionManager
-                .CreateAvatar(_selectedIndex, nickName, _hair, _lens, _ear, _tail)
-                .Subscribe(async eval =>
+                .CreateAvatarAsync(_selectedIndex, nickName, _hair, _lens, _ear, _tail)
+                .Subscribe(async result =>
                     {
                         var avatarState = States.Instance.SelectAvatar(_selectedIndex);
                         StartCoroutine(CreateAndLoginAnimation(avatarState));

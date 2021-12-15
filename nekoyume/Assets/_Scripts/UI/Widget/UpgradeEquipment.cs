@@ -311,7 +311,7 @@ namespace Nekoyume.UI
                 L10nManager.Localize("NOTIFICATION_ITEM_ENHANCEMENT_START"),
                 NotificationCell.NotificationType.Information);
 
-            Game.Game.instance.ActionManager.ItemEnhancement(_baseItem, _materialItem, slotIndex, _costNcg).Subscribe();
+            Game.Game.instance.ActionManager.ItemEnhancementAsync(_baseItem, _materialItem, slotIndex, _costNcg).Subscribe();
 
             StartCoroutine(CoCombineNPCAnimation(_baseItem, row.SuccessRequiredBlockIndex, () => UpdateState(State.Empty)));
         }

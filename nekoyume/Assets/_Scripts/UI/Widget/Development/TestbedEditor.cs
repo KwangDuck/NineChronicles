@@ -19,9 +19,7 @@ namespace Nekoyume
 
         public void OnClickStuffTheShop()
         {
-#if LIB9C_DEV_EXTENSIONS || UNITY_EDITOR
-            Game.Game.instance.ActionManager.CreateTestbed().Subscribe();
-#endif
+
         }
     }
 }

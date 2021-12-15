@@ -79,7 +79,7 @@ namespace Nekoyume.UI
                 .Subscribe(_ =>
                 {
                     AudioController.PlayClick();
-                    Game.Game.instance.ActionManager.RapidCombination(_slotState, _slotIndex).Subscribe();
+                    Game.Game.instance.ActionManager.RapidCombinationAsync(_slotState, _slotIndex).Subscribe();
                     Find<CombinationSlotsPopup>().SetCaching(
                         _slotIndex,
                         true,

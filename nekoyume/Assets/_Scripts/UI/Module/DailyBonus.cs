@@ -197,7 +197,7 @@ namespace Nekoyume.UI.Module
                 L10nManager.Localize("UI_RECEIVING_DAILY_REWARD"),
                 NotificationCell.NotificationType.Information);
             
-            Game.Game.instance.ActionManager.DailyReward().Subscribe();
+            Game.Game.instance.ActionManager.DailyRewardAsync().Subscribe();
 
             var address = States.Instance.CurrentAvatarState.address;
             if (GameConfigStateSubject.ActionPointState.ContainsKey(address))

@@ -393,8 +393,8 @@ namespace Nekoyume.UI
         {
             var currentAvatarInventory = States.Instance.CurrentAvatarState.inventory;
 
-            Game.Game.instance.ActionManager.RankingBattle(
-                arenaRankCell.ArenaInfo.AvatarAddress,
+            Game.Game.instance.ActionManager.RankingBattleAsync(
+                arenaRankCell.ArenaInfo.AvatarAddress.ToHex(),
                 currentAvatarInventory.Costumes
                     .Where(i => i.equipped)
                     .Select(i => i.ItemId).ToList(),
