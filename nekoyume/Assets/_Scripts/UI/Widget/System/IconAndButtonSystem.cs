@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using Nekoyume.Game.Controller;
 using Nekoyume.Helper;
@@ -163,7 +163,7 @@ namespace Nekoyume.UI
 
         private IEnumerator CoCheckBlockIndex(long blockIndex)
         {
-            yield return new WaitWhile(() => Game.Game.instance.Agent.BlockIndex == blockIndex);
+            yield return new WaitWhile(() => 0 == blockIndex);
             CancelCallback = null;
             Close();
         }

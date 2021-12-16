@@ -36,9 +36,6 @@ namespace Nekoyume.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-            Game.Game.instance.Agent.BlockIndexSubject.ObserveOnMainThread()
-                .Subscribe(SubscribeBlockIndex)
-                .AddTo(_disposablesOfOnEnable);
         }
 
         protected override void OnDisable()
@@ -50,7 +47,7 @@ namespace Nekoyume.UI
         public override void Show(bool ignoreShowAnimation = false)
         {
             base.Show(ignoreShowAnimation);
-            UpdateSlots(Game.Game.instance.Agent.BlockIndex);
+            UpdateSlots(0);
             HelpTooltip.HelpMe(100008, true);
 
             if (blur)
@@ -66,12 +63,12 @@ namespace Nekoyume.UI
             ItemUsable itemUsable = null)
         {
             slots[slotIndex].SetCached(value, requiredBlockIndex, slotType, itemUsable);
-            UpdateSlots(Game.Game.instance.Agent.BlockIndex);
+            UpdateSlots(0);
         }
 
         public bool TryGetEmptyCombinationSlot(out int slotIndex)
         {
-            UpdateSlots(Game.Game.instance.Agent.BlockIndex);
+            UpdateSlots(0);
             for (var i = 0; i < slots.Count; i++)
             {
                 if (slots[i].Type != CombinationSlot.SlotType.Empty)

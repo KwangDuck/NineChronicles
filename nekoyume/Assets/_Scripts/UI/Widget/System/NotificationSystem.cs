@@ -120,10 +120,6 @@ namespace Nekoyume.UI
                 .AddTo(gameObject);
 
             CloseWidget = null;
-            Game.Game.instance.Agent.BlockIndexSubject
-                .ObserveOnMainThread()
-                .Subscribe(SubscribeBlockIndex)
-                .AddTo(gameObject);
 
             _state = State.Idle;
             StartCoroutine(CoUpdate());

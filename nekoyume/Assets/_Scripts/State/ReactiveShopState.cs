@@ -403,50 +403,14 @@ namespace Nekoyume.State
         private static async Task AddOrderDigest(Address address,
             IDictionary<Address, List<OrderDigest>> orderDigests)
         {
-            var shardedShopState = await Game.Game.instance.Agent.GetStateAsync(address);
-            if (shardedShopState is Dictionary dictionary)
-            {
-                var state = new ShardedShopStateV2(dictionary);
-                foreach (var orderDigest in state.OrderDigestList)
-                {
-                    if (orderDigest.ExpiredBlockIndex != 0 && orderDigest.ExpiredBlockIndex >
-                        Game.Game.instance.Agent.BlockIndex)
-                    {
-                        var agentAddress = orderDigest.SellerAgentAddress;
-                        if (!orderDigests.ContainsKey(agentAddress))
-                        {
-                            orderDigests.Add(agentAddress, new List<OrderDigest>());
-                        }
-
-                        orderDigests[agentAddress].Add(orderDigest);
-                    }
-                }
-            }
+            await Task.Yield();
         }
 
         private static async Task<List<OrderDigest>> GetSellOrderDigests()
         {
             var avatarAddress = States.Instance.CurrentAvatarState.address;
             var receiptAddress = OrderDigestListState.DeriveAddress(avatarAddress);
-            var receiptState = await Game.Game.instance.Agent.GetStateAsync(receiptAddress);
             var receipts = new List<OrderDigest>();
-            if (receiptState is Dictionary dictionary)
-            {
-                var state = new OrderDigestListState(dictionary);
-
-                var validOrderDigests = state.OrderDigestList.Where(x =>
-                    x.ExpiredBlockIndex > Game.Game.instance.Agent.BlockIndex);
-                receipts.AddRange(validOrderDigests);
-
-                var expiredOrderDigests = state.OrderDigestList.Where(x =>
-                    x.ExpiredBlockIndex <= Game.Game.instance.Agent.BlockIndex);
-                var inventory = States.Instance.CurrentAvatarState.inventory;
-                var lockedDigests = expiredOrderDigests
-                    .Where(x => inventory.TryGetLockedItem(new OrderLock(x.OrderId), out _))
-                    .ToList();
-                receipts.AddRange(lockedDigests);
-            }
-
             return receipts;
         }
     }

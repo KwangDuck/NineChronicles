@@ -42,10 +42,7 @@ namespace Nekoyume.UI.Module
             if (expired)
             {
                 _expiredBlockIndex = model.ExpiredBlockIndex.Value;
-                SetExpired(Game.Game.instance.Agent.BlockIndex);
-                Game.Game.instance.Agent.BlockIndexSubject
-                    .Subscribe(SetExpired)
-                    .AddTo(_disposables);
+                SetExpired(0);
             }
 
             _cancellationTokenSource = new CancellationTokenSource();

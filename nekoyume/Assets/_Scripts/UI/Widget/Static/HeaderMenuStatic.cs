@@ -183,10 +183,6 @@ namespace Nekoyume.UI.Module
             });
 
             Game.Event.OnRoomEnter.AddListener(_ => UpdateAssets(AssetVisibleState.Main));
-            Game.Game.instance.Agent.BlockIndexSubject
-                .ObserveOnMainThread()
-                .Subscribe(SubscribeBlockIndex)
-                .AddTo(gameObject);
         }
 
         protected override void OnEnable()
@@ -316,7 +312,7 @@ namespace Nekoyume.UI.Module
 
         private void SubscribeInventory(Nekoyume.Model.Item.Inventory inventory)
         {
-            var blockIndex = Game.Game.instance.Agent.BlockIndex;
+            var blockIndex = 0;
             var avatarLevel = States.Instance.CurrentAvatarState?.level ?? 0;
             var hasNotification = inventory?.HasNotification(avatarLevel, blockIndex) ?? false;
             UpdateInventoryNotification(hasNotification);

@@ -45,9 +45,6 @@ namespace Nekoyume.UI
 
         private void OnEnable()
         {
-            Game.Game.instance.Agent.BlockIndexSubject
-                .Subscribe(SetBlockIndex)
-                .AddTo(_disposablesFromOnEnable);
             WeeklyArenaStateSubject.WeeklyArenaState
                 .Subscribe(SetWeeklyArenaState)
                 .AddTo(_disposablesFromOnEnable);
@@ -68,8 +65,7 @@ namespace Nekoyume.UI
 
         private void SetWeeklyArenaState(WeeklyArenaState weeklyArenaState)
         {
-            _resetIndex = weeklyArenaState.ResetIndex;
-            remainTimeSlider.value = Game.Game.instance.Agent.BlockIndex - _resetIndex;
+            remainTimeSlider.value = 0 - _resetIndex;
             UpdateArenaInfo(weeklyArenaState);
         }
 

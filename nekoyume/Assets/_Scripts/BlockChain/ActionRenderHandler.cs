@@ -61,10 +61,6 @@ namespace Nekoyume.BlockChain
             _actionRenderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
 
             Stop();
-            _actionRenderer.BlockEndSubject.ObserveOnMainThread().Subscribe(_ =>
-            {
-                Debug.Log($"[{nameof(BlockRenderHandler)}] Render actions end");
-            }).AddTo(_disposables);
 
             RewardGold();
             GameConfig();
@@ -292,7 +288,7 @@ namespace Nekoyume.BlockChain
                 }
 
                 var formatKey = string.Empty;
-                var currentBlockIndex = Game.Game.instance.Agent.BlockIndex;
+                var currentBlockIndex = 0;
                 var combinationSlotState = States.Instance.GetCombinationSlotState(currentBlockIndex);
                 var stateResult = combinationSlotState[slotIndex]?.Result;
                 switch (stateResult)

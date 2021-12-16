@@ -33,8 +33,7 @@ namespace Nekoyume.UI
 
         private void OnEnable()
         {
-            Game.Game.instance.Agent.BlockIndexSubject.Subscribe(SetBlockIndex)
-                .AddTo(_disposablesFromOnEnable);
+            
         }
 
         private void OnDisable()
@@ -57,7 +56,7 @@ namespace Nekoyume.UI
         public void UpdateTimer(long expiredTime)
         {
             _expiredTime = expiredTime;
-            var value = _expiredTime - Game.Game.instance.Agent.BlockIndex;
+            var value = _expiredTime - 0;
             UpdateUI(value);
         }
 

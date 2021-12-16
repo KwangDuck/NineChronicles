@@ -34,13 +34,13 @@ namespace Nekoyume.State
             LocalLayer.Instance.Add(agentAddress, modifier);
 
             //FIXME Avoid LocalLayer duplicate modify gold.
-            var state = new GoldBalanceState(agentAddress, await Game.Game.instance.Agent.GetBalanceAsync(agentAddress, gold.Currency));
-            if (!state.address.Equals(agentAddress))
-            {
-                return;
-            }
+            //var state = new GoldBalanceState(agentAddress, await Game.Game.instance.Agent.GetBalanceAsync(agentAddress, gold.Currency));
+            //if (!state.address.Equals(agentAddress))
+            //{
+            //    return;
+            //}
 
-            States.Instance.SetGoldBalanceState(state);
+            //States.Instance.SetGoldBalanceState(state);
         }
 
         public static void ModifyAgentGold(Address agentAddress, BigInteger gold)

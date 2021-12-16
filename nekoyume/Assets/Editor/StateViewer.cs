@@ -157,7 +157,7 @@ namespace Editor
             {
                 address = Aliases[searchString];
             }
-            return Agent.GetState(address);
+            return null;
         }
 
         public void RegisterAlias(string alias, Address address)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Libplanet.Action;
 using Libplanet.Tx;
 using Nekoyume.Action;
@@ -112,39 +112,16 @@ namespace Nekoyume.BlockChain
                     TxId txId;
                     if (ate.TxId.HasValue)
                     {
-                        txId = ate.TxId.Value;
-                        if (Game.Game.instance.Agent.IsTxStaged(txId))
-                        {
-                            errorMsg += $" Transaction for action is still staged. (txId: {txId})";
-                            code = "26";
-                        }
-                        else
-                        {
-                            errorMsg += $" Transaction for action is not staged. (txId: {txId})";
-                            code = "27";
-                        }
+                        
                     }
                     else
                     {
-                        if (Game.Game.instance.Agent.TryGetTxId(ate.ActionId, out txId))
-                        {
-                            errorMsg += $" Transaction for action is still staged. (txId: {txId})";
-                            code = "26";
-                        }
-                        else
-                        {
-                            errorMsg += " Transaction for action is not staged.";
-                            code = "27";
-                        }
+                        
                     }
 
                     Debug.LogError($"Action timeout: (txId: {txId}, actionId: {ate.ActionId}, code: {code})");
 
                     errorMsg += $"\nError Code: {code}";
-                    break;
-                case UnableToRenderWhenSyncingBlocksException _:
-                    code = "28";
-                    key = "ERROR_UNABLE_TO_RENDER_WHEN_SYNCING_BLOCKS";
                     break;
             }
 

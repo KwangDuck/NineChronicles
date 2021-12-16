@@ -79,7 +79,7 @@ namespace Nekoyume.State.Modifiers
                     wi.IsWorldUnlocked(worldUnlockSheetRow.WorldId) &&
                     wi.IsStageCleared(worldUnlockSheetRow.StageId))
                 {
-                    wi.UnlockWorld(worldId, Game.Game.instance.Agent.BlockIndex, worldSheet);
+                    wi.UnlockWorld(worldId, 0, worldSheet);
                 }
             }
 

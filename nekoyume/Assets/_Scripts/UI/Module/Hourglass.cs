@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Nekoyume.Helper;
 using Nekoyume.State;
@@ -37,7 +37,7 @@ namespace Nekoyume.UI.Module
 
         private void UpdateHourglass(Nekoyume.Model.Item.Inventory inventory)
         {
-            var count = Util.GetHourglassCount(inventory, Game.Game.instance.Agent.BlockIndex);
+            var count = Util.GetHourglassCount(inventory, 0);
             countText.text = count.ToString();
         }
 

@@ -53,7 +53,7 @@ namespace Nekoyume.UI.Module
                         && base.CheckCondition();
                 case CostType.Hourglass:
                     var inventory = States.Instance.CurrentAvatarState.inventory;
-                    var count = Util.GetHourglassCount(inventory, Game.Game.instance.Agent.BlockIndex);
+                    var count = Util.GetHourglassCount(inventory, 0);
                     return count >= _cost && base.CheckCondition();
                 default:
                     return base.CheckCondition();
@@ -86,7 +86,7 @@ namespace Nekoyume.UI.Module
                     break;
                 case CostType.Hourglass:
                     var inventory = States.Instance.CurrentAvatarState.inventory;
-                    var count = Util.GetHourglassCount(inventory, Game.Game.instance.Agent.BlockIndex);
+                    var count = Util.GetHourglassCount(inventory, 0);
                     if (count < _cost)
                     {
                         OneLineSystem.Push(

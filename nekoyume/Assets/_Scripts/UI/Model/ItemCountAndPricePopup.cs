@@ -1,3 +1,4 @@
+using Libplanet;
 using Libplanet.Assets;
 using Nekoyume.State;
 using UniRx;
@@ -12,7 +13,7 @@ namespace Nekoyume.UI.Model
 
         public ItemCountAndPricePopup()
         {
-            var currency = States.Instance.GoldBalanceState.Gold.Currency;
+            var currency = new Currency("ticker", 0, new Address());
             Price = new ReactiveProperty<FungibleAssetValue>(new FungibleAssetValue(currency, 10, 0));
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -111,7 +111,7 @@ namespace Nekoyume.State.Modifiers
             {
                 state.inventory.RemoveFungibleItem(
                     pair.Key.Value,
-                    Game.Game.instance.Agent.BlockIndex,
+                    0,
                     pair.Value);
             }
 

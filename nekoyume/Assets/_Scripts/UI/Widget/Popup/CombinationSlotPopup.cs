@@ -98,10 +98,6 @@ namespace Nekoyume.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-
-            Game.Game.instance.Agent.BlockIndexSubject.ObserveOnMainThread()
-                .Subscribe(SubscribeOnBlockIndex)
-                .AddTo(_disposablesOfOnEnable);
         }
 
         protected override void OnDisable()

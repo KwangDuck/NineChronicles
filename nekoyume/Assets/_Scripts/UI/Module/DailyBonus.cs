@@ -75,13 +75,10 @@ namespace Nekoyume.UI.Module
 
             if (!(States.Instance.CurrentAvatarState is null))
             {
-                SetBlockIndex(Game.Game.instance.Agent.BlockIndex, false);
+                SetBlockIndex(0, false);
                 SetRewardReceivedBlockIndex(States.Instance.CurrentAvatarState.dailyRewardReceivedIndex, false);
             }
 
-            Game.Game.instance.Agent.BlockIndexSubject.ObserveOnMainThread()
-                .Subscribe(x => SetBlockIndex(x, true))
-                .AddTo(_disposables);
             ReactiveAvatarState.DailyRewardReceivedIndex
                 .Subscribe(x => SetRewardReceivedBlockIndex(x, true))
                 .AddTo(_disposables);

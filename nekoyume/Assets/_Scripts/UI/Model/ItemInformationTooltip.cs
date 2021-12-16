@@ -5,6 +5,7 @@ using Nekoyume.State;
 
 namespace Nekoyume.UI.Model
 {
+    using Libplanet;
     using Nekoyume.Model.Item;
     using UniRx;
 
@@ -28,7 +29,7 @@ namespace Nekoyume.UI.Model
 
         public ItemInformationTooltip(CountableItem countableItem = null)
         {
-            var currency = States.Instance.GoldBalanceState.Gold.Currency;
+            var currency = new Currency("ticker", 0, new Address());
             Price = new ReactiveProperty<FungibleAssetValue>(new FungibleAssetValue(currency));
 
             ItemInformation = new ItemInformation(countableItem);

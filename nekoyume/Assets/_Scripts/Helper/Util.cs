@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -59,16 +59,7 @@ namespace Nekoyume.Helper
         public static async Task<Order> GetOrder(Guid orderId)
         {
             var address = Order.DeriveAddress(orderId);
-            return await UniTask.Run(async () =>
-            {
-                var state = await Game.Game.instance.Agent.GetStateAsync(address);
-                if (state is Dictionary dictionary)
-                {
-                    return OrderFactory.Deserialize(dictionary);
-                }
-
-                return null;
-            });
+            return null;
         }
 
         public static async Task<string> GetItemNameByOrderId(Guid orderId, bool isNonColored = false)
@@ -82,14 +73,6 @@ namespace Nekoyume.Helper
             var address = Addresses.GetItemAddress(order.TradableId);
             return await UniTask.Run(async () =>
             {
-                var state = await Game.Game.instance.Agent.GetStateAsync(address);
-                if (state is Dictionary dictionary)
-                {
-                    var itemBase = ItemFactory.Deserialize(dictionary);
-                    return isNonColored
-                        ? itemBase.GetLocalizedNonColoredName()
-                        : itemBase.GetLocalizedName();
-                }
 
                 return string.Empty;
             });
@@ -98,19 +81,7 @@ namespace Nekoyume.Helper
         public static async Task<ItemBase> GetItemBaseByTradableId(Guid tradableId, long requiredBlockExpiredIndex)
         {
             var address = Addresses.GetItemAddress(tradableId);
-            return await UniTask.Run(async () =>
-            {
-                var state = await Game.Game.instance.Agent.GetStateAsync(address);
-                if (state is Dictionary dictionary)
-                {
-                    var itemBase = ItemFactory.Deserialize(dictionary);
-                    var tradableItem = itemBase as ITradableItem;
-                    tradableItem.RequiredBlockIndex = requiredBlockExpiredIndex;
-                    return tradableItem as ItemBase;
-                }
-
-                return null;
-            });
+            return null;
         }
 
         public static ItemBase CreateItemBaseByItemId(int itemId)
@@ -156,7 +127,7 @@ namespace Nekoyume.Helper
                 return false;
             }
 
-            var agentAddress = Game.Game.instance.Agent.Address;
+            var agentAddress = string.Empty;
             var key = $"{StoredSlotIndex}{agentAddress}";
             var hasKey = PlayerPrefs.HasKey(key);
             slotIndex = hasKey ? PlayerPrefs.GetInt(key) : 0;
@@ -171,7 +142,7 @@ namespace Nekoyume.Helper
                 return;
             }
 
-            var agentAddress = Game.Game.instance.Agent.Address;
+            var agentAddress = string.Empty;
             var key = $"{StoredSlotIndex}{agentAddress}";
             PlayerPrefs.SetInt(key, slotIndex);
         }

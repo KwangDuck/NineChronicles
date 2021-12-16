@@ -317,12 +317,7 @@ namespace Nekoyume
             foreach (var name in tableNames)
             {
                 var value = string.Empty;
-                var state = Game.Game.instance.Agent.GetState(Addresses.TableSheet.Derive(name));
-                if (!(state is null))
-                {
-                    value = state.ToDotnetString();
-                }
-
+                
                 result[name] = value;
             }
 

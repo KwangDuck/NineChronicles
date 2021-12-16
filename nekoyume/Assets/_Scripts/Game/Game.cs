@@ -158,7 +158,7 @@ namespace Nekoyume.Game
             );
 
             yield return new WaitUntil(() => agentInitialized);
-            Analyzer = new Analyzer().Initialize(Agent.Address.ToString());
+            Analyzer = new Analyzer().Initialize(string.Empty);
             Analyzer.Track("Unity/Started");
             // NOTE: Create ActionManager after Agent initialized.
             ActionManager = new ActionManager(Agent);
@@ -239,11 +239,6 @@ namespace Nekoyume.Game
                 var csv = new ConcurrentDictionary<string, string>();
                 Parallel.ForEach(csvAssets, asset =>
                 {
-                    if (Agent.GetState(Addresses.TableSheet.Derive(asset.name)) is Text tableCsv)
-                    {
-                        var table = tableCsv.ToDotnetString();
-                        csv[asset.name] = table;
-                    }
                 });
                 TableSheets = new TableSheets(csv);
             });
@@ -412,48 +407,12 @@ namespace Nekoyume.Game
             settings.UpdateSoundSettings();
             settings.UpdatePrivateKey(_options.PrivateKey);
 
-            //var loginPopup = Widget.Find<LoginSystem>();
-
-            //if (Application.isBatchMode)
-            //{
-            //    loginPopup.Show(_options.KeyStorePath, _options.PrivateKey);
-            //}
-            //else
-            //{
-            //    var intro = Widget.Find<IntroScreen>();
-            //    intro.Show(_options.KeyStorePath, _options.PrivateKey);
-            //    yield return new WaitUntil(() => loginPopup.Login);
-            //}
-
-            var privateKey = new PrivateKey();
-
-            yield return Agent.Initialize(
-                _options,
-                privateKey,
-                callback
-            );
+            yield return Agent.Initialize(_options, callback);
         }
 
         public void ResetStore()
         {
-            var confirm = Widget.Find<ConfirmPopup>();
-            var storagePath = _options.StoragePath ?? BlockChain.Agent.DefaultStoragePath;
-            confirm.CloseCallback = result =>
-            {
-                if (result == ConfirmResult.No)
-                {
-                    return;
-                }
-
-                StoreUtils.ResetStore(storagePath);
-
-#if UNITY_EDITOR
-                UnityEditor.EditorApplication.ExitPlaymode();
-#else
-                Application.Quit();
-#endif
-            };
-            confirm.Show("UI_CONFIRM_RESET_STORE_TITLE", "UI_CONFIRM_RESET_STORE_CONTENT");
+            
         }
 
         public void ResetKeyStore()

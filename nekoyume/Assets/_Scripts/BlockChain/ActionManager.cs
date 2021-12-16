@@ -356,11 +356,7 @@ namespace Nekoyume.BlockChain
         {
             var avatarAddress = States.Instance.CurrentAvatarState.address;
             var materialRow = Game.Game.instance.TableSheets.MaterialItemSheet.Values
-                .First(r => r.ItemSubType == ItemSubType.Hourglass);
-            var diff = state.UnlockBlockIndex - Game.Game.instance.Agent.BlockIndex;
-            var cost = RapidCombination0.CalculateHourglassCount(States.Instance.GameConfigState, diff);
-
-            LocalLayerModifier.RemoveItem(avatarAddress, materialRow.ItemId, cost);
+                .First(r => r.ItemSubType == ItemSubType.Hourglass);            
 
             var req = new REQ_RapidCombination
             {

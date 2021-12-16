@@ -184,10 +184,10 @@ namespace Nekoyume.UI
             var currentAddress = States.Instance.CurrentAvatarState?.address;
             if (currentAddress != null)
             {
-                var arenaInfo = States.Instance.WeeklyArenaState.GetArenaInfo(currentAddress.Value);
-                rankingExclamationMark.gameObject.SetActive(
-                    btnRanking.IsUnlocked &&
-                    (arenaInfo == null || arenaInfo.DailyChallengeCount > 0));
+                //var arenaInfo = States.Instance.WeeklyArenaState.GetArenaInfo(currentAddress.Value);
+                //rankingExclamationMark.gameObject.SetActive(
+                //    btnRanking.IsUnlocked &&
+                //    (arenaInfo == null || arenaInfo.DailyChallengeCount > 0));
             }
 
             var worldMap = Find<WorldMap>();

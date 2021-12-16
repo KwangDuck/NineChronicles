@@ -118,7 +118,7 @@ namespace Nekoyume.UI.Model
         {
             if (itemBase is ITradableItem tradableItem)
             {
-                var blockIndex = Game.Game.instance.Agent?.BlockIndex ?? -1;
+                var blockIndex = -1;
                 if (tradableItem.RequiredBlockIndex > blockIndex)
                 {
                     return;

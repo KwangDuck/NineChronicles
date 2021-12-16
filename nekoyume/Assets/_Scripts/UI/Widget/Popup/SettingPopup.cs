@@ -126,16 +126,6 @@ namespace Nekoyume.UI
             }
             else
             {
-                if (Game.Game.instance.Agent.PrivateKey is null)
-                {
-                    addressContentInputField.text = string.Empty;
-                    privateKeyContentInputField.text = string.Empty;
-                }
-                else
-                {
-                    addressContentInputField.text = Game.Game.instance.Agent.Address.ToString();
-                    privateKeyContentInputField.text = ByteUtil.Hex(Game.Game.instance.Agent.PrivateKey.ByteArray);
-                }
             }
 
             var muteString = L10nManager.Localize("UI_MUTE_AUDIO");

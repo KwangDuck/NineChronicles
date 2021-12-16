@@ -176,14 +176,7 @@ namespace Nekoyume.UI
 
             await UniTask.Run(async () =>
             {
-                var agent = Game.Game.instance.Agent;
-                var gameConfigState = States.Instance.GameConfigState;
-                var weeklyArenaIndex = (int)agent.BlockIndex / gameConfigState.WeeklyArenaInterval;
-                var weeklyArenaAddress = WeeklyArenaState.DeriveAddress(weeklyArenaIndex);
-                var weeklyArenaState =
-                    new WeeklyArenaState((Bencodex.Types.Dictionary) await agent.GetStateAsync(weeklyArenaAddress));
-                States.Instance.SetWeeklyArenaState(weeklyArenaState);
-                await UpdateWeeklyCache(States.Instance.WeeklyArenaState);
+;
             });
 
             base.Show(true);
@@ -359,7 +352,7 @@ namespace Nekoyume.UI
                 var gameConfigState = states.GameConfigState;
                 if (stateType == StateType.Filtered)
                 {
-                    var currentBlockIndex = Game.Game.instance.Agent.BlockIndex;
+                    var currentBlockIndex = 0;
                     rankingInfos = _rankingInfos
                         .Where(context =>
                             currentBlockIndex - context.UpdatedAt <= gameConfigState.DailyRewardInterval)
@@ -466,54 +459,6 @@ namespace Nekoyume.UI
             _rankingInfos = rankingInfos
                 .OrderByDescending(c => c.Exp)
                 .ThenBy(c => c.StageClearedBlockIndex)
-                .ToList();
-        }
-
-        private async Task UpdateWeeklyCache(WeeklyArenaState state)
-        {
-            var infos = state.GetArenaInfos(1, 3);
-            if (States.Instance.CurrentAvatarState != null)
-            {
-                var currentAvatarAddress = States.Instance.CurrentAvatarState.address;
-                var infos2 = state.GetArenaInfos(currentAvatarAddress, 90, 10);
-                // Player does not play prev & this week arena.
-                if (!infos2.Any() && state.OrderedArenaInfos.Any())
-                {
-                    var address = state.OrderedArenaInfos.Last().AvatarAddress;
-                    infos2 = state.GetArenaInfos(address, 90, 0);
-                }
-
-                infos.AddRange(infos2);
-                infos = infos.ToImmutableHashSet().OrderBy(tuple => tuple.rank).ToList();
-            }
-
-            var addressList = infos.Select(i => i.arenaInfo.AvatarAddress).ToList();
-            var avatarStates = await Game.Game.instance.Agent.GetAvatarStates(addressList);
-            foreach (var address in addressList)
-            {
-                States.TryGetAvatarState(address);
-            }
-            _weeklyCachedInfo = infos
-                .Select(tuple =>
-                {
-                    var avatarAddress = tuple.arenaInfo.AvatarAddress;
-                    if (!avatarStates.ContainsKey(avatarAddress))
-                    {
-                        return (0, null);
-                    }
-
-                    var avatarState = avatarStates[avatarAddress];
-
-                    var arenaInfo = tuple.arenaInfo;
-#pragma warning disable 618
-                    arenaInfo.Level = avatarState.level;
-                    arenaInfo.ArmorId = avatarState.GetArmorIdForPortrait();
-                    arenaInfo.CombatPoint = avatarState.GetCP();
-#pragma warning restore 618
-                    return tuple;
-                })
-                .Select(t => t)
-                .Where(tuple => tuple.rank > 0)
                 .ToList();
         }
     }

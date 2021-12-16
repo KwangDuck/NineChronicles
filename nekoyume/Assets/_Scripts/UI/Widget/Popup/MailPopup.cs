@@ -95,10 +95,6 @@ namespace Nekoyume.UI
             _selectedButtonSprite = Resources.Load<Sprite>("UI/Textures/button_yellow_02");
 
             ReactiveAvatarState.MailBox?.Subscribe(SetList).AddTo(gameObject);
-            Game.Game.instance.Agent.BlockIndexSubject
-                .ObserveOnMainThread()
-                .Subscribe(UpdateNotification)
-                .AddTo(gameObject);
 
             emptyText.text = L10nManager.Localize(emptyTextL10nKey);
         }
@@ -135,8 +131,7 @@ namespace Nekoyume.UI
         {
             tabState = (MailTabState) state;
 
-            var blockIndex = Game.Game.instance.Agent.BlockIndex;
-            UpdateMailList(blockIndex);
+            UpdateMailList(0);
         }
 
         private IEnumerable<Nekoyume.Model.Mail.Mail> GetAvailableMailList(long blockIndex, MailTabState state)
@@ -183,7 +178,7 @@ namespace Nekoyume.UI
 
         public void UpdateTabs(long? blockIndex = null)
         {
-            blockIndex ??= Game.Game.instance.Agent.BlockIndex;
+            blockIndex = 0;
 
             // 전체 탭
             allButton.HasNotification.Value = MailBox

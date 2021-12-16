@@ -136,15 +136,12 @@ namespace Nekoyume.UI.Module
 
                     CachedType = CacheType.Appraise;
                     UpdateItemInformation(itemUsable, slotType);
-                    UpdateRequiredBlockInformation(
-                        requiredBlockIndex + Game.Game.instance.Agent.BlockIndex,
-                        Game.Game.instance.Agent.BlockIndex,
-                        Game.Game.instance.Agent.BlockIndex);
+                    UpdateRequiredBlockInformation(requiredBlockIndex + 0, 0, 0);
                     break;
 
                 case SlotType.WaitingReceive:
                     CachedType = CacheType.WaitingReceive;
-                    UpdateInformation(Type, Game.Game.instance.Agent.BlockIndex, _state, IsCached);
+                    UpdateInformation(Type, 0, _state, IsCached);
                     break;
             }
         }
@@ -154,17 +151,14 @@ namespace Nekoyume.UI.Module
             touchHandler.OnClick.Subscribe(pointerEventData =>
             {
                 AudioController.PlayClick();
-                OnClickSlot(Type, _state, _slotIndex, Game.Game.instance.Agent.BlockIndex);
+                OnClickSlot(Type, _state, _slotIndex, 0);
             }).AddTo(gameObject);
         }
 
         private void OnEnable()
         {
-            Game.Game.instance.Agent.BlockIndexSubject.ObserveOnMainThread()
-                .Subscribe(SubscribeOnBlockIndex)
-                .AddTo(_disposablesOfOnEnable);
             ReactiveAvatarState.Inventory
-                .Select(_ => Game.Game.instance.Agent.BlockIndex)
+                .Select(_ => (long)0)
                 .Subscribe(SubscribeOnBlockIndex)
                 .AddTo(_disposablesOfOnEnable);
         }

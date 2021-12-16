@@ -43,11 +43,6 @@ namespace Nekoyume.UI
             _currentPanelAnimationState = PanelAnimationState.Off;
             _nextPanelAnimationState = PanelAnimationState.Off;
             _animationTextAtlasIndex = 0;
-
-            Agent.OnEnqueueOwnGameAction += guid => _nextPanelAnimationState = PanelAnimationState.On;
-            Agent.OnHasOwnTx += has => _nextPanelAnimationState = has
-                ? PanelAnimationState.On
-                : PanelAnimationState.Off;
         }
 
         protected override void Update()

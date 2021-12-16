@@ -233,7 +233,7 @@ namespace Nekoyume.BlockChain
 
             var avatarAddress = eval.Action.sellerAvatarAddress;
             var itemId = eval.Action.tradableId;
-            var blockIndex = Game.Game.instance.Agent.BlockIndex;
+            var blockIndex = 0;
             var count = eval.Action.count;
             LocalLayerModifier.RemoveItem(avatarAddress, itemId, blockIndex, count);
             UpdateCurrentAvatarStateAsync(eval);

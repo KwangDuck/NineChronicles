@@ -244,8 +244,8 @@ namespace Nekoyume.UI
             _isPointerOnScrollArea = false;
             _isClickedButtonArea = false;
             _disposablesForModel.DisposeAllAndClear();
-            Model.target.Value = null;
-            Model.ItemInformation.item.Value = null;
+            //Model.target.Value = null;
+            //Model.ItemInformation.item.Value = null;
             base.Close(ignoreCloseAnimation);
         }
 

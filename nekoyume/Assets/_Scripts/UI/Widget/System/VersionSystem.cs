@@ -15,8 +15,6 @@ namespace Nekoyume.UI
         protected override void Awake()
         {
             base.Awake();
-            Game.Game.instance.Agent.BlockIndexSubject.Subscribe(SubscribeBlockIndex).AddTo(gameObject);
-            Game.Game.instance.Agent.BlockTipHashSubject.Subscribe(SubscribeBlockHash).AddTo(gameObject);
         }
 
         public void SetVersion(int version)
