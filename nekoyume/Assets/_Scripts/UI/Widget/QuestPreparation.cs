@@ -207,7 +207,7 @@ namespace Nekoyume.UI
                     _stage.IsExitReserved = false;
                     _stage.IsRepeatStage = false;
                     _stage.foodCount = consumables.Count;
-                    ActionRenderHandler.Instance.Pending = true;
+                    //ActionRenderHandler.Instance.Pending = true;
 
                     Find<BoosterPopup>().Show(_stage, costumes, equipments, consumables, 12, _worldId, _stageId.Value);
                 });
@@ -831,7 +831,7 @@ namespace Nekoyume.UI
             _stage.IsExitReserved = false;
             _stage.IsRepeatStage = repeat;
             _stage.foodCount = consumables.Count;
-            ActionRenderHandler.Instance.Pending = true;
+            //ActionRenderHandler.Instance.Pending = true;
 
             Game.Game.instance.ActionManager.HackAndSlashAsync(
                 costumes,

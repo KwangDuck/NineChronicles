@@ -10,7 +10,7 @@ using Nekoyume.Model.State;
 using Nekoyume.UI;
 using Material = Nekoyume.Model.Item.Material;
 
-namespace Nekoyume.BlockChain
+namespace Nekoyume.Game
 {
     using Gateway.Protocol;
     using UniRx;
@@ -21,15 +21,15 @@ namespace Nekoyume.BlockChain
     public class ActionManager : IDisposable
     {
         private static readonly TimeSpan ActionTimeout = TimeSpan.FromSeconds(360f);        
-        private readonly IAgent _agent;
         private Guid _lastBattleActionId;
+        private IGatewayDispatcher _gatewayDispatcher;
 
-        public static ActionManager Instance => Game.Game.instance.ActionManager;
+        public static ActionManager Instance => Game.instance.ActionManager;
         public static bool IsLastBattleActionId(Guid actionId) => actionId == Instance._lastBattleActionId;
 
-        public ActionManager(IAgent agent)
+        public ActionManager()
         {
-            _agent = agent ?? throw new ArgumentNullException(nameof(agent));
+            
         }
 
         public void Dispose()
@@ -91,7 +91,7 @@ namespace Nekoyume.BlockChain
                 new Libplanet.Address(),
                 new Libplanet.Address(),
                 0,
-                Game.Game.instance.TableSheets.GetAvatarSheets(),
+                Game.instance.TableSheets.GetAvatarSheets(),
                 States.Instance.GameConfigState,
                 new Libplanet.Address()
             );
@@ -355,7 +355,7 @@ namespace Nekoyume.BlockChain
             int slotIndex)
         {
             var avatarAddress = States.Instance.CurrentAvatarState.address;
-            var materialRow = Game.Game.instance.TableSheets.MaterialItemSheet.Values
+            var materialRow = Game.instance.TableSheets.MaterialItemSheet.Values
                 .First(r => r.ItemSubType == ItemSubType.Hourglass);            
 
             var req = new REQ_RapidCombination

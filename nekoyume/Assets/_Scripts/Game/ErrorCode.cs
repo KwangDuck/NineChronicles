@@ -7,7 +7,7 @@ using Nekoyume.Model.State;
 using Nekoyume.TableData;
 using UnityEngine;
 
-namespace Nekoyume.BlockChain
+namespace Nekoyume.Game
 {
     public static class ErrorCode
     {
@@ -105,23 +105,6 @@ namespace Nekoyume.BlockChain
                     break;
                 case CombinationSlotResultNullException _:
                     code = "25";
-                    break;
-                case ActionTimeoutException ate:
-                    key = "ERROR_NETWORK";
-                    errorMsg = "Action timeout occurred.";
-                    TxId txId;
-                    if (ate.TxId.HasValue)
-                    {
-                        
-                    }
-                    else
-                    {
-                        
-                    }
-
-                    Debug.LogError($"Action timeout: (txId: {txId}, actionId: {ate.ActionId}, code: {code})");
-
-                    errorMsg += $"\nError Code: {code}";
                     break;
             }
 

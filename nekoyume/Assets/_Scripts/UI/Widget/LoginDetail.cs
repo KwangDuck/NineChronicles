@@ -100,7 +100,7 @@ namespace Nekoyume.UI
                     {
                         var avatarState = States.Instance.SelectAvatar(_selectedIndex);
                         StartCoroutine(CreateAndLoginAnimation(avatarState));
-                        ActionRenderHandler.RenderQuest(avatarState.address, avatarState.questList.completedQuestIds);
+                        //ActionRenderHandler.RenderQuest(avatarState.address, avatarState.questList.completedQuestIds);
                     },
                     e =>
                     {

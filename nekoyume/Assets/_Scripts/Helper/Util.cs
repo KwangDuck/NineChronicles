@@ -119,14 +119,7 @@ namespace Nekoyume.Helper
         }
 
         public static bool TryGetStoredAvatarSlotIndex(out int slotIndex)
-        {
-            if (Game.Game.instance.Agent is null)
-            {
-                Debug.LogError("[Util.TryGetStoredSlotIndex] agent is null");
-                slotIndex = 0;
-                return false;
-            }
-
+        {            
             var agentAddress = string.Empty;
             var key = $"{StoredSlotIndex}{agentAddress}";
             var hasKey = PlayerPrefs.HasKey(key);
@@ -135,13 +128,7 @@ namespace Nekoyume.Helper
         }
 
         public static void SaveAvatarSlotIndex(int slotIndex)
-        {
-            if (Game.Game.instance.Agent is null)
-            {
-                Debug.LogError("[Util.SaveSlotIndex] agent is null");
-                return;
-            }
-
+        {            
             var agentAddress = string.Empty;
             var key = $"{StoredSlotIndex}{agentAddress}";
             PlayerPrefs.SetInt(key, slotIndex);

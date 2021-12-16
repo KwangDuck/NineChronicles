@@ -20,8 +20,6 @@ namespace Editor
 
         private string searchString;
 
-        private StateProxy stateProxy;
-
         [MenuItem("Tools/Libplanet/View State")]
         private static void ShowWindow()
         {   
@@ -65,15 +63,6 @@ namespace Editor
             if (CheckPlaying())
             {
                 RegisterAliases();
-                try
-                {
-                    var state = stateProxy.GetState(searchString);
-                    stateView.SetState(state);
-                }
-                catch (KeyNotFoundException)
-                {
-                    stateView.SetState((Text)"empty");
-                }
             }
         }
 
@@ -104,72 +93,10 @@ namespace Editor
             {
                 stateView = new StateView(treeViewState);
             }
-
-            if (stateProxy is null && CheckPlaying())
-            {
-                stateProxy = new StateProxy(Game.instance.Agent);
-            }
         }
 
         private void RegisterAliases()
-        {
-            var states = Game.instance.States;
-            for (int i = 0; i < 3; ++i)
-            {
-                if (states.AvatarStates.ContainsKey(i))
-                    stateProxy.RegisterAlias($"avatar{i}", states.AvatarStates[i].address);
-            }
-            stateProxy.RegisterAlias("agent", states.AgentState.address);
-            for (int i = 0; i < RankingState.RankingMapCapacity; ++i)
-            {
-                stateProxy.RegisterAlias("ranking", RankingState.Derive(i));
-            }
-
-            stateProxy.RegisterAlias("gameConfig", GameConfigState.Address);
-            stateProxy.RegisterAlias("redeemCode", RedeemCodeState.Address);
-            if (!(states.CurrentAvatarState is null))
-            {
-                stateProxy.RegisterAlias("me", states.CurrentAvatarState.address);
-            }
-        }
-    }
-
-    class StateProxy
-    {
-        private IAgent Agent { get; }
-        private Dictionary<string, Address> Aliases { get; }
-
-        public StateProxy(IAgent agent)
-        {
-            Agent = agent;
-            Aliases = new Dictionary<string, Address>();
-        }
-
-        public IValue GetState(string searchString)
-        {
-            Address address;
-
-            if (searchString.Length == 40)
-            {
-                address = new Address(searchString);
-            }
-            else
-            {
-                address = Aliases[searchString];
-            }
-            return null;
-        }
-
-        public void RegisterAlias(string alias, Address address)
-        {
-            if (!Aliases.ContainsKey(alias))
-            {
-                Aliases.Add(alias, address);
-            }
-            else
-            {
-                Aliases[alias] = address;
-            }
+        {            
         }
     }
 }

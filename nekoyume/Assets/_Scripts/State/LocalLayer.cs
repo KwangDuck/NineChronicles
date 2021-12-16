@@ -32,7 +32,7 @@ namespace Nekoyume.State
             }
         }
 
-        public static LocalLayer Instance => Game.Game.instance.LocalLayer;
+        public static LocalLayer Instance = new LocalLayer();
 
         private ModifierInfo<AgentStateModifier> _agentModifierInfo;
 

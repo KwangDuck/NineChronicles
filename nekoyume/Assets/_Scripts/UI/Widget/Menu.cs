@@ -134,7 +134,7 @@ namespace Nekoyume.UI
             var player = stage.GetPlayer();
             player.StartRun();
             ActionCamera.instance.ChaseX(player.transform);
-            ActionRenderHandler.Instance.Pending = true;
+            //ActionRenderHandler.Instance.Pending = true;
             Game.Game.instance.ActionManager.HackAndSlashAsync(player, worldId, stageId, 1).Subscribe();
             LocalLayerModifier.ModifyAvatarActionPoint(States.Instance.CurrentAvatarState.address,
                 - requiredCost);

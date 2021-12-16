@@ -24,11 +24,8 @@ using Menu = Nekoyume.UI.Menu;
 
 namespace Nekoyume.Game
 {
-    using Libplanet.Crypto;
     using UniRx;
 
-    //[RequireComponent(typeof(Agent), typeof(RPCAgent))]
-    [RequireComponent(typeof(DummyAgent))]
     public class Game : MonoSingleton<Game>
     {
         [SerializeField]
@@ -42,15 +39,8 @@ namespace Nekoyume.Game
 
         [SerializeField]
         private Prologue prologue = null;
-
         public States States { get; private set; }
-
-        public LocalLayer LocalLayer { get; private set; }
-        
-        public LocalLayerActions LocalLayerActions { get; private set; }
-
-        public IAgent Agent { get; private set; }
-        
+       
         public Analyzer Analyzer { get; private set; }
 
         public Stage Stage => stage;
@@ -62,6 +52,7 @@ namespace Nekoyume.Game
         public ActionManager ActionManager { get; private set; }
 
         public bool IsInitialized { get; private set; }
+        public int AppProtocolVersion { get; private set; }
 
         public Prologue Prologue => prologue;
 
@@ -90,21 +81,7 @@ namespace Nekoyume.Game
 
             Debug.Log("[Game] Awake() CommandLineOptions loaded");
 
-            //if (_options.RpcClient)
-            //{
-            //    Agent = GetComponent<RPCAgent>();
-            //    SubscribeRPCAgent();
-            //}
-            //else
-            //{
-            //    Agent = GetComponent<Agent>();
-            //}
-
-            Agent = GetComponent<DummyAgent>();
-
             States = new States();
-            LocalLayer = new LocalLayer();
-            LocalLayerActions = new LocalLayerActions();
             MainCanvas.instance.InitializeIntro();
         }
 
@@ -161,7 +138,7 @@ namespace Nekoyume.Game
             Analyzer = new Analyzer().Initialize(string.Empty);
             Analyzer.Track("Unity/Started");
             // NOTE: Create ActionManager after Agent initialized.
-            ActionManager = new ActionManager(Agent);
+            ActionManager = new ActionManager();
             yield return StartCoroutine(CoSyncTableSheets());
             Debug.Log("[Game] Start() TableSheets synchronized");
             // Initialize MainCanvas second
@@ -171,7 +148,7 @@ namespace Nekoyume.Game
             // Initialize Stage
             Stage.Initialize();
 
-            Widget.Find<VersionSystem>().SetVersion(Agent.AppProtocolVersion);
+            Widget.Find<VersionSystem>().SetVersion(0);
 
             ShowNext(agentInitializeSucceed);
             StartCoroutine(CoUpdate());
@@ -179,7 +156,7 @@ namespace Nekoyume.Game
 
         protected override void OnDestroy()
         {
-            ActionManager.Dispose();
+            ActionManager?.Dispose();
             base.OnDestroy();
         }
 
@@ -360,54 +337,22 @@ namespace Nekoyume.Game
 
         private IEnumerator CoLogin(Action<bool> callback)
         {
-            if (_options.Maintenance)
-            {
-                var w = Widget.Create<IconAndButtonSystem>();
-                w.CancelCallback = () =>
-                {
-                    Application.OpenURL(GameConfig.DiscordLink);
-#if UNITY_EDITOR
-                    UnityEditor.EditorApplication.ExitPlaymode();
-#else
-                    Application.Quit();
-#endif
-                };
-                w.Show(
-                    "UI_MAINTENANCE",
-                    "UI_MAINTENANCE_CONTENT",
-                    "UI_OK",
-                    true,
-                    IconAndButtonSystem.SystemType.Information
-                );
-                yield break;
-            }
-
-            if (_options.TestEnd)
-            {
-                var w = Widget.Find<ConfirmPopup>();
-                w.CloseCallback = result =>
-                {
-                    if (result == ConfirmResult.Yes)
-                    {
-                        Application.OpenURL(GameConfig.DiscordLink);
-                    }
-
-#if UNITY_EDITOR
-                    UnityEditor.EditorApplication.ExitPlaymode();
-#else
-                    Application.Quit();
-#endif
-                };
-                w.Show("UI_TEST_END", "UI_TEST_END_CONTENT", "UI_GO_DISCORD", "UI_QUIT");
-
-                yield break;
-            }
-
             var settings = Widget.Find<UI.SettingPopup>();
             settings.UpdateSoundSettings();
             settings.UpdatePrivateKey(_options.PrivateKey);
 
-            yield return Agent.Initialize(_options, callback);
+            // assign appProtocolVersion
+            var appProtocolVersion = _options.AppProtocolVersion is null
+                ? default
+                : Libplanet.Net.AppProtocolVersion.FromToken(_options.AppProtocolVersion);
+            AppProtocolVersion = appProtocolVersion.Version;
+
+            // set state config state
+            States.Instance.SetGameConfigState(new GameConfigState());
+
+            yield return null;
+
+            callback.Invoke(true);
         }
 
         public void ResetStore()

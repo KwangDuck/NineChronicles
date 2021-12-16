@@ -468,7 +468,7 @@ namespace Nekoyume.Game
         {
             IsAvatarStateUpdatedAfterBattle = false;
             // NOTE ActionRenderHandler.Instance.Pending should be false before _onEnterToStageEnd.OnNext() invoked.
-            ActionRenderHandler.Instance.Pending = false;
+            //ActionRenderHandler.Instance.Pending = false;
             _onEnterToStageEnd.OnNext(this);
             yield return new WaitUntil(() => IsAvatarStateUpdatedAfterBattle);
             var avatarState = States.Instance.CurrentAvatarState;
@@ -628,7 +628,7 @@ namespace Nekoyume.Game
             IsAvatarStateUpdatedAfterBattle = false;
 
             // NOTE ActionRenderHandler.Instance.Pending should be false before _onEnterToStageEnd.OnNext() invoked.
-            ActionRenderHandler.Instance.Pending = false;
+            //ActionRenderHandler.Instance.Pending = false;
             _onEnterToStageEnd.OnNext(this);
             yield return new WaitUntil(() => IsAvatarStateUpdatedAfterBattle);
 
@@ -705,10 +705,10 @@ namespace Nekoyume.Game
                 }
             }
 
-            if (!(AvatarState is null) && !ActionRenderHandler.Instance.Pending)
-            {
-                ActionRenderHandler.Instance.UpdateCurrentAvatarStateAsync(AvatarState);
-            }
+            //if (!(AvatarState is null) && !ActionRenderHandler.Instance.Pending)
+            //{
+            //    ActionRenderHandler.Instance.UpdateCurrentAvatarStateAsync(AvatarState);
+            //}
 
             yield return null;
         }

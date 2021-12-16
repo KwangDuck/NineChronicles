@@ -520,7 +520,7 @@ namespace Nekoyume.UI
             StopVFX();
             var player = stage.RunPlayerForNextStage();
             player.DisableHUD();
-            ActionRenderHandler.Instance.Pending = true;
+            //ActionRenderHandler.Instance.Pending = true;
 
             // NOTE: Check mimisbrunnr
             if (SharedModel.WorldID > 10000)
@@ -574,7 +574,7 @@ namespace Nekoyume.UI
             StopVFX();
             var player = stage.RunPlayerForNextStage();
             player.DisableHUD();
-            ActionRenderHandler.Instance.Pending = true;
+            //ActionRenderHandler.Instance.Pending = true;
 
             var props = new Dictionary<string, object>
             {
