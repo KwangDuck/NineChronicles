@@ -205,8 +205,7 @@ namespace Nekoyume.UI
 
         private static bool CheckPassWord(string text)
         {
-            var result = Zxcvbn.Zxcvbn.MatchPassword(text);
-            return result.Score >= 2;
+            return false;
         }
 
         public void CheckRetypePassphrase()
