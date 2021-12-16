@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Nekoyume.BlockChain;
 using Nekoyume.Game;
 using Nekoyume.Game.Controller;
 using Nekoyume.Game.VFX;
@@ -148,19 +147,6 @@ namespace Nekoyume.UI
         protected override void Awake()
         {
             base.Awake();
-
-            closeButton.OnClickAsObservable().Subscribe(_ =>
-                {
-                    if (States.Instance.CurrentAvatarState.worldInformation
-                        .TryGetUnlockedWorldByStageClearedBlockIndex(out var world))
-                    {
-                        var canExit = world.StageClearedId >= Battle.RequiredStageForExitButton;
-                        if (canExit)
-                        {
-                            StartCoroutine(OnClickClose());
-                        }
-                    }
-                }).AddTo(gameObject);
 
             nextButton.OnClickAsObservable().Subscribe(_ =>
                 {
@@ -582,7 +568,6 @@ namespace Nekoyume.UI
             };
             var eventKey = SharedModel.ClearedWaveNumber == 3 ? "Repeat" : "Retry";
             var eventName = $"Unity/Stage Exit {eventKey}";
-            Analyzer.Instance.Track(eventName, props);
 
             // NOTE: Check mimisbrunnr
             if (SharedModel.WorldID > 10000)
@@ -644,13 +629,8 @@ namespace Nekoyume.UI
 
         private void GoToMain()
         {
-            var props = new Dictionary<string, object>
-            {
-                ["StageId"] = Game.Game.instance.Stage.stageId,
-            };
             var eventKey = Game.Game.instance.Stage.IsExitReserved ? "Quit" : "Main";
             var eventName = $"Unity/Stage Exit {eventKey}";
-            Analyzer.Instance.Track(eventName, props);
 
             Find<Battle>().Close(true);
             Game.Event.OnRoomEnter.Invoke(true);

@@ -1,7 +1,4 @@
 using System.Collections;
-using System.Linq;
-using Nekoyume.BlockChain;
-using Nekoyume.State;
 using Nekoyume.UI;
 using Nekoyume.UI.Module;
 using UnityEngine;

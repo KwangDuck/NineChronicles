@@ -36,7 +36,7 @@ namespace Nekoyume.UI.Module
             SetBg(1f);
             SetLevel(model.ItemBase.Value.Grade, model.Level.Value);
             priceGroup.SetActive(true);
-            priceText.text = model.Price.Value.GetQuantityString();
+            priceText.text = model.Price.Value.ToString();
             Model.View = this;
 
             if (expired)

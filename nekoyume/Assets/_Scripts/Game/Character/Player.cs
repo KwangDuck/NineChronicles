@@ -630,11 +630,6 @@ namespace Nekoyume.Game.Character
 
             if (Level != level)
             {
-                Analyzer.Instance.Track("Unity/User Level Up", new Dictionary<string, object>
-                {
-                    ["code"] = level,
-                });
-
                 Widget.Find<LevelUpCelebratePopup>()?.Show(level, Level);
                 InitStats(Model);
             }

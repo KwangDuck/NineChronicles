@@ -29,8 +29,6 @@ namespace Nekoyume.UI
             var sprite = SpriteHelper.GetItemIcon(player.Model.armor? .Id ?? GameConfig.DefaultAvatarArmorId);
             playerProfile.Set(player.Level, States.Instance.CurrentAvatarState.NameWithHash, sprite);
             player.gameObject.SetActive(false);
-            var enemySprite = SpriteHelper.GetItemIcon(enemyInfo.ArmorId);
-            enemyProfile.Set(enemyInfo.Level, enemyInfo.AvatarName, enemySprite);
             loadingText.text = L10nManager.Localize("UI_MATCHING_OPPONENT");
             Show();
         }

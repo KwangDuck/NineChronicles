@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using Lib9c.Model.Order;
-using Nekoyume.Action;
 using Nekoyume.Game.Controller;
 using Nekoyume.Helper;
 using Nekoyume.L10n;
@@ -222,153 +220,34 @@ namespace Nekoyume.UI
 
         public void Read(CombinationMail mail)
         {
-            var itemUsable = mail?.attachment?.itemUsable;
-            if (itemUsable is null)
-            {
-                Debug.LogError("CombinationMail.itemUsable is null");
-                return;
-            }
-
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-
-            // LocalLayer
-            UniTask.Run(async () =>
-            {
-                LocalLayerModifier.AddItem(
-                    avatarAddress,
-                    itemUsable.TradableId,
-                    itemUsable.RequiredBlockIndex,
-                    1,
-                    false);
-                LocalLayerModifier.RemoveNewAttachmentMail(avatarAddress, mail.id, false);
-                var (exist, avatarState) = States.TryGetAvatarState(avatarAddress);
-                if (!exist)
-                {
-                    return null;
-                }
-
-                return avatarState;
-            }).ToObservable().SubscribeOnMainThread().Subscribe(async avatarState =>
-            {
-                Debug.Log("CombinationMail LocalLayer task completed");
-                States.Instance.AddOrReplaceAvatarState(avatarState, States.Instance.CurrentAvatarKey);
-            });
-            // ~LocalLayer
-
-            if (mail.attachment is CombinationConsumable5.ResultModel resultModel)
-            {
-                if (resultModel.subRecipeId.HasValue &&
-                    Game.Game.instance.TableSheets.EquipmentItemSubRecipeSheetV2.TryGetValue(
-                        resultModel.subRecipeId.Value,
-                        out var row))
-                {
-                    Find<CombinationResultPopup>().Show(itemUsable, row.Options.Count);
-                }
-                else
-                {
-                    Find<CombinationResultPopup>().Show(itemUsable);
-                }
-            }
+            
         }
 
         public async void Read(OrderBuyerMail orderBuyerMail)
         {
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-            var order = await Util.GetOrder(orderBuyerMail.OrderId);
-            var itemBase = await Util.GetItemBaseByTradableId(order.TradableId, order.ExpiredBlockIndex);
-            var count = order is FungibleOrder fungibleOrder ? fungibleOrder.ItemCount : 1;
-            var popup = Find<BuyItemInformationPopup>();
-            var model = new UI.Model.BuyItemInformationPopup(new CountableItem(itemBase, count))
-            {
-                isSuccess = true,
-                materialItems = new List<CombinationMaterial>()
-            };
-            model.OnClickSubmit.Subscribe(_ =>
-            {
-                LocalLayerModifier.AddItem(avatarAddress, order.TradableId, order.ExpiredBlockIndex, count);
-                LocalLayerModifier.RemoveNewMail(avatarAddress, orderBuyerMail.id, true);
-            }).AddTo(gameObject);
-            popup.Pop(model);
+            var popup = Find<BuyItemInformationPopup>();         
         }
 
         public async void Read(OrderSellerMail orderSellerMail)
         {
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-            var agentAddress = States.Instance.AgentState.address;
-            var order = await Util.GetOrder(orderSellerMail.OrderId);
-            var taxedPrice = order.Price - order.GetTax();
-            LocalLayerModifier.ModifyAgentGold(agentAddress, taxedPrice);
-            LocalLayerModifier.RemoveNewMail(avatarAddress, orderSellerMail.id);
         }
 
         public async void Read(OrderExpirationMail orderExpirationMail)
         {
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-            var order = await Util.GetOrder(orderExpirationMail.OrderId);
-
             Find<OneButtonSystem>().Show(L10nManager.Localize("UI_SELL_CANCEL_INFO"),
                 L10nManager.Localize("UI_YES"),
                 () =>
                 {
-                    LocalLayerModifier.AddItem(avatarAddress, order.TradableId, order.ExpiredBlockIndex, 1);
-                    LocalLayerModifier.RemoveNewMail(avatarAddress, orderExpirationMail.id);
+                    
                 });
         }
 
         public async void Read(CancelOrderMail cancelOrderMail)
         {
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-            var order = await Util.GetOrder(cancelOrderMail.OrderId);
-
-            Find<OneButtonSystem>().Show(L10nManager.Localize("UI_SELL_CANCEL_INFO"),
-                L10nManager.Localize("UI_YES"),
-                () =>
-                {
-                    LocalLayerModifier.AddItem(avatarAddress, order.TradableId, order.ExpiredBlockIndex, 1);
-                    LocalLayerModifier.RemoveNewMail(avatarAddress, cancelOrderMail.id);
-                    var shopSell = Find<ShopSell>();
-                    if (shopSell.isActiveAndEnabled)
-                    {
-                        shopSell.Refresh();
-                    }
-                });
         }
 
         public void Read(ItemEnhanceMail itemEnhanceMail)
         {
-            var itemUsable = itemEnhanceMail?.attachment?.itemUsable;
-            if (itemUsable is null)
-            {
-                Debug.LogError("ItemEnhanceMail.itemUsable is null");
-                return;
-            }
-
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-
-            // LocalLayer
-            UniTask.Run(async () =>
-            {
-                LocalLayerModifier.AddItem(
-                    avatarAddress,
-                    itemUsable.TradableId,
-                    itemUsable.RequiredBlockIndex,
-                    1,
-                    false);
-                LocalLayerModifier.RemoveNewAttachmentMail(avatarAddress, itemEnhanceMail.id, false);
-                var (exist, avatarState) = States.TryGetAvatarState(avatarAddress);
-                if (!exist)
-                {
-                    return null;
-                }
-
-                return avatarState;
-            }).ToObservable().SubscribeOnMainThread().Subscribe(async avatarState =>
-            {
-                Debug.Log("ItemEnhanceMail LocalLayer task completed");
-                States.Instance.AddOrReplaceAvatarState(avatarState, States.Instance.CurrentAvatarKey);
-            });
-            // ~LocalLayer
-
             Find<EnhancementResultPopup>().Show(itemEnhanceMail);
         }
 
@@ -379,51 +258,12 @@ namespace Nekoyume.UI
 
         public void Read(MonsterCollectionMail monsterCollectionMail)
         {
-            if (!(monsterCollectionMail.attachment is MonsterCollectionResult monsterCollectionResult))
-            {
-                return;
-            }
-
             var popup = Find<MonsterCollectionRewardsPopup>();
             popup.OnClickSubmit.First().Subscribe(widget =>
             {
-                // LocalLayer
-                for (var i = 0; i < monsterCollectionResult.rewards.Count; i++)
-                {
-                    var rewardInfo = monsterCollectionResult.rewards[i];
-                    if (!rewardInfo.ItemId.TryParseAsTradableId(
-                        Game.Game.instance.TableSheets.ItemSheet,
-                        out var tradableId))
-                    {
-                        continue;
-                    }
-
-
-                    if (!rewardInfo.ItemId.TryGetFungibleId(
-                        Game.Game.instance.TableSheets.ItemSheet,
-                        out var fungibleId))
-                    {
-                        continue;
-                    }
-
-                    var avatarState = States.Instance.CurrentAvatarState;
-                    avatarState.inventory.TryGetFungibleItems(fungibleId, out var items);
-                    var item = items.FirstOrDefault(x => x.item is ITradableItem);
-                    if (item != null && item is ITradableItem tradableItem)
-                    {
-                        LocalLayerModifier.AddItem(monsterCollectionResult.avatarAddress,
-                                                   tradableId,
-                                                   tradableItem.RequiredBlockIndex,
-                                                   rewardInfo.Quantity);
-                    }
-                }
-
-                LocalLayerModifier.RemoveNewAttachmentMail(monsterCollectionResult.avatarAddress, monsterCollectionMail.id, true);
-                // ~LocalLayer
-
+                
                 widget.Close();
-            });
-            popup.Pop(monsterCollectionResult.rewards);
+            });            
         }
 
         public void TutorialActionClickFirstCombinationMailSubmitButton()

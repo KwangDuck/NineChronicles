@@ -5,12 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Bencodex.Types;
-using Lib9c.Formatters;
-using MessagePack;
-using MessagePack.Resolvers;
-using Nekoyume.Action;
-using Nekoyume.BlockChain;
 using Nekoyume.Game.Controller;
 using Nekoyume.Game.VFX;
 using Nekoyume.Helper;
@@ -20,7 +14,6 @@ using Nekoyume.Pattern;
 using Nekoyume.State;
 using Nekoyume.UI;
 using UnityEngine;
-using Menu = Nekoyume.UI.Menu;
 
 namespace Nekoyume.Game
 {
@@ -28,27 +21,14 @@ namespace Nekoyume.Game
 
     public class Game : MonoSingleton<Game>
     {
-        [SerializeField]
-        private Stage stage = null;
+        [SerializeField] private Stage stage = null;
+        [SerializeField] private bool useSystemLanguage = true;
+        [SerializeField] private LanguageType languageType = default;
+        [SerializeField] private Prologue prologue = null;
 
-        [SerializeField]
-        private bool useSystemLanguage = true;
-
-        [SerializeField]
-        private LanguageType languageType = default;
-
-        [SerializeField]
-        private Prologue prologue = null;
         public States States { get; private set; }
-       
-        public Analyzer Analyzer { get; private set; }
-
         public Stage Stage => stage;
-
-        // FIXME Action.PatchTableSheet.Execute()에 의해서만 갱신됩니다.
-        // 액션 실행 여부와 상관 없이 최신 상태를 반영하게끔 수정해야합니다.
         public TableSheets TableSheets { get; private set; }
-
         public ActionManager ActionManager { get; private set; }
 
         public bool IsInitialized { get; private set; }
@@ -88,12 +68,6 @@ namespace Nekoyume.Game
         private IEnumerator Start()
         {
             Debug.Log("[Game] Start() invoked");
-            var resolver = MessagePack.Resolvers.CompositeResolver.Create(
-                NineChroniclesResolver.Instance,
-                StandardResolver.Instance
-            );
-            var options = MessagePackSerializerOptions.Standard.WithResolver(resolver);
-            MessagePackSerializer.DefaultOptions = options;
 
 #if UNITY_EDITOR
             if (useSystemLanguage)
@@ -114,6 +88,9 @@ namespace Nekoyume.Game
             // Initialize TableSheets. This should be done before initialize the Agent.
             yield return StartCoroutine(CoInitializeTableSheets());
             Debug.Log("[Game] Start() TableSheets initialized");
+
+            // initialize descriptors from tablesheets
+
             yield return StartCoroutine(ResourcesHelper.CoInitialize());
             Debug.Log("[Game] Start() ResourcesHelper initialized");
             AudioController.instance.Initialize();
@@ -135,8 +112,7 @@ namespace Nekoyume.Game
             );
 
             yield return new WaitUntil(() => agentInitialized);
-            Analyzer = new Analyzer().Initialize(string.Empty);
-            Analyzer.Track("Unity/Started");
+
             // NOTE: Create ActionManager after Agent initialized.
             ActionManager = new ActionManager();
             yield return StartCoroutine(CoSyncTableSheets());
@@ -256,11 +232,6 @@ namespace Nekoyume.Game
 
         protected override void OnApplicationQuit()
         {
-            if (Analyzer.Instance != null)
-            {
-                Analyzer.Instance.Track("Unity/Player Quit");
-                Analyzer.Instance.Flush();   
-            }
         }
 
         private IEnumerator CoUpdate()
@@ -341,11 +312,7 @@ namespace Nekoyume.Game
             settings.UpdateSoundSettings();
             settings.UpdatePrivateKey(_options.PrivateKey);
 
-            // assign appProtocolVersion
-            var appProtocolVersion = _options.AppProtocolVersion is null
-                ? default
-                : Libplanet.Net.AppProtocolVersion.FromToken(_options.AppProtocolVersion);
-            AppProtocolVersion = appProtocolVersion.Version;
+            // assign appProtocolVersion            
 
             // set state config state
             States.Instance.SetGameConfigState(new GameConfigState());

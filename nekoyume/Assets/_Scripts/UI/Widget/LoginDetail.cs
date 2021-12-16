@@ -1,5 +1,4 @@
 using System;
-using Nekoyume.BlockChain;
 using Nekoyume.State;
 using Nekoyume.Game.Controller;
 using Nekoyume.Model;
@@ -71,7 +70,6 @@ namespace Nekoyume.UI
 
         public void CreateClick()
         {
-            Analyzer.Instance.Track("Unity/Create Click");
             var inputBox = Find<InputBoxPopup>();
             inputBox.CloseCallback = result =>
             {
@@ -91,7 +89,6 @@ namespace Nekoyume.UI
                 return;
             }
 
-            Analyzer.Instance.Track("Unity/Choose Nickname");
             Find<GrayLoadingScreen>().Show();
 
             Game.Game.instance.ActionManager

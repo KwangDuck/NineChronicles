@@ -168,15 +168,6 @@ namespace Nekoyume.UI
 
         public void SaveTutorialProgress(int id)
         {
-            if (_mixpanelTargets.Exists(x => x == id))
-            {
-                var props = new Dictionary<string, object>
-                {
-                    ["Id"] = id,
-                };
-                Analyzer.Instance.Track("Unity/Tutorial progress", props);
-            }
-
             var prefsKey = $"TUTORIAL_PROGRESS";
             PlayerPrefs.SetInt(prefsKey, id);
         }

@@ -543,15 +543,6 @@ namespace Nekoyume.UI
 
         private void LocalStateItemEquipModify(ItemBase itemBase, bool equip)
         {
-            if (!(itemBase is INonFungibleItem nonFungibleItem))
-            {
-                return;
-            }
-
-            LocalLayerModifier.SetItemEquip(
-                States.Instance.CurrentAvatarState.address,
-                nonFungibleItem.NonFungibleId,
-                equip);
         }
 
         private bool TryToFindSlotAlreadyEquip(ItemBase item, out EquipmentSlot slot)
@@ -726,14 +717,6 @@ namespace Nekoyume.UI
             NotificationSystem.Push(Nekoyume.Model.Mail.MailType.System, L10nManager.Localize("UI_CHARGE_AP"),
                 NotificationCell.NotificationType.Information);
             Game.Game.instance.ActionManager.ChargeActionPointAsync(material).Subscribe();
-
-            var address = States.Instance.CurrentAvatarState.address;
-            if (GameConfigStateSubject.ActionPointState.ContainsKey(address))
-            {
-                GameConfigStateSubject.ActionPointState.Remove(address);
-            }
-
-            GameConfigStateSubject.ActionPointState.Add(address, true);
         }
 
         public void TutorialActionClickAvatarInfoFirstInventoryCellView()

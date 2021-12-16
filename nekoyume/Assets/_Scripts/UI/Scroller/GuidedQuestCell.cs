@@ -86,24 +86,6 @@ namespace Nekoyume.UI.Scroller
             SetToInProgress(false);
             Quest = quest;
             SetContent(Quest);
-
-            if (ignoreAnimation)
-            {
-                SetRewards(quest.Reward.ItemMap, true);
-                onComplete?.Invoke(this);
-            }
-            else
-            {
-                ClearRewards();
-                showingAndHidingTweener
-                    .PlayTween()
-                    .OnPlay(() => gameObject.SetActive(true))
-                    .OnComplete(() =>
-                    {
-                        SetRewards(quest.Reward.ItemMap);
-                        onComplete?.Invoke(this);
-                    });
-            }
         }
 
         public void Show(Nekoyume.Model.Quest.Quest quest)

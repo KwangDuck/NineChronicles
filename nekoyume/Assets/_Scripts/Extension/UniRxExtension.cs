@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Libplanet.Assets;
 using Nekoyume.L10n;
 using Nekoyume.UI.Module;
 using TMPro;
@@ -71,13 +70,5 @@ namespace Nekoyume
 
         public static IDisposable SubscribeTo(this IObservable<string> source, TextButton text) =>
             source.SubscribeWithState(text, (x, t) => t.Text = x);
-
-        public static IDisposable SubscribeToPrice(this IObservable<FungibleAssetValue> source, TextMeshProUGUI text) =>
-            source.SubscribeWithState(text, (x, t) => t.text = x.GetQuantityString());
-
-        public static IDisposable SubscribeL10nKeyTo(this IObservable<string> source, TextMeshProUGUI text) =>
-            source.SubscribeWithState(
-                text,
-                (x, t) => t.text = string.IsNullOrEmpty(x) ? x : L10nManager.Localize(x));
     }
 }

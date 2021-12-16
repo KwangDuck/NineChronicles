@@ -3,8 +3,6 @@ using UnityEngine.UI;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using Libplanet;
-using Libplanet.Crypto;
 using Nekoyume.Game.Controller;
 using Nekoyume.Helper;
 using Nekoyume.L10n;
@@ -37,8 +35,6 @@ namespace Nekoyume.UI
         public RedeemCode redeemCode;
         public Dropdown resolutionDropdown;
         public Toggle windowedToggle;
-
-        private PrivateKey _privateKey;
 
         #region Mono
 
@@ -118,16 +114,7 @@ namespace Nekoyume.UI
         #endregion
 
         public override void Show(bool ignoreStartAnimation = false)
-        {
-            if (!(_privateKey is null))
-            {
-                addressContentInputField.text = _privateKey.ToAddress().ToString();
-                privateKeyContentInputField.text = ByteUtil.Hex(_privateKey.ByteArray);
-            }
-            else
-            {
-            }
-
+        {            
             var muteString = L10nManager.Localize("UI_MUTE_AUDIO");
             foreach (var text in muteTexts)
             {
@@ -179,7 +166,7 @@ namespace Nekoyume.UI
         {
             if (!string.IsNullOrEmpty(privateKeyHex))
             {
-                _privateKey = new PrivateKey(ByteUtil.ParseHex(privateKeyHex));
+                
             }
         }
 

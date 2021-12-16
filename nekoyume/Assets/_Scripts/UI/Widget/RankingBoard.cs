@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using Libplanet;
 using Nekoyume.EnumType;
 using Nekoyume.Game.Character;
 using Nekoyume.Game.Controller;
@@ -119,23 +116,6 @@ namespace Nekoyume.UI
                 })
                 .AddTo(gameObject);
 
-            arenaRankScroll.OnClickAvatarInfo
-                .Subscribe(cell => OnClickAvatarInfo(
-                    cell.RectTransform,
-                    cell.ArenaInfo.AvatarAddress))
-                .AddTo(gameObject);
-            arenaRankScroll.OnClickChallenge.Subscribe(OnClickChallenge).AddTo(gameObject);
-            expRankScroll.OnClick
-                .Subscribe(cell => OnClickAvatarInfo(
-                    cell.RectTransform,
-                    cell.RankingInfo.AvatarAddress))
-                .AddTo(gameObject);
-            currentAvatarCellView.OnClickAvatarInfo
-                .Subscribe(cell => OnClickAvatarInfo(
-                    cell.RectTransform,
-                    cell.ArenaInfo.AvatarAddress))
-                .AddTo(gameObject);
-
             rewardText.text = L10nManager.Localize("UI_REWARDS");
             winText.text = L10nManager.Localize("UI_WIN");
             loseText.text = L10nManager.Localize("UI_LOSE");
@@ -152,7 +132,6 @@ namespace Nekoyume.UI
                 Game.Event.OnRoomEnter.Invoke(true);
             };
             SubmitWidget = null;
-            SetRankingInfos(States.Instance.RankingMapStates);
         }
 
         public void Show(StateType stateType = StateType.Arena) => ShowAsync(stateType);
@@ -241,12 +220,6 @@ namespace Nekoyume.UI
                 return;
             }
 
-            var avatarAddress = States.Instance.CurrentAvatarState?.address;
-            if (!avatarAddress.HasValue)
-            {
-                return;
-            }
-
             if (!_weeklyCachedInfo.Any())
             {
                 currentAvatarCellView.ShowMyDefaultInfo();
@@ -278,62 +251,6 @@ namespace Nekoyume.UI
                     arenaRankScroll.Show();
                     return;
                 }
-
-                var currentAvatarAddress = States.Instance.CurrentAvatarState?.address;
-                if (!currentAvatarAddress.HasValue ||
-                    !weeklyArenaState.ContainsKey(currentAvatarAddress.Value))
-                {
-                    currentAvatarCellView.ShowMyDefaultInfo();
-
-                    arenaRankScroll.Show(_weeklyCachedInfo
-                        .Select(tuple => new ArenaRankCell.ViewModel
-                        {
-                            rank = tuple.rank,
-                            arenaInfo = tuple.arenaInfo,
-                        }).ToList(), true);
-                    // NOTE: If you want to test many arena cells, use below instead of above.
-                    // arenaRankScroll.Show(Enumerable
-                    //     .Range(1, 1000)
-                    //     .Select(rank => new ArenaRankCell.ViewModel
-                    //     {
-                    //         rank = rank,
-                    //         arenaInfo = new ArenaInfo(
-                    //             States.Instance.CurrentAvatarState,
-                    //             Game.Game.instance.TableSheets.CharacterSheet,
-                    //             true)
-                    //         {
-                    //             ArmorId = States.Instance.CurrentAvatarState.GetPortraitId()
-                    //         },
-                    //         currentAvatarArenaInfo = null
-                    //     }).ToList(), true);
-
-                    return;
-                }
-
-                var (currentAvatarRank, currentAvatarArenaInfo) = _weeklyCachedInfo
-                    .FirstOrDefault(info =>
-                        info.arenaInfo.AvatarAddress.Equals(currentAvatarAddress));
-                if (currentAvatarArenaInfo is null)
-                {
-                    currentAvatarRank = -1;
-                    currentAvatarArenaInfo = new ArenaInfo(
-                        States.Instance.CurrentAvatarState,
-                        Game.Game.instance.TableSheets.CharacterSheet,
-                        false);
-                }
-
-                currentAvatarCellView.Show((
-                    currentAvatarRank,
-                    currentAvatarArenaInfo,
-                    currentAvatarArenaInfo));
-
-                arenaRankScroll.Show(_weeklyCachedInfo
-                    .Select(tuple => new ArenaRankCell.ViewModel
-                    {
-                        rank = tuple.rank,
-                        arenaInfo = tuple.arenaInfo,
-                        currentAvatarArenaInfo = currentAvatarArenaInfo,
-                    }).ToList(), true);
             }
             else
             {
@@ -375,7 +292,7 @@ namespace Nekoyume.UI
             }
         }
 
-        private static void OnClickAvatarInfo(RectTransform rectTransform, Address address)
+        private static void OnClickAvatarInfo(RectTransform rectTransform, string address)
         {
             // NOTE: 블록 익스플로러 연결 코드. 이후에 참고하기 위해 남겨 둡니다.
             // Application.OpenURL(string.Format(GameConfig.BlockExplorerLinkFormat, avatarAddress));
@@ -386,16 +303,6 @@ namespace Nekoyume.UI
         {
             var currentAvatarInventory = States.Instance.CurrentAvatarState.inventory;
 
-            Game.Game.instance.ActionManager.RankingBattleAsync(
-                arenaRankCell.ArenaInfo.AvatarAddress.ToHex(),
-                currentAvatarInventory.Costumes
-                    .Where(i => i.equipped)
-                    .Select(i => i.ItemId).ToList(),
-                currentAvatarInventory.Equipments
-                    .Where(i => i.equipped)
-                    .Select(i => i.ItemId).ToList(),
-                new List<Guid>()
-            ).Subscribe();
             Find<ArenaBattleLoadingScreen>().Show(arenaRankCell.ArenaInfo);
         }
 
@@ -448,7 +355,7 @@ namespace Nekoyume.UI
             Close();
         }
 
-        private void SetRankingInfos(Dictionary<Address, RankingMapState> states)
+        private void SetRankingInfos(Dictionary<string, RankingMapState> states)
         {
             var rankingInfos = new HashSet<Nekoyume.Model.State.RankingInfo>();
             foreach (var pair in states)

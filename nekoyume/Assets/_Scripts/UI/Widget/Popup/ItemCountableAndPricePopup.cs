@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Nekoyume.EnumType;
-using Nekoyume.Game.Controller;
 using Nekoyume.L10n;
 using Nekoyume.Model.Mail;
 using Nekoyume.UI.Module;
@@ -181,53 +180,8 @@ namespace Nekoyume.UI
             _data.Count.Subscribe(value => countInputField.text = value.ToString())
                 .AddTo(_disposablesForSetData);
 
-            _data.Price.Subscribe(value =>
-                {
-                    if (value.MinorUnit == 0 && priceInputField.text.Contains(".0"))
-                    {
-                        priceInputField.text = $"{value.MajorUnit}.{value.MinorUnit}";
-                    }
-                    else if (value.MajorUnit == 0 && value.MinorUnit == 0)
-                    {
-                        priceInputField.text = string.Empty;
-                    }
-                    else
-                    {
-                        priceInputField.text = value.GetQuantityString();
-                    }
-                })
-                .AddTo(_disposablesForSetData);
-
-            _data.TotalPrice.Subscribe(value =>
-                {
-                    totalPrice.text = value.GetQuantityString();
-                    var isValid = IsValid();
-                    submitButton.Interactable = isValid;
-                    reregisterButton.Interactable = isValid;
-                    positiveMessage.SetActive(isValid);
-                    warningMessage.SetActive(!isValid);
-                })
-                .AddTo(_disposablesForSetData);
-
             priceInputField.Select();
             countInputField.Select();
-        }
-
-        private bool IsValid()
-        {
-            if (decimal.TryParse(_data.TotalPrice.Value.GetQuantityString(),
-                NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var price))
-            {
-                if (price - (int) price > 0)
-                {
-                    return false;
-                }
-
-                var count = _data.Count.Value;
-                return !(price < Model.Shop.MinimumPrice || count < 0);
-            }
-
-            return false;
         }
 
         protected override void Clear()

@@ -1,13 +1,12 @@
-﻿using Libplanet.Assets;
 using UniRx;
 
 namespace Nekoyume.UI.Model
 {
     public class ItemCountableAndPricePopup : ItemCountPopup<ItemCountableAndPricePopup>
     {
-        public readonly ReactiveProperty<FungibleAssetValue> Price = new ReactiveProperty<FungibleAssetValue>();
-        public readonly ReactiveProperty<FungibleAssetValue> TotalPrice = new ReactiveProperty<FungibleAssetValue>();
-        public readonly ReactiveProperty<FungibleAssetValue> PreTotalPrice = new ReactiveProperty<FungibleAssetValue>();
+        public readonly ReactiveProperty<long> Price = new ReactiveProperty<long>();
+        public readonly ReactiveProperty<long> TotalPrice = new ReactiveProperty<long>();
+        public readonly ReactiveProperty<long> PreTotalPrice = new ReactiveProperty<long>();
         public readonly ReactiveProperty<int> Count = new ReactiveProperty<int>(1);
         public readonly ReactiveProperty<bool> IsSell = new ReactiveProperty<bool>();
 

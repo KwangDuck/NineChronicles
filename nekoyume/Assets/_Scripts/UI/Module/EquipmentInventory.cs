@@ -1,9 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Nekoyume.Action;
 using Nekoyume.Game.Controller;
-using Nekoyume.Model.Elemental;
 using Nekoyume.Model.Item;
 using Nekoyume.State;
 using Nekoyume.UI.Model;
@@ -11,7 +9,6 @@ using Nekoyume.UI.Scroller;
 using TMPro;
 using UniRx.Triggers;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Nekoyume.UI.Module
 {

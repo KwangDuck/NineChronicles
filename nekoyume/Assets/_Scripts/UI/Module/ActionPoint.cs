@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Nekoyume.State;
-using Nekoyume.State.Subjects;
 using Nekoyume.UI.Module.Common;
 using TMPro;
 using UnityEngine;
@@ -52,30 +51,7 @@ namespace Nekoyume.UI.Module
                 .Subscribe(_ => OnSliderChange())
                 .AddTo(gameObject);
             sliderAnimator.SetMaxValue(States.Instance.GameConfigState.ActionPointMax);
-            sliderAnimator.SetValue(0f, false);
-
-            GameConfigStateSubject.GameConfigState
-                .Subscribe(state => sliderAnimator.SetMaxValue(state.ActionPointMax))
-                .AddTo(gameObject);
-
-            GameConfigStateSubject.ActionPointState.ObserveAdd().Subscribe(x =>
-            {
-                var address = States.Instance.CurrentAvatarState.address;
-                if (x.Key == address)
-                {
-                    Charger(true);
-                }
-
-            }).AddTo(gameObject);
-
-            GameConfigStateSubject.ActionPointState.ObserveRemove().Subscribe(x =>
-            {
-                var address = States.Instance.CurrentAvatarState.address;
-                if (x.Key == address)
-                {
-                    Charger(false);
-                }
-            }).AddTo(gameObject);
+            sliderAnimator.SetValue(0f, false);            
         }
 
         protected override void OnEnable()
@@ -100,20 +76,7 @@ namespace Nekoyume.UI.Module
             {
                 Charger(false);
             }
-            else
-            {
-                var address = States.Instance.CurrentAvatarState.address;
-                if (GameConfigStateSubject.ActionPointState.ContainsKey(address))
-                {
-                    var value = GameConfigStateSubject.ActionPointState[address];
-                    Charger(value);
-                }
-                else
-                {
-                    Charger(false);
-                }
-            }
-
+            
         }
 
         protected override void OnDisable()

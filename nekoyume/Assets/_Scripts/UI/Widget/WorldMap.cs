@@ -107,9 +107,7 @@ namespace Nekoyume.UI
                 }
 
                 var worldId = worldButton.Id;
-                var worldIsUnlocked =
-                    worldInformation.TryGetWorld(worldId, out var worldModel) &&
-                    worldModel.IsUnlocked;
+                var worldIsUnlocked = false;
 
                 UpdateNotificationInfo();
 
@@ -124,11 +122,6 @@ namespace Nekoyume.UI
                 {
                     worldButton.Lock();
                 }
-            }
-
-            if (!worldInformation.TryGetFirstWorld(out var firstWorld))
-            {
-                throw new Exception("worldInformation.TryGetFirstWorld() failed!");
             }
 
             var status = Find<Status>();
@@ -150,16 +143,7 @@ namespace Nekoyume.UI
 
         private void ShowWorld(int worldId)
         {
-            if (!SharedViewModel.WorldInformation.TryGetWorld(worldId, out var world))
-                throw new ArgumentException(nameof(worldId));
-
-            if (worldId == 1)
-            {
-                Analyzer.Instance.Track("Unity/Click Yggdrasil");
-            }
-
             Push();
-            ShowWorld(world.Id, world.GetNextStageId(), false);
         }
 
         private void ShowWorld(int worldId, int stageId, bool showWorld, bool callByShow = false)
@@ -184,17 +168,7 @@ namespace Nekoyume.UI
 
         public void UpdateNotificationInfo()
         {
-            var questStageId = Game.Game.instance.States.CurrentAvatarState.questList?
-                .EnumerateLazyQuestStates()
-                .Select(l => l.State)
-                .OfType<WorldQuest>()
-                .Where(x => !x.Complete)
-                .OrderBy(x => x.Goal)
-                .FirstOrDefault()?
-                .Goal ?? -1;
-            StageIdToNotify = questStageId;
-
-            HasNotification = questStageId > 0;
+            
         }
 
         private void CallByShowUpdateWorld()

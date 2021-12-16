@@ -1,4 +1,3 @@
-using Libplanet;
 using Nekoyume.Model;
 using Nekoyume.Model.Mail;
 using Nekoyume.Model.Quest;
@@ -13,10 +12,7 @@ namespace Nekoyume.State
     /// 현재 선택된 AvatarState가 포함하는 값의 변화를 각각의 ReactiveProperty<T> 필드를 통해 외부에 변화를 알린다.
     /// </summary>
     public static class ReactiveAvatarState
-    {
-        private static readonly ReactiveProperty<Address> _address;
-        public static IObservable<Address> Address;
-
+    {        
         private static readonly ReactiveProperty<Inventory> _inventory;
         public static IObservable<Inventory> Inventory;
 
@@ -37,9 +33,6 @@ namespace Nekoyume.State
 
         static ReactiveAvatarState()
         {
-            _address = new ReactiveProperty<Address>();
-            Address = _address.ObserveOnMainThread();
-
             _inventory = new ReactiveProperty<Inventory>();
             Inventory = _inventory.ObserveOnMainThread();
 
@@ -67,7 +60,6 @@ namespace Nekoyume.State
                 return;
             }
 
-            _address.SetValueAndForceNotify(state.address);
             _inventory.SetValueAndForceNotify(state.inventory);
             _mailBox.SetValueAndForceNotify(state.mailBox);
             _worldInformation.SetValueAndForceNotify(state.worldInformation);

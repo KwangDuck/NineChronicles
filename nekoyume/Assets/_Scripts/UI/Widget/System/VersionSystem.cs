@@ -1,7 +1,4 @@
-using Libplanet;
-using Libplanet.Blocks;
 using TMPro;
-using UniRx;
 
 namespace Nekoyume.UI
 {
@@ -10,7 +7,6 @@ namespace Nekoyume.UI
         public TextMeshProUGUI informationText;
         private int _version;
         private long _blockIndex;
-        private BlockHash _hash;
 
         protected override void Awake()
         {
@@ -29,16 +25,10 @@ namespace Nekoyume.UI
             UpdateText();
         }
 
-        private void SubscribeBlockHash(BlockHash hash)
-        {
-            _hash = hash;
-            UpdateText();
-        }
-
         private void UpdateText()
         {
             const string format = "APV: {0} / #{1} / Hash: {2}";
-            var hash = _hash.ToString();
+            var hash = string.Empty;
             var text = string.Format(
                 format,
                 _version,

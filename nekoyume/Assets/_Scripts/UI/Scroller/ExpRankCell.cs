@@ -73,8 +73,7 @@ namespace Nekoyume.UI.Scroller
             var rankingInfo = itemData.rankingInfo;
 
             RankingInfo = rankingInfo ?? throw new ArgumentNullException(nameof(rankingInfo));
-            _isCurrentUser = States.Instance.CurrentAvatarState?.address ==
-                             RankingInfo.AvatarAddress;
+            _isCurrentUser = false;
 
             backgroundImage.enabled = Index % 2 == 1;
             rankText.text = rank.ToString();

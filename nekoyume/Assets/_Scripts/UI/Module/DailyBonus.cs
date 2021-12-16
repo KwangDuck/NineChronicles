@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
-using Libplanet;
 using Nekoyume.Game.Controller;
 using Nekoyume.Game.VFX;
 using Nekoyume.L10n;
@@ -63,10 +61,6 @@ namespace Nekoyume.UI.Module
                 .AddTo(gameObject);
             sliderAnimator.SetMaxValue(States.Instance.GameConfigState.DailyRewardInterval);
             sliderAnimator.SetValue(0f, false);
-
-            GameConfigStateSubject.GameConfigState
-                .Subscribe(state => sliderAnimator.SetMaxValue(state.DailyRewardInterval))
-                .AddTo(gameObject);
         }
 
         protected override void OnEnable()
@@ -195,13 +189,6 @@ namespace Nekoyume.UI.Module
                 NotificationCell.NotificationType.Information);
             
             Game.Game.instance.ActionManager.DailyRewardAsync().Subscribe();
-
-            var address = States.Instance.CurrentAvatarState.address;
-            if (GameConfigStateSubject.ActionPointState.ContainsKey(address))
-            {
-                GameConfigStateSubject.ActionPointState.Remove(address);
-            }
-            GameConfigStateSubject.ActionPointState.Add(address, true);
 
             StartCoroutine(CoGetDailyRewardAnimation());
         }

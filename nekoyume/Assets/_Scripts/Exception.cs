@@ -1,5 +1,4 @@
 using System;
-using Libplanet;
 using Nekoyume;
 using Nekoyume.Model.State;
 using Nekoyume.UI;
@@ -248,10 +247,6 @@ public class FailedToInstantiateStateException<T> : Exception where T : State
     private const string MessageFormatWithAddress = "Failed to instantiate state. type: `{0}` / address: `{1}`.";
 
     public FailedToInstantiateStateException() : base(string.Format(MessageFormat, typeof(T).Name))
-    {
-    }
-
-    public FailedToInstantiateStateException(Address address) : base(string.Format(MessageFormatWithAddress, typeof(T).Name, address))
     {
     }
 }

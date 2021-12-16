@@ -6,17 +6,13 @@ using Nekoyume.UI.Module;
 using Nekoyume.UI.Tween;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Nekoyume.Game;
 using Nekoyume.Game.Controller;
 using Nekoyume.Game.VFX;
 using Nekoyume.Helper;
 using Nekoyume.L10n;
-using Nekoyume.Model.Item;
 using Nekoyume.Model.Mail;
-using Nekoyume.Model.Quest;
-using Nekoyume.State;
 using Nekoyume.TableData;
 using TMPro;
 using UnityEngine;
@@ -163,14 +159,6 @@ namespace Nekoyume.UI
                 Debug.LogError(sb.ToString());
                 return;
             }
-
-            var quest = States.Instance.CurrentAvatarState?.questList
-                .EnumerateLazyQuestStates()
-                .Select(l => l.State)
-                .OfType<CombinationEquipmentQuest>()
-                .FirstOrDefault(item =>
-                    item.Id == row.Id);
-            Show(quest, ignoreShowAnimation);
         }
 
         public void Show(Nekoyume.Model.Quest.Quest quest, bool ignoreShowAnimation = false)
@@ -182,17 +170,6 @@ namespace Nekoyume.UI
                 Debug.LogError(sb.ToString());
                 return;
             }
-
-            var rewardModels = quest.Reward.ItemMap
-                .Select(pair =>
-                {
-                    var itemRow = Game.Game.instance.TableSheets.MaterialItemSheet.OrderedList
-                        .First(row => row.Id == pair.Key);
-                    var material = ItemFactory.CreateMaterial(itemRow);
-                    return new CountableItem(material, pair.Value);
-                })
-                .ToList();
-            Show(quest, rewardModels, ignoreShowAnimation);
         }
 
         private void Show(
@@ -225,7 +202,6 @@ namespace Nekoyume.UI
             base.Show(ignoreShowAnimation);
             PlayEffects();
             MakeNotification(quest.GetContent());
-            UpdateLocalState(quest.Id, quest.Reward?.ItemMap);
         }
 
         #endregion
@@ -342,20 +318,6 @@ namespace Nekoyume.UI
                 Debug.LogError(sb.ToString());
                 return;
             }
-
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-            foreach (var reward in rewards)
-            {
-                var materialRow = Game.Game.instance.TableSheets.MaterialItemSheet
-                    .First(pair => pair.Key == reward.Key);
-
-                LocalLayerModifier.AddItem(
-                    avatarAddress,
-                    materialRow.Value.ItemId,
-                    reward.Value);
-            }
-
-            LocalLayerModifier.RemoveReceivableQuest(avatarAddress, questId, true);
         }
 
         private void AppearNPC(bool ignoreShowAnimation, NPCAnimation.Type animationType)

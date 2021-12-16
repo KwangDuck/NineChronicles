@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Bencodex.Types;
-using Nekoyume.Model.Quest;
 using Nekoyume.Model.State;
 using UnityEngine;
 
@@ -56,26 +54,6 @@ namespace Nekoyume.State.Modifiers
 
         public override AvatarState Modify(AvatarState state)
         {
-            if (state is null)
-            {
-                return null;
-            }
-
-            var quests = state.questList;
-            foreach (var lazyQuest in quests.EnumerateLazyQuestStates())
-            {
-                foreach (var id in questIdList)
-                {
-                    var qid = lazyQuest.GetStateOrSerializedEncoding(out Quest q, out Dictionary d)
-                        ? q.Id
-                        : Quest.GetQuestId(d);
-                    if (id.Equals(qid))
-                    {
-                        lazyQuest.State.isReceivable = true;
-                    }
-                }
-            }
-
             return state;
         }
 

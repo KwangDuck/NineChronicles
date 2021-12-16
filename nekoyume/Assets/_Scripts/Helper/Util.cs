@@ -2,9 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Bencodex.Types;
 using Cysharp.Threading.Tasks;
-using Lib9c.Model.Order;
 using Nekoyume.Model.Item;
 using UnityEngine;
 
@@ -56,39 +54,14 @@ namespace Nekoyume.Helper
             return sb.ToString();
         }
 
-        public static async Task<Order> GetOrder(Guid orderId)
-        {
-            var address = Order.DeriveAddress(orderId);
-            return null;
-        }
-
-        public static async Task<string> GetItemNameByOrderId(Guid orderId, bool isNonColored = false)
-        {
-            var order = await GetOrder(orderId);
-            if (order == null)
-            {
-                return string.Empty;
-            }
-
-            var address = Addresses.GetItemAddress(order.TradableId);
-            return await UniTask.Run(async () =>
-            {
-
-                return string.Empty;
-            });
-        }
-
         public static async Task<ItemBase> GetItemBaseByTradableId(Guid tradableId, long requiredBlockExpiredIndex)
         {
-            var address = Addresses.GetItemAddress(tradableId);
             return null;
         }
 
         public static ItemBase CreateItemBaseByItemId(int itemId)
         {
-            var row = Game.Game.instance.TableSheets.ItemSheet[itemId];
-            var item = ItemFactory.CreateItem(row, new Cheat.DebugRandom());
-            return item;
+            return null;
         }
 
         public static int GetHourglassCount(Inventory inventory, long currentBlockIndex)

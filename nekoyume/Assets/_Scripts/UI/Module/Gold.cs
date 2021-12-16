@@ -1,5 +1,4 @@
 using System;
-using Libplanet.Assets;
 using Nekoyume.State;
 using Nekoyume.State.Subjects;
 using Nekoyume.UI.Module.Common;
@@ -49,12 +48,12 @@ namespace Nekoyume.UI.Module
                 return;
             }
 
-            SetGold(States.Instance.GoldBalanceState.Gold);
+            //SetGold(States.Instance.GoldBalanceState.Gold);
         }
 
-        private void SetGold(FungibleAssetValue gold)
+        private void SetGold(long gold)
         {
-            text.text = gold.GetQuantityString();
+            text.text = gold.ToString();
         }
 
         private void OnClickOnlineShopButton()

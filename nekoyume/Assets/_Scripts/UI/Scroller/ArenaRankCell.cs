@@ -86,15 +86,6 @@ namespace Nekoyume.UI.Scroller
             characterView.OnClickCharacterIcon
                 .Subscribe(async avatarState =>
                 {
-                    if (avatarState is null)
-                    {
-                        var (exist, state) = States.TryGetAvatarState(ArenaInfo.AvatarAddress);
-                        avatarState = exist ? state : null;
-                        if (avatarState is null)
-                        {
-                            return;
-                        }
-                    }
                     Widget.Find<FriendInfoPopup>().Show(avatarState);
                 })
                 .AddTo(gameObject);
@@ -171,8 +162,7 @@ namespace Nekoyume.UI.Scroller
 
             ArenaInfo = itemData.arenaInfo ?? throw new ArgumentNullException(nameof(itemData.arenaInfo));
             var currentAvatarArenaInfo = itemData.currentAvatarArenaInfo;
-            _isCurrentUser = currentAvatarArenaInfo is null ?
-                false : ArenaInfo.AvatarAddress == currentAvatarArenaInfo.AvatarAddress;
+            _isCurrentUser = false;
 
             if (controlBackgroundImage)
             {
@@ -247,14 +237,7 @@ namespace Nekoyume.UI.Scroller
 
         private static string GetCP(ArenaInfo arenaInfo)
         {
-            if (States.Instance.CurrentAvatarState?.address == arenaInfo.AvatarAddress)
-            {
-                return CPHelper.GetCPV2(States.Instance.CurrentAvatarState,
-                    Game.Game.instance.TableSheets.CharacterSheet,
-                    Game.Game.instance.TableSheets.CostumeStatSheet).ToString();
-            }
-
-            return arenaInfo.CombatPoint.ToString();
+            return string.Empty;
         }
     }
 }

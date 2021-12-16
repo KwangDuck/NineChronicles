@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Nekoyume.L10n;
-using Nekoyume.State;
 using Nekoyume.UI.Model;
 using TMPro;
 using UnityEngine;
@@ -135,10 +134,6 @@ namespace Nekoyume.UI.Module
             SharedModel.itemSubTypeFilter = 0;
             sortFilter.SetValueWithoutNotify(0);
             SharedModel.sortFilter = 0;
-
-            ReactiveShopState.SellDigests
-                .Subscribe(SharedModel.ResetItems)
-                .AddTo(_disposablesAtOnEnable);
         }
 
         public void Close()

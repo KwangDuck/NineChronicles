@@ -1,7 +1,6 @@
 using Nekoyume.Helper;
 using Nekoyume.L10n;
 using Nekoyume.Model.Item;
-using Nekoyume.State;
 using Nekoyume.TableData;
 using Nekoyume.UI.Module;
 using Nekoyume.UI.Scroller;
@@ -127,7 +126,7 @@ namespace Nekoyume.UI.Model
 
         public void LoadRecipeVFXSkipList()
         {
-            var addressHex = States.Instance.CurrentAvatarState.address.ToHex();
+            var addressHex = "0x00";
             var key = string.Format(RecipeVFXSkipListKey, addressHex);
 
             if (!PlayerPrefs.HasKey(key))
@@ -177,8 +176,7 @@ namespace Nekoyume.UI.Model
 
         public void SaveRecipeVFXSkipList()
         {
-
-            var addressHex = States.Instance.CurrentAvatarState.address.ToHex();
+            var addressHex = "0x00";
             var key = string.Format(RecipeVFXSkipListKey, addressHex);
 
             var data = string.Empty;

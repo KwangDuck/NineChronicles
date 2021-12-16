@@ -1,12 +1,7 @@
 using System;
-using System.Numerics;
-using Libplanet.Assets;
-using Nekoyume.State;
 
 namespace Nekoyume.UI.Model
 {
-    using Libplanet;
-    using Nekoyume.Model.Item;
     using UniRx;
 
     public class ItemInformationTooltip : Tooltip
@@ -21,7 +16,7 @@ namespace Nekoyume.UI.Model
         public readonly ReactiveProperty<bool> SubmitButtonEnabled = new ReactiveProperty<bool>(false);
         public readonly ReactiveProperty<string> SubmitButtonText = new ReactiveProperty<string>(null);
 
-        public readonly ReactiveProperty<FungibleAssetValue> Price;
+        public readonly ReactiveProperty<long> Price;
         public readonly ReactiveProperty<long> ExpiredBlockIndex = new ReactiveProperty<long>();
 
         public readonly Subject<UI.ItemInformationTooltip> OnSubmitClick = new Subject<UI.ItemInformationTooltip>();
@@ -29,8 +24,7 @@ namespace Nekoyume.UI.Model
 
         public ItemInformationTooltip(CountableItem countableItem = null)
         {
-            var currency = new Currency("ticker", 0, new Address());
-            Price = new ReactiveProperty<FungibleAssetValue>(new FungibleAssetValue(currency));
+            Price = new ReactiveProperty<long>();
 
             ItemInformation = new ItemInformation(countableItem);
             ItemInformation.item.Subscribe(item =>

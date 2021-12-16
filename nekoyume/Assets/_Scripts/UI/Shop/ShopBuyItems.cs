@@ -183,10 +183,6 @@ namespace Nekoyume.UI.Module
         public void Show()
         {
             Reset();
-
-            ReactiveShopState.BuyDigests
-                .Subscribe(SharedModel.ResetItems)
-                .AddTo(_disposablesAtOnEnable);
         }
 
         public void Close()

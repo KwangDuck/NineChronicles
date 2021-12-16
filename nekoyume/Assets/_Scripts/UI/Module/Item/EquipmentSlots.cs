@@ -169,28 +169,7 @@ namespace Nekoyume.UI.Module
                 return false;
             }
 
-            if (itemSubType == ItemSubType.Ring)
-            {
-                // Find the first slot which contains the same `non-fungible item`
-                slot = typeSlots.FirstOrDefault(e =>
-                            !e.IsEmpty &&
-                            e.Item is INonFungibleItem nonFungibleItem &&
-                            nonFungibleItem.NonFungibleId.Equals(equipment.NonFungibleId))
-                        // Find the first empty slot.
-                        ?? typeSlots.FirstOrDefault(e => e.IsEmpty)
-                        // Find the first slot of `ElementalType` that is different from `elementalTypeToIgnore`.
-                        ?? (elementalTypeToIgnore != null
-                            ? typeSlots.FirstOrDefault(e =>
-                                !e.Item.ElementalType.Equals(elementalTypeToIgnore))
-                            : null)
-                        // Find the first slot with the lowest 'CP'.
-                        ?? typeSlots.OrderBy(e => CPHelper.GetCP((ItemUsable) e.Item))
-                            .First();
-            }
-            else
-            {
-                slot = typeSlots.First();
-            }
+            slot = typeSlots.First();
 
             return true;
         }
@@ -209,12 +188,8 @@ namespace Nekoyume.UI.Module
                 return false;
             }
 
-            slot = slots.FirstOrDefault(e =>
-                !e.IsLock &&
-                !e.IsEmpty &&
-                ((INonFungibleItem) e.Item).NonFungibleId
-                .Equals(((INonFungibleItem) itemBase).NonFungibleId) &&
-                e.Item.Equals(itemBase));
+            slot = slots.First();
+
             return slot;
         }
 

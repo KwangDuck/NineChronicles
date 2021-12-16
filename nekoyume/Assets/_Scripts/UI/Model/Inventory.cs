@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using Libplanet;
 using Nekoyume.Battle;
 using Nekoyume.Model.Elemental;
 using Nekoyume.Model.Item;
@@ -367,40 +365,8 @@ namespace Nekoyume.UI.Model
                 return false;
             }
 
-            return TryGetMaterial(material.ItemId, isTradableMaterial, out inventoryItem);
-        }
-
-        public bool TryGetMaterial(HashDigest<SHA256> itemId, bool isTradableMaterial, out InventoryItem inventoryItem)
-        {
-            foreach (var item in Materials)
-            {
-                if (!(item.ItemBase.Value is Material material) ||
-                    !material.ItemId.Equals(itemId))
-                {
-                    continue;
-                }
-
-                if (isTradableMaterial)
-                {
-                    if (!(item.ItemBase.Value is TradableMaterial tradableMaterial))
-                    {
-                        continue;
-                    }
-                }
-                else
-                {
-                    if ((item.ItemBase.Value is TradableMaterial tradableMaterial))
-                    {
-                        continue;
-                    }
-                }
-
-                inventoryItem = item;
-                return true;
-            }
-
             inventoryItem = null;
-            return false;
+            return true;
         }
 
         public bool TryGetMaterial(int id, out InventoryItem inventoryItem)

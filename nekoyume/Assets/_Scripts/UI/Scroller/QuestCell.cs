@@ -1,13 +1,9 @@
 using System;
-using System.Linq;
 using Nekoyume.Game.Controller;
 using Nekoyume.Game.VFX;
 using Nekoyume.Helper;
-using Nekoyume.Model.Item;
-using Nekoyume.UI.Model;
 using Nekoyume.UI.Module;
 using TMPro;
-using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 using QuestModel = Nekoyume.Model.Quest.Quest;
@@ -160,29 +156,6 @@ namespace Nekoyume.UI.Scroller
                 progressText.color = ColorHelper.HexToColorRGB("e0a491");
                 receiveButton.gameObject.SetActive(true);
                 receiveButton.Interactable = false;
-            }
-
-            var itemMap = _quest.Reward.ItemMap;
-            for (var i = 0; i < rewardViews.Length; i++)
-            {
-                if (i < itemMap.Count)
-                {
-                    var pair = itemMap.ElementAt(i);
-                    var rewardView = rewardViews[i];
-                    rewardView.ignoreOne = true;
-                    var row = Game.Game.instance.TableSheets.MaterialItemSheet.Values.First(
-                        itemRow => itemRow.Id == pair.Key);
-                    var item = ItemFactory.CreateMaterial(row);
-                    var countableItem = new CountableItem(item, pair.Value);
-                    countableItem.Dimmed.Value = isReceived;
-                    rewardView.SetData(countableItem);
-                    rewardView.iconImage.rectTransform.sizeDelta *= 0.7f;
-                    rewardView.gameObject.SetActive(true);
-                }
-                else
-                {
-                    rewardViews[i].gameObject.SetActive(false);
-                }
             }
         }
 

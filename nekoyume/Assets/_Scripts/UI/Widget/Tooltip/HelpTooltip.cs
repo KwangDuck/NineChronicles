@@ -139,15 +139,8 @@ namespace Nekoyume.UI
             {
                 return;
             }
-            var props = new Dictionary<string, object>
-            {
-                ["HelpPopupId"] = id,
-            };
-            Analyzer.Instance.Track("Unity/Click HelpPopup", props);
 
-#pragma warning disable 618
             Instance.Show();
-#pragma warning restore 618
         }
 
         public static void ThankYou()
@@ -157,9 +150,7 @@ namespace Nekoyume.UI
                 return;
             }
 
-#pragma warning disable 618
             Instance.Close();
-#pragma warning restore 618
         }
 
         #endregion

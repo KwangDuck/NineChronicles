@@ -50,7 +50,6 @@ namespace Nekoyume.UI.Scroller
             button.Interactable = isNew;
             iconImage.overrideSprite = SpriteHelper.GetMailIcon(_mail.MailType);
 
-            content.text = await _mail.ToInfo();
             content.color = isNew
                 ? ColorHelper.HexToColorRGB("fff9dd")
                 : ColorHelper.HexToColorRGB("7a7a7a");

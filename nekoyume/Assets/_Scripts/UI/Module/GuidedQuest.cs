@@ -351,24 +351,7 @@ namespace Nekoyume.UI.Module
         private IEnumerator CoUpdateList(System.Action onComplete)
         {
             var questList = SharedViewModel.avatarState?.questList;
-            var newWorldQuest = GetTargetWorldQuest(questList);
-            if (TryEnterToAddNewGuidedQuest(
-                SharedViewModel.worldQuest,
-                newWorldQuest,
-                !(WorldQuestCell.Quest is null)))
-            {
-                yield return new WaitUntil(() => _state.Value == ViewState.Shown);
-            }
-
-            var newCombinationEquipmentQuest = GetTargetCombinationEquipmentQuest(questList);
-            if (TryEnterToAddNewGuidedQuest(
-                SharedViewModel.combinationEquipmentQuest,
-                newCombinationEquipmentQuest,
-                !(CombinationEquipmentQuestCell.Quest is null)))
-            {
-                yield return new WaitUntil(() => _state.Value == ViewState.Shown);
-            }
-
+            yield return null;
             onComplete?.Invoke();
         }
 
@@ -457,67 +440,6 @@ namespace Nekoyume.UI.Module
         private void EnterToHidden()
         {
             _state.Value = ViewState.Hidden;
-        }
-
-        #endregion
-
-        #region Getter
-
-        private static WorldQuest GetTargetWorldQuest(QuestList questList)
-        {
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (GameConfig.RequireClearedStageLevel.UIMainMenuStage > 0)
-            {
-                if (SharedViewModel.avatarState is null ||
-                    !SharedViewModel.avatarState.worldInformation.TryGetLastClearedStageId(
-                        out var lastClearedStageId) ||
-                    lastClearedStageId < GameConfig.RequireClearedStageLevel.UIMainMenuStage)
-                {
-                    return null;
-                }
-            }
-
-            var targetQuest = questList?
-                .EnumerateLazyQuestStates()
-                .Select(l => l.State)
-                .OfType<WorldQuest>()
-                .Where(quest => !quest.Complete)
-                .OrderBy(quest => quest.Goal)
-                .FirstOrDefault();
-            if (targetQuest is null)
-            {
-                return null;
-            }
-
-            var targetStageId = targetQuest.Goal;
-            return !Game.Game.instance.TableSheets.WorldSheet.TryGetByStageId(targetStageId, out _)
-                ? null
-                : targetQuest;
-        }
-
-        private static CombinationEquipmentQuest GetTargetCombinationEquipmentQuest(
-            QuestList questList)
-        {
-            if (SharedViewModel.avatarState?.worldInformation is null ||
-                !SharedViewModel.avatarState.worldInformation.TryGetLastClearedStageId(out var lastClearedStageId) ||
-                lastClearedStageId < GameConfig.RequireClearedStageLevel.CombinationEquipmentAction)
-            {
-                return null;
-            }
-
-            var recipeSheet = Game.Game.instance.TableSheets.EquipmentItemRecipeSheet;
-            return questList?
-                .EnumerateLazyQuestStates()
-                .Select(l => l.State)
-                .OfType<CombinationEquipmentQuest>()
-                .Select(quest => recipeSheet.TryGetValue(quest.RecipeId, out var recipeRow)
-                    ? (quest, unlockStageId: recipeRow.UnlockStage)
-                    : (quest, unlockStageId: int.MaxValue))
-                .Where(tuple => !tuple.quest.Complete &&
-                                tuple.unlockStageId <= lastClearedStageId)
-                .OrderBy(tuple => tuple.unlockStageId)
-                .Select(tuple => tuple.quest)
-                .FirstOrDefault();
         }
 
         #endregion

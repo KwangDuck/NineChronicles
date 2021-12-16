@@ -1,13 +1,5 @@
-using Nekoyume.Model.State;
-using Nekoyume.State;
 using System.Collections.Generic;
-using System.Linq;
-using UniRx;
-using Nekoyume.Battle;
 using System.Threading.Tasks;
-using Libplanet;
-
-using Debug = UnityEngine.Debug;
 using Nekoyume.Model.Item;
 
 namespace Nekoyume.UI.Model
@@ -43,54 +35,6 @@ namespace Nekoyume.UI.Model
 
         public Task Update(int displayCount)
         {
-            //var apiClient = Game.Game.instance.ApiClient;
-
-            //if (apiClient.IsInitialized)
-            //{
-            //    return Task.Run(async () =>
-            //    {
-            //        if (!_rankingMapLoaded)
-            //        {
-            //            for (var i = 0; i < RankingState.RankingMapCapacity; ++i)
-            //            {
-            //                var address = RankingState.Derive(i);
-            //                var mapState =
-            //                    await Game.Game.instance.Agent.GetStateAsync(address) is
-            //                        Bencodex.Types.Dictionary serialized
-            //                    ? new RankingMapState(serialized)
-            //                    : new RankingMapState(address);
-            //                States.Instance.SetRankingMapStates(mapState);
-            //            }
-
-            //            var rankingMapStates = States.Instance.RankingMapStates;
-            //            _rankingInfoSet = new HashSet<Nekoyume.Model.State.RankingInfo>();
-            //            foreach (var pair in rankingMapStates)
-            //            {
-            //                var rankingInfo = pair.Value.GetRankingInfos(null);
-            //                _rankingInfoSet.UnionWith(rankingInfo);
-            //            }
-
-            //            _rankingMapLoaded = true;
-            //        }
-
-            //        Debug.LogWarning($"total user count : {_rankingInfoSet.Count()}");
-
-            //        var sw = new Stopwatch();
-            //        sw.Start();
-
-            //        await Task.WhenAll(
-            //            LoadAbilityRankingInfos(displayCount),
-            //            LoadStageRankingInfos(apiClient, displayCount),
-            //            LoadMimisbrunnrRankingInfos(apiClient, displayCount),
-            //            LoadCraftRankingInfos(apiClient, displayCount),
-            //            LoadEquipmentRankingInfos(apiClient, displayCount)
-            //        );
-            //        IsInitialized = true;
-            //        sw.Stop();
-            //        UnityEngine.Debug.LogWarning($"total elapsed : {sw.Elapsed}");
-            //    });
-            //}
-
             return Task.CompletedTask;
         }
     }

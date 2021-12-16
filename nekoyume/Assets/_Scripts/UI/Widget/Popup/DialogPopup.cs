@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Libplanet;
 using Nekoyume.Game.Controller;
 using Nekoyume.Helper;
 using Nekoyume.L10n;
@@ -50,14 +49,8 @@ namespace Nekoyume.UI
                 return false;
             }
 
-            key = GetPlayerPrefsKey(States.Instance.CurrentAvatarState.address, dialogId);
+            key = string.Empty;
             return true;
-        }
-
-        public static string GetPlayerPrefsKey(Address address, int dialogId)
-        {
-            var addr = address.ToString();
-            return $"DIALOG_{addr}_{dialogId}";
         }
 
         public static void DeleteDialogPlayerPrefsOfCurrentAvatarState()
@@ -65,24 +58,6 @@ namespace Nekoyume.UI
             if (States.Instance.CurrentAvatarState is null)
             {
                 return;
-            }
-
-            DeleteDialogPlayerPrefs(States.Instance.CurrentAvatarState.address);
-        }
-
-        public static void DeleteDialogPlayerPrefs(Address address)
-        {
-            var index = 1;
-            while (true)
-            {
-                var key = GetPlayerPrefsKey(address, index);
-                if (!PlayerPrefs.HasKey(key))
-                {
-                    break;
-                }
-
-                PlayerPrefs.DeleteKey(key);
-                index++;
             }
         }
 

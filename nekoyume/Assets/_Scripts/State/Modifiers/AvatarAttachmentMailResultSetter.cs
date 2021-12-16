@@ -26,7 +26,7 @@ namespace Nekoyume.State.Modifiers
                 return null;
             }
 
-            var ids = new HashSet<Guid>(guidList.Select(i => i.Value));
+            var ids = new HashSet<Guid>(guidList);
             var attachmentMails = state.mailBox
                 .OfType<AttachmentMail>()
                 .Where(m => ids.Contains(m.id));

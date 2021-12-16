@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Nekoyume.Model.State;
 
@@ -76,16 +76,6 @@ namespace Nekoyume.State.Modifiers
 
         public override AvatarState Modify(AvatarState state)
         {
-            if (state is null)
-            {
-                return null;
-            }
-
-            foreach (var item in _items)
-            {
-                state.inventory.RemoveTradableItem(item.Key, item.Value.RequiredBlockIndex, item.Value.Count);
-            }
-
             return state;
         }
     }

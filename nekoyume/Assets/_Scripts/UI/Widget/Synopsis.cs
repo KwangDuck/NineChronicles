@@ -341,11 +341,7 @@ namespace Nekoyume.UI
         public override void Show(bool ignoreShowAnimation = false)
         {
             base.Show(ignoreShowAnimation);
-            Analyzer.Instance.Track("Unity/Synopsis Start");
             AudioController.instance.PlayMusic(AudioController.MusicCode.Prologue);
-            var skipPrologue = States.Instance.AgentState.avatarAddresses.Any();
-            skipButton.SetActive(skipPrologue);
-            StartCoroutine(StartSynopsis(skipPrologue));
         }
 
         private async Task End()
@@ -369,7 +365,6 @@ namespace Nekoyume.UI
                 EnterLogin();
             }
 
-            Analyzer.Instance.Track("Unity/Synopsis End");
             Close();
         }
 

@@ -1,5 +1,4 @@
 using System;
-using Libplanet.Assets;
 using UniRx;
 
 namespace Nekoyume.State.Subjects
@@ -9,17 +8,17 @@ namespace Nekoyume.State.Subjects
     /// </summary>
     public static class AgentStateSubject
     {
-        private static readonly Subject<FungibleAssetValue> _gold;
+        private static readonly Subject<long> _gold;
             
-        public static readonly IObservable<FungibleAssetValue> Gold;
+        public static readonly IObservable<long> Gold;
 
         static AgentStateSubject()
         {
-            _gold = new Subject<FungibleAssetValue>();
+            _gold = new Subject<long>();
             Gold = _gold.ObserveOnMainThread();
         }
 
-        public static void OnNextGold(FungibleAssetValue gold)
+        public static void OnNextGold(long gold)
         {
             _gold.OnNext(gold);
         }

@@ -1,6 +1,5 @@
 using System;
 using System.Globalization;
-using Libplanet.Assets;
 using Nekoyume.EnumType;
 using Nekoyume.Game.Character;
 using Nekoyume.Game.Controller;
@@ -8,7 +7,6 @@ using Nekoyume.Helper;
 using Nekoyume.L10n;
 using Nekoyume.Model.Item;
 using Nekoyume.Model.Mail;
-using Nekoyume.Model.State;
 using Nekoyume.State;
 using Nekoyume.UI.Model;
 using Nekoyume.UI.Module;
@@ -216,15 +214,6 @@ namespace Nekoyume.UI
 
             var data = SharedModel.ItemCountableAndPricePopup.Value;
 
-            if (decimal.TryParse(shopItem.Price.Value.GetQuantityString(),
-                NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var totalPrice))
-            {
-                var price = totalPrice / shopItem.Count.Value;
-                var majorUnit = (int) price;
-                var minorUnit = (int)((price - majorUnit) * 100);
-                var currency = States.Instance.GoldBalanceState.Gold.Currency;
-                data.Price.Value = new FungibleAssetValue(currency, majorUnit, minorUnit);
-            }
             data.PreTotalPrice.Value = shopItem.Price.Value;
             data.TotalPrice.Value = shopItem.Price.Value;
             data.Count.Value = shopItem.Count.Value;
@@ -249,9 +238,6 @@ namespace Nekoyume.UI
             }
 
             var data = SharedModel.ItemCountableAndPricePopup.Value;
-            var currency = States.Instance.GoldBalanceState.Gold.Currency;
-            data.TotalPrice.Value = new FungibleAssetValue(currency, Shop.MinimumPrice, 0);
-            data.Price.Value = new FungibleAssetValue(currency, Shop.MinimumPrice, 0);
             data.Count.Value = 1;
             data.IsSell.Value = true;
 
@@ -310,24 +296,9 @@ namespace Nekoyume.UI
                 return;
             }
 
-            if (data.TotalPrice.Value.MinorUnit > 0)
-            {
-                OneLineSystem.Push(
-                    MailType.System,
-                    L10nManager.Localize("UI_TOTAL_PRICE_WARNING"),
-                    NotificationCell.NotificationType.Alert);
-                return;
-            }
-
-            if (data.TotalPrice.Value.Sign * data.TotalPrice.Value.MajorUnit < Model.Shop.MinimumPrice)
-            {
-                throw new InvalidSellingPriceException(data);
-            }
-
             var totalPrice = data.TotalPrice.Value;
             var count = data.Count.Value;
             var itemSubType = data.Item.Value.ItemBase.Value.ItemSubType;
-            Game.Game.instance.ActionManager.SellAsync(tradableItem, count, totalPrice.RawValue, itemSubType).Subscribe();
             
             ResponseSell();
         }
@@ -339,39 +310,6 @@ namespace Nekoyume.UI
                 return;
             }
 
-            if (data.TotalPrice.Value.MinorUnit > 0)
-            {
-                OneLineSystem.Push(
-                    MailType.System,
-                    L10nManager.Localize("UI_TOTAL_PRICE_WARNING"),
-                    NotificationCell.NotificationType.Alert);
-                return;
-            }
-
-            if (data.TotalPrice.Value.Sign * data.TotalPrice.Value.MajorUnit < Shop.MinimumPrice)
-            {
-                throw new InvalidSellingPriceException(data);
-            }
-
-            var requiredBlockIndex = tradableItem.RequiredBlockIndex;
-            var totalPrice = data.TotalPrice.Value;
-            var preTotalPrice = data.PreTotalPrice.Value;
-            var count = data.Count.Value;
-            var digest =
-                ReactiveShopState.GetSellDigest(tradableItem.TradableId, requiredBlockIndex, preTotalPrice, count);
-            if (digest == null)
-            {
-                return;
-            }
-
-            var itemSubType = data.Item.Value.ItemBase.Value.ItemSubType;
-            Game.Game.instance.ActionManager.UpdateSellAsync(
-                digest.OrderId,
-                tradableItem,
-                count,
-                totalPrice.RawValue,
-                itemSubType).Subscribe();
-            
             ResponseSell();
         }
 
@@ -393,8 +331,7 @@ namespace Nekoyume.UI
             var majorUnit = (int) price;
             var minorUnit = (int)((Math.Truncate((price - majorUnit) * 100) / 100) * 100);
             var model = SharedModel.ItemCountableAndPricePopup.Value;
-            model.Price.SetValueAndForceNotify(new FungibleAssetValue(model.Price.Value.Currency,
-                majorUnit, minorUnit));
+            model.Price.SetValueAndForceNotify(0);
             UpdateTotalPrice(PriorityType.Price);
         }
 
@@ -402,43 +339,17 @@ namespace Nekoyume.UI
         {
             var model = SharedModel.ItemCountableAndPricePopup.Value;
             decimal price = 0;
-            if (decimal.TryParse(model.Price.Value.GetQuantityString(), NumberStyles.AllowDecimalPoint,
-                CultureInfo.InvariantCulture, out var result))
-            {
-                price = result;
-            }
-
+            
             var count = model.Count.Value;
             var totalPrice = price * count;
 
             if (totalPrice > LimitPrice)
             {
-                switch (priorityType)
-                {
-                    case PriorityType.Price:
-                        price = LimitPrice / model.Count.Value;
-                        var majorUnit = (int) price;
-                        var minorUnit = (int)((price - majorUnit) * 100);
-                        model.Price.Value = new FungibleAssetValue(model.Price.Value.Currency, majorUnit, minorUnit);
-                        break;
-                    case PriorityType.Count:
-                        count = LimitPrice / (int)price;
-                        model.Count.Value = count;
-                        break;
-                }
-
                 OneLineSystem.Push(
                     MailType.System,
                     L10nManager.Localize("UI_SELL_LIMIT_EXCEEDED"),
                     NotificationCell.NotificationType.Alert);
             }
-
-            var currency = model.TotalPrice.Value.Currency;
-            var sum = price * count;
-            var major = (int) sum;
-            var minor = (int) ((sum - (int) sum) * 100);
-            var fungibleAsset = new FungibleAssetValue(currency, major, minor);
-            model.TotalPrice.SetValueAndForceNotify(fungibleAsset);
         }
 
         // sell cancellation
@@ -462,26 +373,7 @@ namespace Nekoyume.UI
             if (!(model.Item.Value.ItemBase.Value is ITradableItem tradableItem))
             {
                 return;
-            }
-
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-            var tradableId = tradableItem.TradableId;
-            var requiredBlockIndex = tradableItem.RequiredBlockIndex;
-            var price = model.Price.Value;
-            var count = model.Item.Value.Count.Value;
-            var subType = tradableItem.ItemSubType;
-
-            var digest = ReactiveShopState.GetSellDigest(tradableId, requiredBlockIndex, price, count);
-            if (digest != null)
-            {
-                Analyzer.Instance.Track("Unity/Sell Cancellation");
-                Game.Game.instance.ActionManager.SellCancellationAsync(
-                    avatarAddress.ToHex(),
-                    digest.OrderId,
-                    digest.TradableId,
-                    subType).Subscribe();
-                ResponseSellCancellation(digest.OrderId, digest.TradableId);
-            }
+            }           
         }
 
         private void SubscribeSellCancellationPopupCancel()
@@ -540,7 +432,7 @@ namespace Nekoyume.UI
         private async void ResponseSellCancellation(Guid orderId, Guid tradableId)
         {
             SharedModel.ItemCountAndPricePopup.Value.Item.Value = null;
-            var itemName = await Util.GetItemNameByOrderId(orderId);
+            var itemName = "item";
             ReactiveShopState.RemoveSellDigest(orderId);
             AudioController.instance.PlaySfx(AudioController.SfxCode.InputItem);
             var format = L10nManager.Localize("NOTIFICATION_SELL_CANCEL_START");

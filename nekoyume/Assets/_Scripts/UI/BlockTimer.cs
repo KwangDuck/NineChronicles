@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Lib9c.Model.Order;
-using Nekoyume.Action;
 using Nekoyume.Helper;
 using Nekoyume.L10n;
 using TMPro;
@@ -27,7 +25,7 @@ namespace Nekoyume.UI
         {
             remainTimeSlider.OnValueChangedAsObservable().Subscribe(OnSliderChange)
                 .AddTo(gameObject);
-            remainTimeSlider.maxValue = Order.ExpirationInterval;
+            remainTimeSlider.maxValue = 100;
             remainTimeSlider.value = 0;
         }
 

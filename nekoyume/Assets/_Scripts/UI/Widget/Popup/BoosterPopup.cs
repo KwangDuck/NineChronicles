@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Nekoyume.BlockChain;
 using Nekoyume.Game;
 using Nekoyume.Game.Character;
 using Nekoyume.Model.Item;

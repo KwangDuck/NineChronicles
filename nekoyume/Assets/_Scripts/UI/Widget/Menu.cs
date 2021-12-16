@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Nekoyume.BlockChain;
 using Nekoyume.Game;
 using Nekoyume.Game.Controller;
 using Nekoyume.State;
@@ -136,13 +135,6 @@ namespace Nekoyume.UI
             ActionCamera.instance.ChaseX(player.transform);
             //ActionRenderHandler.Instance.Pending = true;
             Game.Game.instance.ActionManager.HackAndSlashAsync(player, worldId, stageId, 1).Subscribe();
-            LocalLayerModifier.ModifyAvatarActionPoint(States.Instance.CurrentAvatarState.address,
-                - requiredCost);
-            var props = new Dictionary<string, object>
-            {
-                ["StageID"] = stageId,
-            };
-            Analyzer.Instance.Track("Unity/Click Guided Quest Enter Dungeon", props);
         }
 
         public void GoToStage(BattleLog battleLog)
@@ -154,8 +146,6 @@ namespace Nekoyume.UI
 
         private void GoToCombinationEquipmentRecipe(int recipeId)
         {
-            Analyzer.Instance.Track("Unity/Click Guided Quest Combination Equipment");
-
             CombinationClickInternal(() => Find<Craft>().Show(recipeId));
         }
 
@@ -167,7 +157,7 @@ namespace Nekoyume.UI
             btnRanking.Update();
             btnMimisbrunnr.Update();
 
-            var addressHex = States.Instance.CurrentAvatarState.address.ToHex();
+            var addressHex = string.Empty;
             var firstOpenCombinationKey = string.Format(FirstOpenCombinationKeyFormat, addressHex);
             var firstOpenShopKey = string.Format(FirstOpenShopKeyFormat, addressHex);
             var firstOpenQuestKey = string.Format(FirstOpenQuestKeyFormat, addressHex);
@@ -181,7 +171,7 @@ namespace Nekoyume.UI
                 btnShop.IsUnlocked &&
                 PlayerPrefs.GetInt(firstOpenShopKey, 0) == 0);
 
-            var currentAddress = States.Instance.CurrentAvatarState?.address;
+            var currentAddress = string.Empty;
             if (currentAddress != null)
             {
                 //var arenaInfo = States.Instance.WeeklyArenaState.GetArenaInfo(currentAddress.Value);
@@ -223,7 +213,7 @@ namespace Nekoyume.UI
 
             if (questExclamationMark.gameObject.activeSelf)
             {
-                var addressHex = States.Instance.CurrentAvatarState.address.ToHex();
+                var addressHex = string.Empty;
                 var key = string.Format(FirstOpenQuestKeyFormat, addressHex);
                 PlayerPrefs.SetInt(key, 1);
             }
@@ -245,7 +235,7 @@ namespace Nekoyume.UI
 
             if (shopExclamationMark.gameObject.activeSelf)
             {
-                var addressHex = States.Instance.CurrentAvatarState.address.ToHex();
+                var addressHex = string.Empty;
                 var key = string.Format(FirstOpenShopKeyFormat, addressHex);
                 PlayerPrefs.SetInt(key, 1);
             }
@@ -274,7 +264,7 @@ namespace Nekoyume.UI
 
             if (combinationExclamationMark.gameObject.activeSelf)
             {
-                var addressHex = States.Instance.CurrentAvatarState.address.ToHex();
+                var addressHex = string.Empty;
                 var key = string.Format(FirstOpenCombinationKeyFormat, addressHex);
                 PlayerPrefs.SetInt(key, 1);
             }
@@ -320,45 +310,7 @@ namespace Nekoyume.UI
                 return;
             }
 
-            var wi = States.Instance.CurrentAvatarState.worldInformation;
-            if (!wi.TryGetWorld(worldId, out var world))
-            {
-                LocalLayerModifier.AddWorld(
-                    States.Instance.CurrentAvatarState.address,
-                    worldId);
-
-                if (!wi.TryGetWorld(worldId, out world))
-                {
-                    // Do nothing.
-                    return;
-                }
-            }
-
-            if (!world.IsUnlocked)
-            {
-                // Do nothing.
-                return;
-            }
-
-            var SharedViewModel = new WorldMap.ViewModel
-            {
-                WorldInformation = wi,
-            };
-
-            if (mimisbrunnrExclamationMark.gameObject.activeSelf)
-            {
-                var addressHex = States.Instance.CurrentAvatarState.address.ToHex();
-                var key = string.Format(FirstOpenMimisbrunnrKeyFormat, addressHex);
-                PlayerPrefs.SetInt(key, 1);
-            }
-
-            _coLazyClose = StartCoroutine(CoLazyClose());
-            AudioController.PlayClick();
-
-            SharedViewModel.SelectedWorldId.SetValueAndForceNotify(world.Id);
-            SharedViewModel.SelectedStageId.SetValueAndForceNotify(world.GetNextStageId());
             var stageInfo = Find<UI.StageInformation>();
-            stageInfo.Show(SharedViewModel, worldRow, StageInformation.StageType.Mimisbrunnr);
             var status = Find<Status>();
             status.Close(true);
             Find<EventBanner>().Close(true);
@@ -398,10 +350,7 @@ namespace Nekoyume.UI
         {
             var tutorialController = Game.Game.instance.Stage.TutorialController;
             var avatarState = Game.Game.instance.States.CurrentAvatarState;
-            var nextStageId = avatarState.worldInformation != null &&
-                              avatarState.worldInformation.TryGetLastClearedStageId(out var stageId)
-                ? stageId + 1
-                : 1;
+            var nextStageId = 1;
 
             if (nextStageId > 4)
             {
@@ -525,26 +474,5 @@ namespace Nekoyume.UI
             player.DisableHudContainer();
             HackAndSlash(GuidedQuest.WorldQuest?.Goal ?? 4);
         }
-
-#if UNITY_EDITOR
-        protected override void Update()
-        {
-            base.Update();
-
-            if (!Find<CombinationResultPopup>().gameObject.activeSelf &&
-                !Find<EnhancementResultPopup>().gameObject.activeSelf &&
-                Input.GetKey(KeyCode.LeftControl))
-            {
-                if (Input.GetKeyDown(KeyCode.C))
-                {
-                    Find<CombinationResultPopup>().ShowWithEditorProperty();
-                }
-                else if (Input.GetKeyDown(KeyCode.E))
-                {
-                    Find<EnhancementResultPopup>().ShowWithEditorProperty();
-                }
-            }
-        }
-#endif
     }
 }

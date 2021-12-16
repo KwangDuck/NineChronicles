@@ -110,12 +110,7 @@ namespace Nekoyume.UI
             LoadRecipeModel();
             SharedModel.SelectedRow
                 .Subscribe(SetSubRecipe)
-                .AddTo(gameObject);
-            ReactiveAvatarState.Address.Subscribe(address =>
-            {
-                if (address.Equals(default)) return;
-                SharedModel.LoadRecipeVFXSkipList();
-            }).AddTo(gameObject);
+                .AddTo(gameObject);            
 
             recipeScroll.InitializeNotification();
             ReactiveAvatarState.QuestList
@@ -236,29 +231,7 @@ namespace Nekoyume.UI
 
         private void SubscribeQuestList(QuestList questList)
         {
-            var quest = questList?
-                .EnumerateLazyQuestStates()
-                .Select(l => l.State)
-                .OfType<CombinationEquipmentQuest>()
-                .Where(x => !x.Complete)
-                .OrderBy(x => x.StageId)
-                .FirstOrDefault();
-
-            if (quest is null ||
-                !Game.Game.instance.TableSheets.EquipmentItemRecipeSheet
-                .TryGetValue(quest.RecipeId, out var row) ||
-                !States.Instance.CurrentAvatarState.worldInformation
-                .TryGetLastClearedStageId(out var clearedStage))
-            {
-                SharedModel.NotifiedRow.Value = null;
-                return;
-            }
-
-            var stageId = row.UnlockStage;
-            if (SharedModel.NotifiedRow != null)
-            {
-                SharedModel.NotifiedRow.Value = clearedStage >= stageId ? row : null;
-            }            
+            
         }
 
         private void CombinationEquipmentAction(SubRecipeView.RecipeInfo recipeInfo)

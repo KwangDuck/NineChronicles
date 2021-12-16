@@ -1,9 +1,5 @@
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using Nekoyume.Action;
 using Nekoyume.EnumType;
 using Nekoyume.Game.Controller;
 using Nekoyume.L10n;
@@ -90,7 +86,7 @@ namespace Nekoyume.UI
                 return;
             }
 
-            var currentGold = double.Parse(States.Instance.GoldBalanceState.Gold.GetQuantityString());
+            var currentGold = 0;
             if (currentGold < _price)
             {
                 OneLineSystem.Push(
@@ -112,31 +108,10 @@ namespace Nekoyume.UI
         private async void BuyMultiple()
         {
             var wishItems = shopItems.SharedModel.GetWishItems;
-            var purchaseInfos = new ConcurrentBag<PurchaseInfo>();
-
-            await foreach (var item in wishItems.ToAsyncEnumerable())
-            {
-                var purchaseInfo = await ShopBuy.GetPurchaseInfo(item.OrderId.Value);
-                purchaseInfos.Add(purchaseInfo);
-            }
-            Game.Game.instance.ActionManager.BuyAsync(purchaseInfos.ToList()).Subscribe();
-
-            if (shopItems.SharedModel.WishItemCount > 0)
-            {
-                var props = new Dictionary<string, object>
-                {
-                    ["Count"] = shopItems.SharedModel.WishItemCount,
-                };
-                Analyzer.Instance.Track("Unity/Number of Purchased Items", props);
-            }
+            Game.Game.instance.ActionManager.BuyAsync().Subscribe();
 
             foreach (var shopItem in shopItems.SharedModel.GetWishItems)
             {
-                var props = new Dictionary<string, object>
-                {
-                    ["Price"] = shopItem.Price.Value.GetQuantityString(),
-                };
-                Analyzer.Instance.Track("Unity/Buy", props);
                 shopItem.Selected.Value = false;
                 ReactiveShopState.RemoveBuyDigest(shopItem.OrderId.Value);
                 var format = L10nManager.Localize("NOTIFICATION_BUY_START");
@@ -169,7 +144,7 @@ namespace Nekoyume.UI
             for (int i = 0; i < shopItems.SharedModel.WishItemCount; i++)
             {
                 var item = shopItems.SharedModel.GetWishItems[i];
-                _price += double.Parse(item.Price.Value.GetQuantityString());
+                _price += 0;
                 items[i].gameObject.SetActive(true);
                 items[i].SetData(item, () =>
                 {
@@ -179,7 +154,7 @@ namespace Nekoyume.UI
             }
 
             priceText.text = _price.ToString();
-            var currentGold = double.Parse(States.Instance.GoldBalanceState.Gold.GetQuantityString());
+            var currentGold = 0;
             if (currentGold < _price)
             {
                 priceText.color = Palette.GetColor(ColorType.ButtonDisabled);

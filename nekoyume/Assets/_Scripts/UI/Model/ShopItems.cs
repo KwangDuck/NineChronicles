@@ -1,11 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Bencodex.Types;
-using Lib9c.Model.Order;
-using Nekoyume.Helper;
-using Nekoyume.Model.Item;
-using Nekoyume.State;
 using Nekoyume.UI.Module;
 
 namespace Nekoyume.UI.Model
@@ -40,46 +35,6 @@ namespace Nekoyume.UI.Model
             SelectedItemView.Dispose();
             _selectedItemViewModel.Dispose();
             _onDoubleClickItemView.Dispose();
-        }
-
-        // reactive shop state에서 스테이트 가져올때 전체적으로 리셋해줌.
-        public void ResetItems(IReadOnlyDictionary<
-                ItemSubTypeFilter, Dictionary<ShopSortFilter, Dictionary<int, List<OrderDigest>>>> digests)
-        {
-            _items = digests is null
-                ? new Dictionary<ItemSubTypeFilter, Dictionary<ShopSortFilter, Dictionary<int, List<ShopItem>>>>()
-                : DigestToViewModel(digests);
-            ResetShopItems();
-        }
-
-        private Dictionary<ItemSubTypeFilter, Dictionary<
-                    ShopSortFilter, Dictionary<int, List<ShopItem>>>>
-            DigestToViewModel(IReadOnlyDictionary<ItemSubTypeFilter, Dictionary<
-                    ShopSortFilter, Dictionary<int, List<OrderDigest>>>> shopItems)
-        {
-            return shopItems.ToDictionary(
-                pair => pair.Key,
-                pair => pair.Value.ToDictionary(
-                    pair2 => pair2.Key,
-                    pair2 => pair2.Value.ToDictionary(
-                        pair3 => pair3.Key,
-                        pair3 => pair3.Value.Select(CreateShopItem).ToList())));
-        }
-
-        private ShopItem CreateShopItem(OrderDigest orderDigest)
-        {
-            var item = new ShopItem(orderDigest);
-            item.OnClick.Subscribe(model =>
-            {
-                if (!(model is ShopItem shopItemViewModel))
-                {
-                    return;
-                }
-
-                OnClickItem(shopItemViewModel.View);
-            });
-
-            return item;
         }
 
         protected async void SelectItemView(ShopItemView view)

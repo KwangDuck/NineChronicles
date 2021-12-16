@@ -1,7 +1,4 @@
-﻿using System;
-using Libplanet;
-using Libplanet.Assets;
-using Nekoyume.Model.Item;
+using System;
 using Nekoyume.UI.Module;
 using UniRx;
 
@@ -9,27 +6,16 @@ namespace Nekoyume.UI.Model
 {
     public class ShopBuyItem : CountableItem
     {
-        public readonly ReactiveProperty<Address> SellerAgentAddress = new ReactiveProperty<Address>();
-        public readonly ReactiveProperty<Address> SellerAvatarAddress = new ReactiveProperty<Address>();
-        public readonly ReactiveProperty<FungibleAssetValue> Price = new ReactiveProperty<FungibleAssetValue>();
+        public readonly ReactiveProperty<string> SellerAgentAddress = new ReactiveProperty<string>();
+        public readonly ReactiveProperty<string> SellerAvatarAddress = new ReactiveProperty<string>();
+        public readonly ReactiveProperty<long> Price = new ReactiveProperty<long>();
         public readonly ReactiveProperty<Guid> ProductId = new ReactiveProperty<Guid>();
 
         public ShopItemView View;
 
         public ShopBuyItem(Nekoyume.Model.Item.ShopItem item)
-            : this(item.SellerAgentAddress, item.SellerAvatarAddress, item.Price, item.ProductId,
-                item.ItemUsable ?? (ItemBase)item.Costume)
+            : base(null, 0)
         {
-        }
-
-        private ShopBuyItem(Address sellerAgentAddress, Address sellerAvatarAddress, FungibleAssetValue price, Guid productId,
-            ItemBase item) : base(item, 1)
-        {
-            GradeEnabled.Value = true;
-            SellerAgentAddress.Value = sellerAgentAddress;
-            SellerAvatarAddress.Value = sellerAvatarAddress;
-            Price.Value = price;
-            ProductId.Value = productId;
         }
 
         public override void Dispose()

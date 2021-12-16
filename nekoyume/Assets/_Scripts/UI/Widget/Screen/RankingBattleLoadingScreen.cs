@@ -15,8 +15,6 @@ namespace Nekoyume.UI
             var player = Game.Game.instance.Stage.GetPlayer();
             var sprite = SpriteHelper.GetItemIcon(player.Model.armor?.Id ?? GameConfig.DefaultAvatarArmorId);
             profile.Set(player.Level, States.Instance.CurrentAvatarState.NameWithHash, sprite);
-            var enemySprite = SpriteHelper.GetItemIcon(enemyInfo.ArmorId);
-            enemyProfile.Set(enemyInfo.Level, enemyInfo.AvatarName, enemySprite);
 
             base.Show();
         }

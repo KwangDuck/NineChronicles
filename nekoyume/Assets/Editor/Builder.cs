@@ -1,7 +1,5 @@
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Lib9c.DevExtensions;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
@@ -185,7 +183,7 @@ namespace Editor
 
         private static void CopyJsonDataFile(string fileName)
         {
-            var sourcePath = TestbedHelper.GetDataPath(fileName);
+            var sourcePath = "";
             var destPath = Path.Combine(Application.streamingAssetsPath, $"{fileName}.json");
             File.Copy(sourcePath, destPath, true);
         }

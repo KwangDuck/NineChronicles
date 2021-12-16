@@ -45,9 +45,6 @@ namespace Nekoyume.UI.Module
                 case CostType.None:
                     Debug.LogError("Cost not set!");
                     return false;
-                case CostType.NCG:
-                    return States.Instance.GoldBalanceState.Gold.MajorUnit >= _cost
-                        && base.CheckCondition();
                 case CostType.ActionPoint:
                     return States.Instance.CurrentAvatarState.actionPoint >= _cost
                         && base.CheckCondition();
@@ -64,16 +61,6 @@ namespace Nekoyume.UI.Module
         {
             switch (_costType)
             {
-                case CostType.NCG:
-                    if (States.Instance.GoldBalanceState.Gold.MajorUnit < _cost)
-                    {
-                        OneLineSystem.Push(
-                            MailType.System,
-                            L10nManager.Localize("UI_NOT_ENOUGH_NCG"),
-                            NotificationCell.NotificationType.Alert);
-                        return;
-                    }
-                    break;
                 case CostType.ActionPoint:
                     if (States.Instance.CurrentAvatarState.actionPoint < _cost)
                     {

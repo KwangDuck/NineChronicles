@@ -203,36 +203,7 @@ namespace Nekoyume.UI.Scroller
             // TODO: 나중에 해금 시스템이 분리되면 아래의 해금 조건 텍스트를 얻는 로직을 옮겨서 반복을 없애야 좋겠다.
             if (value)
             {
-                unlockConditionText.enabled = true;
-
-                if (States.Instance.CurrentAvatarState.worldInformation.TryGetLastClearedStageId(
-                    out var stageId))
-                {
-                    var diff = unlockStage - stageId;
-                    if (diff > 50)
-                    {
-                        unlockConditionText.text = string.Format(
-                            L10nManager.Localize("UI_UNLOCK_CONDITION_STAGE"),
-                            "???");
-                    }
-                    else
-                    {
-                        if (diff <= 0 && tempLocked)
-                        {
-                            lockVFX.Play();
-                            shakeTweener.PlayLoop();
-                        }
-                        unlockConditionText.text = string.Format(
-                            L10nManager.Localize("UI_UNLOCK_CONDITION_STAGE"),
-                            unlockStage.ToString());
-                    }
-                }
-                else
-                {
-                    unlockConditionText.text = string.Format(
-                        L10nManager.Localize("UI_UNLOCK_CONDITION_STAGE"),
-                        "???");
-                }
+                unlockConditionText.enabled = true;                
             }
             else
             {
@@ -303,9 +274,7 @@ namespace Nekoyume.UI.Scroller
             // 메인 재료 검사.
             var inventory = avatarState.inventory;
             var materialSheet = Game.Game.instance.TableSheets.MaterialItemSheet;
-            if (materialSheet.TryGetValue(EquipmentRowData.MaterialId, out var materialRow) &&
-                inventory.TryGetFungibleItems(materialRow.ItemId, out var outFungibleItems) &&
-                outFungibleItems.Sum(e => e.count) >= EquipmentRowData.MaterialCount)
+            if (materialSheet.TryGetValue(EquipmentRowData.MaterialId, out var materialRow))
             {
                 // 서브 재료 검사.
                 if (EquipmentRowData.SubRecipeIds.Any())
@@ -320,13 +289,6 @@ namespace Nekoyume.UI.Scroller
                         shouldDimmed = false;
                         foreach (var info in subRow.Materials)
                         {
-                            if (materialSheet.TryGetValue(info.Id, out materialRow) &&
-                                inventory.TryGetFungibleItems(materialRow.ItemId, out outFungibleItems) &&
-                                outFungibleItems.Sum(e => e.count) >= info.Count)
-                            {
-                                continue;
-                            }
-
                             shouldDimmed = true;
                             break;
                         }

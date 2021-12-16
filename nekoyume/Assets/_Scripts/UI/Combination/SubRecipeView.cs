@@ -12,9 +12,6 @@ using System.Globalization;
 using Nekoyume.State;
 using System.Numerics;
 using UnityEngine.UI;
-using Nekoyume.Model.Item;
-using Libplanet;
-using System.Security.Cryptography;
 using Nekoyume.Extensions;
 using Toggle = Nekoyume.UI.Module.Toggle;
 using Nekoyume.L10n;
@@ -31,7 +28,6 @@ namespace Nekoyume.UI
             public int? SubRecipeId;
             public BigInteger CostNCG;
             public int CostAP;
-            public List<(HashDigest<SHA256>, int count)> Materials;
         }
 
         [Serializable]
@@ -177,8 +173,6 @@ namespace Nekoyume.UI
             int costAP = 0;
             int recipeId = 0;
             int? subRecipeId = null;
-            List<(HashDigest<SHA256> material, int count)> materialList
-                = new List<(HashDigest<SHA256> material, int count)>();
 
             var equipmentRow = _recipeRow as EquipmentItemRecipeSheet.Row;
             var consumableRow = _recipeRow as ConsumableItemRecipeSheet.Row;
@@ -200,8 +194,6 @@ namespace Nekoyume.UI
                 costNCG = equipmentRow.RequiredGold;
                 costAP = equipmentRow.RequiredActionPoint;
                 recipeId = equipmentRow.Id;
-                var baseMaterial = CreateMaterial(equipmentRow.MaterialId, equipmentRow.MaterialCount);
-                materialList.Add(baseMaterial);
 
                 if (_subrecipeIds != null &&
                     _subrecipeIds.Any())
@@ -224,10 +216,6 @@ namespace Nekoyume.UI
                         true);
 
                     costNCG += subRecipe.RequiredGold;
-
-                    var subMaterials = subRecipe.Materials
-                        .Select(x => CreateMaterial(x.Id, x.Count));
-                    materialList.AddRange(subMaterials);
                 }
                 else
                 {
@@ -242,10 +230,6 @@ namespace Nekoyume.UI
                 costNCG = (BigInteger)consumableRow.RequiredGold;
                 costAP = consumableRow.RequiredActionPoint;
                 recipeId = consumableRow.Id;
-
-                var materials = consumableRow.Materials
-                    .Select(x => CreateMaterial(x.Id, x.Count));
-                materialList.AddRange(materials);
             }
 
             blockIndexText.text = blockIndex.ToString();
@@ -258,7 +242,6 @@ namespace Nekoyume.UI
                 CostAP = costAP,
                 RecipeId = recipeId,
                 SubRecipeId = subRecipeId,
-                Materials = materialList
             };
             _selectedRecipeInfo = recipeInfo;
 
@@ -327,11 +310,6 @@ namespace Nekoyume.UI
 
         private bool CheckMaterialAndSlot()
         {
-            if (!CheckMaterial(_selectedRecipeInfo.Materials))
-            {
-                return false;
-            }
-
             var slots = Widget.Find<CombinationSlotsPopup>();
             if (!slots.TryGetEmptyCombinationSlot(out var _))
             {
@@ -356,21 +334,9 @@ namespace Nekoyume.UI
                 return false;
             }
 
-            if (States.Instance.GoldBalanceState.Gold.MajorUnit < _selectedRecipeInfo.CostNCG)
-            {
-                errorMessage = L10nManager.Localize("UI_NOT_ENOUGH_NCG");
-                return false;
-            }
-
             if (States.Instance.CurrentAvatarState.actionPoint < _selectedRecipeInfo.CostAP)
             {
                 errorMessage = L10nManager.Localize("UI_NOT_ENOUGH_AP");
-                return false;
-            }
-
-            if (!CheckMaterial(_selectedRecipeInfo.Materials))
-            {
-                errorMessage = L10nManager.Localize("NOTIFICATION_NOT_ENOUGH_MATERIALS");
                 return false;
             }
 
@@ -384,32 +350,6 @@ namespace Nekoyume.UI
 
             errorMessage = null;
             return true;
-        }
-
-        private bool CheckMaterial(List<(HashDigest<SHA256> material, int count)> materials)
-        {
-            var inventory = States.Instance.CurrentAvatarState.inventory;
-
-            foreach (var material in materials)
-            {
-                var itemCount = inventory.TryGetFungibleItems(material.material, out var outFungibleItems)
-                            ? outFungibleItems.Sum(e => e.count)
-                            : 0;
-
-                if (material.count > itemCount)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private (HashDigest<SHA256>, int) CreateMaterial(int id, int count)
-        {
-            var row = Game.Game.instance.TableSheets.MaterialItemSheet[id];
-            var material = ItemFactory.CreateMaterial(row);
-            return (material.FungibleId, count);
         }
     }
 }

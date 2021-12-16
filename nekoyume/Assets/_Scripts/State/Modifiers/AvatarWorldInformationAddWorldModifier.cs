@@ -53,11 +53,6 @@ namespace Nekoyume.State.Modifiers
             var worldSheet = Game.Game.instance.TableSheets.WorldSheet;
             foreach (var worldId in _worldIds)
             {
-                if (wi.TryGetWorld(worldId, out _))
-                {
-                    continue;
-                }
-
                 var worldRow = worldSheet.OrderedList.FirstOrDefault(row => row.Id == worldId);
                 if (worldRow is null)
                 {
@@ -67,20 +62,9 @@ namespace Nekoyume.State.Modifiers
                     continue;
                 }
 
-                if (!wi.TryAddWorld(worldRow, out _))
-                {
-                    continue;
-                }
-
                 var worldUnlockSheetRow = Game.Game.instance.TableSheets.WorldUnlockSheet
                     .OrderedList
                     .FirstOrDefault(row => row.WorldIdToUnlock == worldId);
-                if (!(worldUnlockSheetRow is null) &&
-                    wi.IsWorldUnlocked(worldUnlockSheetRow.WorldId) &&
-                    wi.IsStageCleared(worldUnlockSheetRow.StageId))
-                {
-                    wi.UnlockWorld(worldId, 0, worldSheet);
-                }
             }
 
             return state;

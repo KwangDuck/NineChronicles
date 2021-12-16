@@ -1,10 +1,8 @@
 using System.Linq;
-using Libplanet;
 using Nekoyume.EnumType;
 using Nekoyume.Game.Controller;
 using Nekoyume.Model.Item;
 using Nekoyume.Model.State;
-using Nekoyume.State;
 using Nekoyume.UI.Module;
 using TMPro;
 using UniRx;
@@ -73,28 +71,13 @@ namespace Nekoyume.UI
             Close();
         }
 
-        public void Show(RectTransform target, Address avatarAddress)
+        public void Show(RectTransform target, string avatarAddress)
         {
             ShowAsync(target, avatarAddress);
         }
 
-        public async void ShowAsync(RectTransform target, Address avatarAddress)
-        {
-            var (exist, avatarState) = States.TryGetAvatarState(avatarAddress);
-            if (!exist)
-            {
-                return;
-            }
-
-            Show(target, avatarState);
-        }
-
-        public void Show(RectTransform target, AvatarState avatarState)
-        {
-            var isCurrentAvatar =
-                States.Instance.CurrentAvatarState?.address.Equals(avatarState.address)
-                ?? false;
-            Show(target, avatarState, isCurrentAvatar);
+        public async void ShowAsync(RectTransform target, string avatarAddress)
+        {           
         }
 
         public void Show(RectTransform target, AvatarState avatarState, bool isCurrentAvatar)
@@ -112,10 +95,6 @@ namespace Nekoyume.UI
                 {
                     characterView.SetByPlayer(player);
                 }
-            }
-            else
-            {
-                characterView.SetByAvatarAddress(avatarState.address);
             }
 
             levelText.text = $"<color=#B38271>LV.{avatarState.level}</color>";

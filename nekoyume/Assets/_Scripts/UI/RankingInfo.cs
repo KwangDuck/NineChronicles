@@ -70,28 +70,7 @@ namespace Nekoyume.UI
         }
 
         private void UpdateArenaInfo(WeeklyArenaState weeklyArenaState)
-        {
-            var avatarAddress = States.Instance.CurrentAvatarState?.address;
-            if (avatarAddress == null)
-            {
-                winCount.text = "-";
-                loseCount.text = "-";
-                return;
-            }
-
-            var arenaInfos = weeklyArenaState
-                .GetArenaInfos(avatarAddress.Value, 0, 0);
-
-            if (arenaInfos.Count == 0)
-            {
-                winCount.text = "-";
-                loseCount.text = "-";
-                return;
-            }
-
-            var record = arenaInfos[0].arenaInfo.ArenaRecord;
-            winCount.text = record.Win.ToString();
-            loseCount.text = record.Lose.ToString();
+        {   
         }
 
         private void OnSliderChange(float value)

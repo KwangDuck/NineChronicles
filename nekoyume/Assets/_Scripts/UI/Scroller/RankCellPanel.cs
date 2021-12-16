@@ -70,8 +70,7 @@ namespace Nekoyume.UI.Scroller
             var avatarState = rankingInfo.AvatarState;
             nicknameText.text = avatarState.name;
             nicknameText.gameObject.SetActive(true);
-            addressText.text = avatarState.address
-                .ToString()
+            addressText.text = "0x00"
                 .Remove(addressStringCount);
 
             UpdateRank(rankingInfo.Rank);
@@ -163,7 +162,7 @@ namespace Nekoyume.UI.Scroller
             rankText.text = "-";
             characterView.SetByAvatarState(avatarState);
             nicknameText.text = avatarState.name;
-            addressText.text = avatarState.address.ToString()
+            addressText.text = "0x00"
                 .Remove(addressStringCount);
 
             firstElementText.text = "-";

@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using Nekoyume.Action;
 using Nekoyume.Game.Character;
 using Nekoyume.Model.Item;
-using Nekoyume.State;
 using Nekoyume.Model.State;
 using Nekoyume.UI;
 using Material = Nekoyume.Model.Item.Material;
@@ -13,6 +10,7 @@ using Material = Nekoyume.Model.Item.Material;
 namespace Nekoyume.Game
 {
     using Gateway.Protocol;
+    using Nekoyume.State;
     using UniRx;
 
     /// <summary>
@@ -87,14 +85,17 @@ namespace Nekoyume.Game
         {
 
             // init dummy avatar
-            var avatarState = new AvatarState(
-                new Libplanet.Address(),
-                new Libplanet.Address(),
-                0,
-                Game.instance.TableSheets.GetAvatarSheets(),
-                States.Instance.GameConfigState,
-                new Libplanet.Address()
-            );
+            var avatarState = new AvatarState
+            {
+                characterId = 100010,
+                level = 1,
+                exp = 0,
+                name = nickName,
+                hair = hair,
+                lens = lens,
+                ear = ear,
+                tail = tail,
+            };
             States.Instance.UpdateCurrentAvatarState(avatarState);
             States.Instance.AddOrReplaceAvatarState(avatarState, index);
             States.Instance.SelectAvatar(index);
@@ -198,12 +199,7 @@ namespace Nekoyume.Game
 
         // charge action point
         public IObservable<(REQ_ChargeActionPoint, RES_ChargeActionPoint)> ChargeActionPointAsync(Material material)
-        {
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-
-            LocalLayerModifier.RemoveItem(avatarAddress, material.ItemId);
-            LocalLayerModifier.ModifyAvatarActionPoint(avatarAddress, States.Instance.GameConfigState.ActionPointMax);
-
+        {            
             var req = new REQ_ChargeActionPoint
             {
                 Header = MakeHeader(),
@@ -243,22 +239,6 @@ namespace Nekoyume.Game
             SubRecipeView.RecipeInfo recipeInfo,
             int slotIndex)
         {
-            var agentAddress = States.Instance.AgentState.address;
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-
-            LocalLayerModifier.ModifyAgentGold(agentAddress, -recipeInfo.CostNCG);
-            LocalLayerModifier.ModifyAvatarActionPoint(agentAddress, -recipeInfo.CostAP);
-
-            foreach (var (material, count) in recipeInfo.Materials)
-            {
-                LocalLayerModifier.RemoveItem(avatarAddress, material, count);
-            }
-
-            Analyzer.Instance.Track("Unity/Create CombinationConsumable", new Dictionary<string, object>
-            {
-                ["RecipeId"] = recipeInfo.RecipeId,
-            });
-
             var req = new REQ_CombinationConsumable
             {
                 Header = MakeHeader(),
@@ -280,22 +260,6 @@ namespace Nekoyume.Game
             SubRecipeView.RecipeInfo recipeInfo,
             int slotIndex)
         {
-            Analyzer.Instance.Track("Unity/Create CombinationEquipment", new Dictionary<string, object>
-            {
-                ["RecipeId"] = recipeInfo.RecipeId,
-            });
-
-            var agentAddress = States.Instance.AgentState.address;
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-
-            LocalLayerModifier.ModifyAgentGold(agentAddress, -recipeInfo.CostNCG);
-            LocalLayerModifier.ModifyAvatarActionPoint(agentAddress, -recipeInfo.CostAP);
-
-            foreach (var (material, count) in recipeInfo.Materials)
-            {
-                LocalLayerModifier.RemoveItem(avatarAddress, material, count);
-            }
-
             var req = new REQ_CombinationEquipment
             {
                 Header = MakeHeader(),
@@ -318,22 +282,6 @@ namespace Nekoyume.Game
             int slotIndex,
             BigInteger costNCG)
         {
-            var agentAddress = States.Instance.AgentState.address;
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-
-            LocalLayerModifier.ModifyAgentGold(agentAddress, -costNCG);
-            LocalLayerModifier.ModifyAvatarActionPoint(avatarAddress, -GameConfig.EnhanceEquipmentCostAP);
-            LocalLayerModifier.ModifyAvatarActionPoint(avatarAddress, -GameConfig.EnhanceEquipmentCostAP);
-            LocalLayerModifier.RemoveItem(avatarAddress, baseEquipment.TradableId,
-                baseEquipment.RequiredBlockIndex, 1);
-            LocalLayerModifier.RemoveItem(avatarAddress, materialEquipment.TradableId,
-                materialEquipment.RequiredBlockIndex, 1);
-            // NOTE: 장착했는지 안 했는지에 상관없이 해제 플래그를 걸어 둔다.
-            LocalLayerModifier.SetItemEquip(avatarAddress, baseEquipment.NonFungibleId, false);
-            LocalLayerModifier.SetItemEquip(avatarAddress, materialEquipment.NonFungibleId, false);
-
-            Analyzer.Instance.Track("Unity/Item Enhancement");
-
             var req = new REQ_ItemEnhancement
             {
                 Header = MakeHeader(),
@@ -354,10 +302,6 @@ namespace Nekoyume.Game
             CombinationSlotState state,
             int slotIndex)
         {
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-            var materialRow = Game.instance.TableSheets.MaterialItemSheet.Values
-                .First(r => r.ItemSubType == ItemSubType.Hourglass);            
-
             var req = new REQ_RapidCombination
             {
                 Header = MakeHeader(),
@@ -400,13 +344,6 @@ namespace Nekoyume.Game
             List<Guid> consumableIds
         )
         {
-            if (!ArenaHelper.TryGetThisWeekAddress(out var weeklyArenaAddress))
-            {
-                throw new NullReferenceException(nameof(weeklyArenaAddress));
-            }
-
-            Analyzer.Instance.Track("Unity/Ranking Battle");
-
             var req = new REQ_RankingBattle
             {
                 Header = MakeHeader(),
@@ -445,17 +382,6 @@ namespace Nekoyume.Game
             BigInteger price,
             ItemSubType itemSubType)
         {
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-
-            if (!(tradableItem is TradableMaterial))
-            {
-                LocalLayerModifier.RemoveItem(avatarAddress, tradableItem.TradableId, tradableItem.RequiredBlockIndex, count);
-            }
-
-            // NOTE: 장착했는지 안 했는지에 상관없이 해제 플래그를 걸어 둔다.
-            LocalLayerModifier.SetItemEquip(avatarAddress, tradableItem.TradableId, false);
-            Analyzer.Instance.Track("Unity/Sell");
-
             var req = new REQ_Sell
             {
 
@@ -499,17 +425,6 @@ namespace Nekoyume.Game
             BigInteger price,
             ItemSubType itemSubType)
         {
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-
-            if (!(tradableItem is TradableMaterial))
-            {
-                LocalLayerModifier.RemoveItem(avatarAddress, tradableItem.TradableId, tradableItem.RequiredBlockIndex, count);
-            }
-
-            // NOTE: 장착했는지 안 했는지에 상관없이 해제 플래그를 걸어 둔다.
-            LocalLayerModifier.SetItemEquip(avatarAddress, tradableItem.TradableId, false);
-            Analyzer.Instance.Track("Unity/UpdateSell");
-
             var req = new REQ_UpdateSell
             {
                 Header = MakeHeader(),
@@ -524,14 +439,8 @@ namespace Nekoyume.Game
         }
 
         // buy
-        public IObservable<(REQ_Buy, RES_Buy)> BuyAsync(List<PurchaseInfo> purchaseInfos)
+        public IObservable<(REQ_Buy, RES_Buy)> BuyAsync()
         {
-            var buyerAgentAddress = States.Instance.AgentState.address;
-            foreach (var purchaseInfo in purchaseInfos)
-            {
-                LocalLayerModifier.ModifyAgentGold(buyerAgentAddress, -purchaseInfo.Price);
-            }
-
             var req = new REQ_Buy
             {
                 Header = MakeHeader(),
@@ -571,11 +480,6 @@ namespace Nekoyume.Game
             int stageId,
             int playCount)
         {
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-            costumes ??= new List<Costume>();
-            equipments ??= new List<Equipment>();
-            foods ??= new List<Consumable>();
-
             var req = new REQ_MimisbrunnrBattle
             {
                 Header = MakeHeader(),
@@ -622,20 +526,7 @@ namespace Nekoyume.Game
             int worldId,
             int stageId,
             int playCount)
-        {
-            Analyzer.Instance.Track("Unity/HackAndSlash", new Dictionary<string, object>
-            {
-                ["WorldId"] = worldId,
-                ["StageId"] = stageId,
-                ["PlayCount"] = playCount,
-
-            });
-
-            var avatarAddress = States.Instance.CurrentAvatarState.address;
-            costumes ??= new List<Costume>();
-            equipments ??= new List<Equipment>();
-            foods ??= new List<Consumable>();
-
+        {            
             var req = new REQ_HackAndSlash
             {
                 Header = MakeHeader(),

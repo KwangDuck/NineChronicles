@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using Nekoyume.BlockChain;
 using TMPro;
 using UnityEngine;
 

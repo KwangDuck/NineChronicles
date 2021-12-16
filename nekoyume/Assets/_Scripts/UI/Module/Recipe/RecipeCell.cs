@@ -69,8 +69,7 @@ namespace Nekoyume.UI.Module
                             var worldInformation = States.Instance.CurrentAvatarState.worldInformation;
 
                             var unlockStage = equipmentRow.UnlockStage;
-                            var clearedStage = worldInformation.TryGetLastClearedStageId(out var stageId) ?
-                                stageId : 0;
+                            var clearedStage = 0;
                             var diff = unlockStage - clearedStage;
 
                             if (diff > UnlockConditionDisplayRange)
@@ -165,8 +164,7 @@ namespace Nekoyume.UI.Module
             var worldInformation = States.Instance.CurrentAvatarState.worldInformation;
 
             var unlockStage = equipmentRow.UnlockStage;
-            var clearedStage = worldInformation.TryGetLastClearedStageId(out var stageId) ?
-                stageId : 0;
+            var clearedStage = 0;
 
             var diff = unlockStage - clearedStage;
 

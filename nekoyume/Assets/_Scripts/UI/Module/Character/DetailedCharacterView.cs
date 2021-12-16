@@ -24,8 +24,7 @@ namespace Nekoyume.UI.Module
 
         public void SetByArenaInfo(ArenaInfo arenaInfo)
         {
-            SetByArmorId(arenaInfo.ArmorId);
-            levelText.text = $"Lv.{arenaInfo.Level}";
+            
         }
     }
 }

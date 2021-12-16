@@ -7,7 +7,6 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Nekoyume.Battle;
-using Nekoyume.BlockChain;
 using Nekoyume.Game.Character;
 using Nekoyume.Game.Controller;
 using Nekoyume.Game.Entrance;
@@ -541,8 +540,7 @@ namespace Nekoyume.Game
             _battleResultModel.WorldName = world?.GetLocalizedName();
             _battleResultModel.WorldID = log.worldId;
             _battleResultModel.StageID = log.stageId;
-            avatarState.worldInformation.TryGetLastClearedStageId(out var lasStageId);
-            _battleResultModel.LastClearedStageId = lasStageId;
+            _battleResultModel.LastClearedStageId = 0;
             _battleResultModel.IsClear = log.IsClear;
             var succeedToGetWorldRow =
                 Game.instance.TableSheets.WorldSheet.TryGetValue(worldId, out var worldRow);
@@ -603,15 +601,6 @@ namespace Nekoyume.Game
             var characterSheet = Game.instance.TableSheets.CharacterSheet;
             var costumeStatSheet = Game.instance.TableSheets.CostumeStatSheet;
             var cp = CPHelper.GetCPV2(States.Instance.CurrentAvatarState, characterSheet, costumeStatSheet);
-            var props = new Dictionary<string, object>
-            {
-                ["StageId"] = log.stageId,
-                ["ClearedWave"] = log.clearedWaveNumber,
-                ["Repeat"] = IsRepeatStage,
-                ["CP"] = cp,
-                ["FoodCount"] = foodCount
-            };
-            Analyzer.Instance.Track("Unity/Stage End", props);
         }
 
         private IEnumerator CoSlideBg()
@@ -676,25 +665,6 @@ namespace Nekoyume.Game
             else
             {
                 var isTutorial = false;
-                if (States.Instance.CurrentAvatarState.worldInformation
-                    .TryGetUnlockedWorldByStageClearedBlockIndex(out var worldInfo))
-                {
-                    if (worldInfo.StageClearedId < UI.Battle.RequiredStageForExitButton)
-                    {
-                        Widget.Find<HeaderMenuStatic>().Close(true);
-                        isTutorial = true;
-                    }
-                    else
-                    {
-                        Widget.Find<HeaderMenuStatic>().Show();
-                    }
-                }
-                else
-                {
-                    Widget.Find<HeaderMenuStatic>().Close(true);
-                    isTutorial = true;
-                }
-
                 battle.Show(stageId, IsRepeatStage, IsExitReserved, isTutorial, PlayCount * Game
                     .instance
                     .TableSheets.StageSheet.Values.First(i => i.Id == stageId).CostAP);

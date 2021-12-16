@@ -1,9 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using Nekoyume.BlockChain;
 using Nekoyume.L10n;
 using Nekoyume.Model.Item;
 using Nekoyume.Model.Mail;
@@ -11,12 +8,10 @@ using Nekoyume.State;
 using Nekoyume.UI.Module;
 using UnityEngine;
 using System.Numerics;
-using Nekoyume.Action;
 using Nekoyume.EnumType;
 using Nekoyume.Extensions;
 using Nekoyume.Game.Controller;
 using Nekoyume.Helper;
-using Nekoyume.Model.Stat;
 using Nekoyume.TableData;
 using Nekoyume.UI.Model;
 using TMPro;
@@ -168,12 +163,7 @@ namespace Nekoyume.UI
                     materialSlot.RemoveMaterial();
                     _materialItem = null;
                     SetActiveContainer(false);
-                    materialGuideText.text = L10nManager.Localize("UI_SELECT_MATERIAL_TO_UPGRADE");
-                    if (ItemEnhancement.TryGetRow(_baseItem, _costSheet, out var row))
-                    {
-                        _costNcg = row.Cost;
-                        UpdateInformation(row, _baseItem);
-                    }
+                    materialGuideText.text = L10nManager.Localize("UI_SELECT_MATERIAL_TO_UPGRADE");                    
                     _animator.Play(state == State.RegisterBase ? HashToPostRegisterBase : HashToUnregisterMaterial);
                     break;
 
@@ -288,13 +278,6 @@ namespace Nekoyume.UI
                 return;
             }
 
-            if (States.Instance.GoldBalanceState.Gold.MajorUnit < _costNcg)
-            {
-                errorMessage = L10nManager.Localize("UI_NOT_ENOUGH_NCG");
-                NotificationSystem.Push(MailType.System, errorMessage, NotificationCell.NotificationType.Alert);
-                return;
-            }
-
             var slots = Find<CombinationSlotsPopup>();
             if (!slots.TryGetEmptyCombinationSlot(out var slotIndex))
             {
@@ -302,18 +285,12 @@ namespace Nekoyume.UI
             }
 
             var sheet = Game.Game.instance.TableSheets.EnhancementCostSheetV2;
-            if (ItemEnhancement.TryGetRow(_baseItem, sheet, out var row))
-            {
-                slots.SetCaching(slotIndex, true, row.SuccessRequiredBlockIndex, itemUsable:_baseItem);
-            }
 
             NotificationSystem.Push(MailType.Workshop,
                 L10nManager.Localize("NOTIFICATION_ITEM_ENHANCEMENT_START"),
                 NotificationCell.NotificationType.Information);
 
             Game.Game.instance.ActionManager.ItemEnhancementAsync(_baseItem, _materialItem, slotIndex, _costNcg).Subscribe();
-
-            StartCoroutine(CoCombineNPCAnimation(_baseItem, row.SuccessRequiredBlockIndex, () => UpdateState(State.Empty)));
         }
 
         private IEnumerator CoCombineNPCAnimation(ItemBase itemBase,
@@ -556,13 +533,6 @@ namespace Nekoyume.UI
             }
 
             return true;
-        }
-
-        private static Color GetNcgColor(BigInteger cost)
-        {
-            return States.Instance.GoldBalanceState.Gold.MajorUnit < cost
-                ? Palette.GetColor(ColorType.TextDenial)
-                : Color.white;
         }
     }
 }

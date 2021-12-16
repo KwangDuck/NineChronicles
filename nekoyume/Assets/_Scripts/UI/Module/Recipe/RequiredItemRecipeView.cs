@@ -96,9 +96,7 @@ namespace Nekoyume.UI.Module
             if (checkInventory)
             {
                 var inventory = Game.Game.instance.States.CurrentAvatarState.inventory;
-                itemCount = inventory.TryGetFungibleItems(material.FungibleId, out var outFungibleItems)
-                    ? outFungibleItems.Sum(e => e.count)
-                    : 0;
+                itemCount = 0;
             }
             var countableItem = new CountableItem(material, itemCount);
             view.SetData(countableItem, requiredCount);

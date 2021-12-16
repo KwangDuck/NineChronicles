@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Libplanet;
-using Nekoyume.Action;
 using Nekoyume.EnumType;
 using Nekoyume.Game.Character;
 using Nekoyume.Game.Controller;
@@ -99,33 +97,10 @@ namespace Nekoyume.UI.Module
 
         public SlotType Type { get; private set; } = SlotType.Empty;
         public CacheType CachedType { get; private set; }
-        public bool IsCached
-        {
-            get
-            {
-                var address = States.Instance.CurrentAvatarState.address;
-                return cached.ContainsKey(address) && cached[address];
-            }
-            private set
-            {
-                var address = States.Instance.CurrentAvatarState.address;
-                if (cached.ContainsKey(address))
-                {
-                    cached[address] = value;
-                }
-                else
-                {
-                    cached.Add(address, value);
-                }
-            }
-        }
-
-        private readonly Dictionary<Address, bool> cached = new Dictionary<Address, bool>();
+        public bool IsCached => false;
 
         public void SetCached(bool value, long requiredBlockIndex, SlotType slotType, ItemUsable itemUsable = null)
         {
-            IsCached = value;
-
             switch (slotType)
             {
                 case SlotType.Appraise:
@@ -203,7 +178,6 @@ namespace Nekoyume.UI.Module
                     workingContainer.gameObject.SetActive(false);
                     if (state != null)
                     {
-                        UpdateItemInformation(state.Result.itemUsable, type);
                         UpdateHourglass(state, currentBlockIndex);
                         UpdateRequiredBlockInformation(state.UnlockBlockIndex,
                             state.StartBlockIndex, currentBlockIndex);
@@ -216,7 +190,6 @@ namespace Nekoyume.UI.Module
                     SetContainer(false, true, false, false);
                     preparingContainer.gameObject.SetActive(false);
                     workingContainer.gameObject.SetActive(true);
-                    UpdateItemInformation(state.Result.itemUsable, type);
                     UpdateHourglass(state, currentBlockIndex);
                     UpdateRequiredBlockInformation(state.UnlockBlockIndex, state.StartBlockIndex,
                         currentBlockIndex);
@@ -225,9 +198,6 @@ namespace Nekoyume.UI.Module
 
                 case SlotType.WaitingReceive:
                     SetContainer(false, false, false, true);
-                    waitingReceiveItemView.SetData(new Item(state.Result.itemUsable));
-                    waitingReceiveText.text = string.Format(L10nManager.Localize("UI_SENDING_THROUGH_MAIL"),
-                        state.Result.itemUsable.GetLocalizedName(useElementalIcon: false, ignoreLevel: true));
                     break;
             }
         }
@@ -257,11 +227,6 @@ namespace Nekoyume.UI.Module
                     : SlotType.WaitingReceive;
             }
 
-            if (state?.Result is null)
-            {
-                return SlotType.Empty;
-            }
-
             return currentBlockIndex < state.StartBlockIndex + GameConfig.RequiredAppraiseBlock
                 ? SlotType.Appraise
                 : SlotType.Working;
@@ -285,25 +250,10 @@ namespace Nekoyume.UI.Module
 
             var gameConfigState = Game.Game.instance.States.GameConfigState;
             var diff = state.RequiredBlockIndex - currentBlockIndex;
-            var cost = RapidCombination0.CalculateHourglassCount(gameConfigState, diff);
-            var row = Game.Game.instance.TableSheets.MaterialItemSheet.Values.First(r =>
-                r.ItemSubType == ItemSubType.Hourglass);
-            var isEnough = States.Instance.CurrentAvatarState.inventory.HasFungibleItem(row.ItemId, currentBlockIndex, cost);
-
-            hasNotificationImage.enabled = isEnough;
         }
 
         private void UpdateHourglass(CombinationSlotState state, long currentBlockIndex)
         {
-            var diff = state.UnlockBlockIndex - currentBlockIndex;
-            var cost =
-                RapidCombination0.CalculateHourglassCount(States.Instance.GameConfigState, diff);
-            var inventory = States.Instance.CurrentAvatarState.inventory;
-            var count = Util.GetHourglassCount(inventory, currentBlockIndex);
-            hourglassCountText.text = cost.ToString();
-            hourglassCountText.color = count >= cost
-                ? Palette.GetColor(ColorType.ButtonEnabled)
-                : Palette.GetColor(ColorType.TextDenial);
         }
 
         private void UpdateItemInformation(ItemUsable item, SlotType slotType)

@@ -1,10 +1,10 @@
 {
-    "name": "Lib9c",
+    "name": "Gateway.Protocol",
     "rootNamespace": "",
     "references": [
-        "GUID:560b04d1a97f54a4e82edc0cbbb69285",
         "GUID:58d90f5b41017bf73b0b911dff04815c",
-        "GUID:fed8e50679d9a2046a83df8d4cb95e6a"
+        "GUID:62b9d94cd08d5d047b266d42e8684cb8",
+        "GUID:ccdb2a3bafe19b34792bb6e19521813e"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

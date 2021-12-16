@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Numerics;
-using Libplanet.Assets;
 using Nekoyume.EnumType;
 using Nekoyume.Game.Controller;
 using TMPro;
@@ -53,13 +52,6 @@ namespace Nekoyume.UI.Module
         {
             costNCG.SetActive(true);
             SetText(costNCGText, costNCGTextForSubmittable, isEnough, ncg);
-            UpdateSpace();
-        }
-
-        public void ShowNCG(FungibleAssetValue ncg, bool isEnough)
-        {
-            costNCG.SetActive(true);
-            SetText(costNCGText, costNCGTextForSubmittable, isEnough, ncg.GetQuantityString());
             UpdateSpace();
         }
 

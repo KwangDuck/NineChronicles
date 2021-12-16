@@ -2,14 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Nekoyume.Battle;
-using Nekoyume.BlockChain;
 using Nekoyume.Game;
 using Nekoyume.Game.Controller;
 using Nekoyume.Model.BattleStatus;
 using Nekoyume.Model.Item;
 using Nekoyume.Model.Stat;
-using Nekoyume.Model.State;
 using Nekoyume.State;
 using Nekoyume.UI.Model;
 using Nekoyume.UI.Module;
@@ -271,7 +268,6 @@ namespace Nekoyume.UI
             consumableTitleText.text = L10nManager.Localize("UI_EQUIP_CONSUMABLES");
             costumeTitleText.text = equipmentTitleText.text = L10nManager.Localize("UI_EQUIP_EQUIPMENTS");
 
-            Analyzer.Instance.Track("Unity/Click Stage");
             _stage = Game.Game.instance.Stage;
             _stage.IsRepeatStage = false;
             repeatToggle.isOn = false;
@@ -615,9 +611,6 @@ namespace Nekoyume.UI
                 true,
                 animationTime,
                 middleXGap);
-            LocalLayerModifier.ModifyAvatarActionPoint(
-                States.Instance.CurrentAvatarState.address,
-                -_requiredCost);
             yield return new WaitWhile(() => animation.IsPlaying);
 
             Battle(repeat);
@@ -719,15 +712,7 @@ namespace Nekoyume.UI
 
         private static void LocalStateItemEquipModify(ItemBase itemBase, bool equip)
         {
-            if (!(itemBase is INonFungibleItem nonFungibleItem))
-            {
-                return;
-            }
 
-            LocalLayerModifier.SetItemEquip(
-                States.Instance.CurrentAvatarState.address,
-                nonFungibleItem.NonFungibleId,
-                equip);
         }
 
         private void PostEquipOrUnequip(EquipmentSlot slot, bool equipCostume = false)
@@ -958,8 +943,7 @@ namespace Nekoyume.UI
                 out var worldRow))
                 throw new KeyNotFoundException(
                     $"WorldSheet.TryGetByStageId() {nameof(stageId)}({stageId})");
-
-            var avatarState = new AvatarState(States.Instance.CurrentAvatarState) { level = level };
+            
             List<Guid> consumables = consumableSlots
                 .Where(slot => !slot.IsLock && !slot.IsEmpty)
                 .Select(slot => ((Consumable)slot.Item).ItemId)
@@ -967,40 +951,7 @@ namespace Nekoyume.UI
             var equipments = equipmentSlots
                 .Where(slot => !slot.IsLock && !slot.IsEmpty)
                 .Select(slot => (Equipment)slot.Item)
-                .ToList();
-            var inventoryEquipments = avatarState.inventory.Items
-                .Select(i => i.item)
-                .OfType<Equipment>()
-                .Where(i => i.equipped).ToList();
-
-            foreach (var equipment in inventoryEquipments)
-            {
-                equipment.Unequip();
-            }
-
-            foreach (var equipment in equipments)
-            {
-                if (!avatarState.inventory.TryGetNonFungibleItem(equipment,
-                    out ItemUsable outNonFungibleItem))
-                {
-                    continue;
-                }
-
-                ((Equipment)outNonFungibleItem).Equip();
-            }
-
-            var tableSheets = Game.Game.instance.TableSheets;
-            var simulator = new StageSimulator(
-                new Cheat.DebugRandom(),
-                avatarState,
-                consumables,
-                worldRow.Id,
-                stageId,
-                tableSheets.GetStageSimulatorSheets(),
-                tableSheets.CostumeStatSheet
-            );
-            simulator.Simulate(1);
-            GoToStage(simulator.Log);
+                .ToList();            
         }
 
         private bool CheckEquipmentElementalType()

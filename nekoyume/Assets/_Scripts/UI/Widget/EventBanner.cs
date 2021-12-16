@@ -1,4 +1,3 @@
-using Nekoyume.State;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -37,23 +36,16 @@ namespace Nekoyume.UI.Module
                 .AddTo(gameObject);
         }
 
-        private void GoToArenaEventPage()
-        {
-            var address = States.Instance.AgentState.address;
-            var url = string.Format(ArenaEventPageURLFormat, address);
-            Application.OpenURL(url);
-        }
-
         private void GoToGoldEventPage()
         {
-            var address = States.Instance.AgentState.address;
+            var address = "00";
             var url = string.Format(GoldEventPageURLFormat, address);
             Application.OpenURL(url);
         }
 
         private void GoToInviteEventPage()
         {
-            var address = States.Instance.AgentState.address;
+            var address = "00";
             var url = string.Format(InvitePageURLFormat, address);
             Application.OpenURL(url);
         }

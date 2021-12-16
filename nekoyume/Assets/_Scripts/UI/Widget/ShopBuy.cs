@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Nekoyume.Action;
 using Nekoyume.EnumType;
 using Nekoyume.Game.Character;
 using Nekoyume.Game.Controller;
-using Nekoyume.Helper;
 using Nekoyume.L10n;
 using Nekoyume.Model.Mail;
 using Nekoyume.State;
@@ -186,7 +184,7 @@ namespace Nekoyume.UI
                 return;
             }
 
-            var price = shopItem.Price.Value.GetQuantityString();
+            var price = shopItem.Price.Value;
             var content = string.Format(L10nManager.Localize("UI_BUY_MULTIPLE_FORMAT"), 1, price);
             Find<TwoButtonSystem>().Show(content, L10nManager.Localize("UI_BUY"),
                 L10nManager.Localize("UI_CANCEL"), (() => { Buy(shopItem); }));
@@ -205,23 +203,7 @@ namespace Nekoyume.UI
 
         private async void Buy(ShopItem shopItem)
         {
-            var purchaseInfos = new List<PurchaseInfo>
-            {
-                await GetPurchaseInfo(shopItem.OrderId.Value)
-            };
-            Game.Game.instance.ActionManager.BuyAsync(purchaseInfos).Subscribe();
-
-            var countProps = new Dictionary<string, object>
-            {
-                ["Count"] = 1,
-            };
-            Analyzer.Instance.Track("Unity/Number of Purchased Items", countProps);
-
-            var buyProps = new Dictionary<string, object>
-            {
-                ["Price"] = shopItem.Price.Value.GetQuantityString(),
-            };
-            Analyzer.Instance.Track("Unity/Buy", buyProps);
+            Game.Game.instance.ActionManager.BuyAsync().Subscribe();
 
             SharedModel.ItemCountAndPricePopup.Value.Item.Value = null;
             shopItem.Selected.Value = false;
@@ -259,8 +241,7 @@ namespace Nekoyume.UI
 
         private static bool ButtonEnabledFuncForBuy(CountableItem inventoryItem)
         {
-            return inventoryItem is ShopItem shopItem &&
-                   States.Instance.GoldBalanceState.Gold >= shopItem.Price.Value;
+            return true;
         }
 
 
@@ -292,13 +273,6 @@ namespace Nekoyume.UI
             {
                 callback.Invoke();
             }
-        }
-
-        public static async Task<PurchaseInfo> GetPurchaseInfo(System.Guid orderId)
-        {
-            var order = await Util.GetOrder(orderId);
-            return new PurchaseInfo(orderId, order.TradableId, order.SellerAgentAddress,
-                order.SellerAvatarAddress, order.ItemSubType, order.Price);
         }
     }
 }

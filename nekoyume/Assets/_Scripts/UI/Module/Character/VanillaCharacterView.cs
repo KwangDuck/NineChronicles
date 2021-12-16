@@ -1,5 +1,4 @@
 using System.Linq;
-using Libplanet;
 using Nekoyume.Helper;
 using Nekoyume.Model.Item;
 using Nekoyume.Model.State;
@@ -25,7 +24,7 @@ namespace Nekoyume.UI.Module
             gameObject.SetActive(false);
         }
 
-        public async void SetByAvatarAddress(Address avatarAddress)
+        public async void SetByAvatarAddress(string avatarAddress)
         {
             var (exist, avatarState) = States.TryGetAvatarState(avatarAddress);
             if (!exist)

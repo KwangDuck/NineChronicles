@@ -118,7 +118,6 @@ namespace Nekoyume.UI
             itemInformation.SetData(Model.ItemInformation);
 
             Model.TitleText.SubscribeTo(titleText).AddTo(_disposablesForModel);
-            Model.Price.SubscribeToPrice(priceText).AddTo(_disposablesForModel);
             Model.SubmitButtonText.SubscribeTo(submitButton).AddTo(_disposablesForModel);
             Model.SubmitButtonEnabled.Subscribe(value => submitButton.Interactable = value).AddTo(_disposablesForModel);
             Model.OnSubmitClick.Subscribe(onSubmit).AddTo(_disposablesForModel);
@@ -159,8 +158,7 @@ namespace Nekoyume.UI
             itemInformation.SetData(Model.ItemInformation);
 
             Model.TitleText.SubscribeTo(titleText).AddTo(_disposablesForModel);
-            Model.Price.SubscribeToPrice(priceText).AddTo(_disposablesForModel);
-
+            
             if (onClose != null)
             {
                 Model.OnCloseClick.Subscribe(onClose).AddTo(_disposablesForModel);
@@ -216,13 +214,8 @@ namespace Nekoyume.UI
             itemInformation.SetData(Model.ItemInformation);
 
             Model.TitleText.SubscribeTo(titleText).AddTo(_disposablesForModel);
-            Model.Price.SubscribeToPrice(priceText).AddTo(_disposablesForModel);
             Model.SubmitButtonText.SubscribeTo(buyButton).AddTo(_disposablesForModel);
             Model.SubmitButtonEnabled.Subscribe(buyButton.SetSubmittable).AddTo(_disposablesForModel);
-            Model.Price.Subscribe(price =>
-            {
-                buyButton.ShowNCG(price, price <= States.Instance.GoldBalanceState.Gold);
-            }).AddTo(_disposablesForModel);
 
             Model.OnSubmitClick.Subscribe(onBuy).AddTo(_disposablesForModel);
             if (onClose != null)

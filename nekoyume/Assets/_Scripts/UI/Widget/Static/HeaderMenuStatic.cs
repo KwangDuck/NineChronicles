@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Nekoyume.Action;
-using Nekoyume.EnumType;
 using Nekoyume.Game.VFX;
 using Nekoyume.L10n;
-using Nekoyume.Model.Item;
 using Nekoyume.Model.Mail;
 using Nekoyume.Model.Quest;
 using Nekoyume.Model.State;
@@ -302,10 +299,7 @@ namespace Nekoyume.UI.Module
                 return;
             }
 
-            var hasNotification = questList
-                .EnumerateLazyQuestStates()
-                .Select(l => l.State)
-                .Any(quest => quest.IsPaidInAction && quest.isReceivable);
+            var hasNotification = false;
             _toggleNotifications[ToggleType.Quest].Value = hasNotification;
             Find<QuestPopup>().SetList(questList);
         }
@@ -328,11 +322,6 @@ namespace Nekoyume.UI.Module
 
         private bool HasCombinationNotification(CombinationSlotState state, long currentBlockIndex)
         {
-            if (state?.Result is null)
-            {
-                return false;
-            }
-
             var isAppraise = currentBlockIndex < state.StartBlockIndex + GameConfig.RequiredAppraiseBlock;
             if (isAppraise)
             {
@@ -341,11 +330,7 @@ namespace Nekoyume.UI.Module
 
             var gameConfigState = Game.Game.instance.States.GameConfigState;
             var diff = state.RequiredBlockIndex - currentBlockIndex;
-            var cost = RapidCombination0.CalculateHourglassCount(gameConfigState, diff);
-            var row = Game.Game.instance.TableSheets.MaterialItemSheet.Values.First(r =>
-                r.ItemSubType == ItemSubType.Hourglass);
-            var isEnough =  States.Instance.CurrentAvatarState.inventory.HasFungibleItem(row.ItemId, currentBlockIndex, cost);
-            return isEnough;
+            return false;
         }
 
         public void UpdateInventoryNotification(bool hasNotification)

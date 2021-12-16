@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Nekoyume.JsonConvertibles;
 using Nekoyume.Model.Mail;
 using Nekoyume.Model.State;
 using UnityEngine;
@@ -12,16 +11,16 @@ namespace Nekoyume.State.Modifiers
     [Serializable]
     public class AvatarAttachmentMailNewSetter : AvatarStateModifier
     {
-        [SerializeField] protected List<JsonConvertibleGuid> guidList;
+        [SerializeField] protected List<Guid> guidList;
 
         public override bool IsEmpty => !guidList.Any();
 
         public AvatarAttachmentMailNewSetter(params Guid[] guidParams)
         {
-            guidList = new List<JsonConvertibleGuid>();
+            guidList = new List<Guid>();
             foreach (var guid in guidParams)
             {
-                guidList.Add(new JsonConvertibleGuid(guid));
+                guidList.Add(guid);
             }
         }
 
@@ -60,7 +59,7 @@ namespace Nekoyume.State.Modifiers
                 return null;
             }
 
-            var ids = new HashSet<Guid>(guidList.Select(i => i.Value));
+            var ids = new HashSet<Guid>(guidList);
             var attachmentMails = state.mailBox
                 .OfType<AttachmentMail>()
                 .Where(m => ids.Contains(m.id));
@@ -81,7 +80,7 @@ namespace Nekoyume.State.Modifiers
             var sb = new StringBuilder();
             foreach (var guid in guidList)
             {
-                sb.AppendLine(guid.Value.ToString());
+                sb.AppendLine(guid.ToString());
             }
 
             return sb.ToString();

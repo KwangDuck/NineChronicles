@@ -1,18 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
-using Bencodex.Types;
 using Cysharp.Threading.Tasks;
-using Libplanet;
-using Nekoyume.Action;
-using Nekoyume.BlockChain;
 using Nekoyume.Model.State;
 using Nekoyume.State.Subjects;
 using Debug = UnityEngine.Debug;
-using static Lib9c.SerializeKeys;
 
 namespace Nekoyume.State
 {
@@ -23,9 +14,6 @@ namespace Nekoyume.State
     public class States
     {
         public static States Instance => Game.Game.instance.States;
-
-        public readonly Dictionary<Address, RankingMapState> RankingMapStates = new Dictionary<Address, RankingMapState>();
-
         public WeeklyArenaState WeeklyArenaState { get; private set; }
 
         public AgentState AgentState { get; private set; }
@@ -63,9 +51,6 @@ namespace Nekoyume.State
                 Debug.LogWarning($"[{nameof(States)}.{nameof(SetRankingMapStates)}] {nameof(state)} is null.");
                 return;
             }
-
-            RankingMapStates[state.address] = state;
-            RankingMapStatesSubject.OnNext(RankingMapStates);
         }
 
         public void SetWeeklyArenaState(WeeklyArenaState state)
@@ -75,10 +60,6 @@ namespace Nekoyume.State
                 Debug.LogWarning($"[{nameof(States)}.{nameof(SetWeeklyArenaState)}] {nameof(state)} is null.");
                 return;
             }
-
-            LocalLayer.Instance.InitializeWeeklyArena(state);
-            WeeklyArenaState = LocalLayer.Instance.Modify(state);
-            WeeklyArenaStateSubject.OnNext(WeeklyArenaState);
         }
 
         /// <summary>
@@ -95,22 +76,6 @@ namespace Nekoyume.State
                 return;
             }
 
-            var getAllOfAvatarStates =
-                AgentState is null ||
-                !AgentState.address.Equals(state.address);
-
-            LocalLayer.Instance.InitializeAgentAndAvatars(state);
-            AgentState = LocalLayer.Instance.Modify(state);
-
-            if (!getAllOfAvatarStates)
-            {
-                return;
-            }
-
-            foreach (var pair in AgentState.avatarAddresses)
-            {
-                AddOrReplaceAvatarState(pair.Value, pair.Key);
-            }
         }
 
         public void SetGoldBalanceState(GoldBalanceState goldBalanceState)
@@ -120,12 +85,9 @@ namespace Nekoyume.State
                 Debug.LogWarning($"[{nameof(States)}.{nameof(SetGoldBalanceState)}] {nameof(goldBalanceState)} is null.");
                 return;
             }
-
-            GoldBalanceState = LocalLayer.Instance.Modify(goldBalanceState);
-            AgentStateSubject.OnNextGold(GoldBalanceState.Gold);
         }
 
-        public AvatarState AddOrReplaceAvatarState(Address avatarAddress, int index, bool initializeReactiveState = true)
+        public AvatarState AddOrReplaceAvatarState(string avatarAddress, int index, bool initializeReactiveState = true)
         {
             var (exist, avatarState) = TryGetAvatarState(avatarAddress, true);
             if (exist)
@@ -136,10 +98,9 @@ namespace Nekoyume.State
             return null;
         }
 
-        public static (bool exist, AvatarState avatarState) TryGetAvatarState(Address address, bool allowBrokenState = true)
+        public static (bool exist, AvatarState avatarState) TryGetAvatarState(string address, bool allowBrokenState = true)
         {
-            var state = States.Instance.AvatarStates.Values.FirstOrDefault(state => address.Equals(state.address));
-            return (state != null, state);
+            return (false, null);
         }
 
         public AvatarState AddOrReplaceAvatarState(AvatarState state, int index, bool initializeReactiveState = true)
@@ -149,8 +110,6 @@ namespace Nekoyume.State
                 Debug.LogWarning($"[{nameof(States)}.{nameof(AddOrReplaceAvatarState)}] {nameof(state)} is null.");
                 return null;
             }
-
-            state = LocalLayer.Instance.Modify(state);
 
             if (_avatarStates.ContainsKey(index))
             {
@@ -187,53 +146,18 @@ namespace Nekoyume.State
 
             CurrentAvatarKey = index;
             var avatarState = _avatarStates[CurrentAvatarKey];
-            LocalLayer.Instance.InitializeCurrentAvatarState(avatarState);
-            UpdateCurrentAvatarState(avatarState, initializeReactiveState);
-
-            if (isNew)
-            {
-                _combinationSlotStates.Clear();
-
-                var (exist, curAvatarState) = TryGetAvatarState(avatarState.address);
-                if (exist)
-                {
-                    SetCombinationSlotStates(curAvatarState);
-                    AddOrReplaceAvatarState(curAvatarState, CurrentAvatarKey);
-                }
-            }
-
             return CurrentAvatarState;
         }
 
         public void DeselectAvatar()
         {
-            CurrentAvatarKey = -1;
-            LocalLayer.Instance?.InitializeCurrentAvatarState(null);
+            CurrentAvatarKey = -1;            
             UpdateCurrentAvatarState(null);
         }
 
         private void SetCombinationSlotStates(AvatarState avatarState)
         {
-            if (avatarState is null)
-            {
-                LocalLayer.Instance.InitializeCombinationSlotsByCurrentAvatarState(null);
-                return;
-            }
-
-            LocalLayer.Instance.InitializeCombinationSlotsByCurrentAvatarState(avatarState);
-            for (var i = 0; i < avatarState.combinationSlotAddresses.Count; i++)
-            {
-                var slotAddress = avatarState.address.Derive(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        CombinationSlotState.DeriveFormat,
-                        i
-                    )
-                );
-                //var stateValue = await Game.Game.instance.Agent.GetStateAsync(slotAddress);
-                //var state = new CombinationSlotState((Dictionary)stateValue);
-                //UpdateCombinationSlotState(i, state);
-            }
+            
         }
 
         public void UpdateCombinationSlotState(int index, CombinationSlotState state)

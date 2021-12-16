@@ -121,15 +121,13 @@ namespace Nekoyume.UI
         {
             _sharedViewModel = viewModel;
             UpdateStageInformation(_sharedViewModel.SelectedStageId.Value, States.Instance.CurrentAvatarState.level);
-            _sharedViewModel.WorldInformation.TryGetWorld(worldRow.Id, out var worldModel);
+            
             _sharedViewModel.SelectedStageId
                 .Subscribe(stageId => UpdateStageInformation(
                     stageId,
                     States.Instance.CurrentAvatarState?.level ?? 1)
                 )
                 .AddTo(gameObject);
-
-            closeButtonText.text = L10nManager.Localize($"WORLD_NAME_{worldModel.Name.ToUpper()}");
 
             if (_sharedViewModel.SelectedStageId.Value == 1)
             {
@@ -143,35 +141,10 @@ namespace Nekoyume.UI
             _stageType = stageType;
 
             world.Set(worldRow);
-            var questStageId = Game.Game.instance.States
-                .CurrentAvatarState.questList
-                .EnumerateLazyQuestStates()
-                .Select(l => l.State)
-                .OfType<WorldQuest>()
-                .Where(x => !x.Complete)
-                .OrderBy(x => x.Goal)
-                .FirstOrDefault()?
-                .Goal ?? -1;
-
-            if (worldModel.IsUnlocked)
-            {
-                var openedStageId = worldModel.GetNextStageIdForPlay();
-                if (worldModel.StageEnd < worldRow.StageEnd &&
-                    openedStageId == worldModel.StageEnd &&
-                    openedStageId == worldModel.StageClearedId)
-                {
-                    openedStageId += 1;
-                }
-
-                UnlockWorld(openedStageId, worldModel.GetNextStageId());
-            }
-            else
-            {
-                LockWorld();
-            }
+            LockWorld();
 
             base.Show(true);
-            world.ShowByStageId(_sharedViewModel.SelectedStageId.Value, questStageId);
+            
             HelpTooltip.HelpMe(100003, true);
         }
 
@@ -181,30 +154,7 @@ namespace Nekoyume.UI
             var isSubmittable = false;
             if (!(worldInfo is null))
             {
-                if (worldInfo.TryGetWorldByStageId(stageId, out var innerWorld))
-                {
-                    isSubmittable = innerWorld.IsPlayable(stageId);
-                }
-                else
-                {
-                    // NOTE: Consider expanding the world.
-                    if (Game.Game.instance.TableSheets.WorldSheet.TryGetByStageId(stageId, out var worldRow))
-                    {
-                        worldInfo.UpdateWorld(worldRow);
-                        if (worldInfo.TryGetWorldByStageId(stageId, out var world2))
-                        {
-                            isSubmittable = world2.IsPlayable(stageId);
-                        }
-                        else
-                        {
-                            throw new ArgumentException(nameof(stageId));
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentException(nameof(stageId));
-                    }
-                }
+                
             }
 
             submitButton.Interactable = isSubmittable;
