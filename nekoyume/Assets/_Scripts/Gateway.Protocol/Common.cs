@@ -179,6 +179,7 @@ namespace Gateway.Protocol
     public enum ENUM_Modity
     {
         Add,
+        Percentage,
     }
 
     public enum ENUM_Event
@@ -189,6 +190,25 @@ namespace Gateway.Protocol
         Die,
         Equipment,
         Complete,
+        Consumable,
+    }
+
+    public enum ENUM_Open
+    {
+        NONE,
+        BANNER,
+    }
+
+    public enum ENUM_Interval
+    {
+        NONE,
+        RANKING,
+    }
+
+    public enum ENUM_Schedule
+    {
+        NONE,
+        NOTICE,
     }
 
     public enum ENUM_GoldQuest

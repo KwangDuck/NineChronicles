@@ -17,14 +17,14 @@ namespace Gateway.Protocol.Table
         [Key(7)] public int cri { get; set; }
         [Key(8)] public int hit { get; set; }
         [Key(9)] public int spd { get; set; }
-        [Key(10)] public int lv_hp { get; set; }
-        [Key(11)] public int lv_atk { get; set; }
-        [Key(12)] public int lv_def { get; set; }
-        [Key(13)] public int lv_cri { get; set; }
-        [Key(14)] public int lv_hit { get; set; }
-        [Key(15)] public int lv_spd { get; set; }
-        [Key(16)] public int attack_range { get; set; }
-        [Key(17)] public int run_speed { get; set; }
+        [Key(10)] public float lv_hp { get; set; }
+        [Key(11)] public float lv_atk { get; set; }
+        [Key(12)] public float lv_def { get; set; }
+        [Key(13)] public float lv_cri { get; set; }
+        [Key(14)] public float lv_hit { get; set; }
+        [Key(15)] public float lv_spd { get; set; }
+        [Key(16)] public float attack_range { get; set; }
+        [Key(17)] public float run_speed { get; set; }
     }
 
     [MessagePackObject]
@@ -64,20 +64,20 @@ namespace Gateway.Protocol.Table
 
     #region Item
     [MessagePackObject]
-    public class ST_TableConsumableItemReceipt : I_TableData
+    public class ST_TableConsumableItemRecipe : I_TableData
     {
         [Key(0)] public int id { get; set; }
         [Key(1)] public int required_block_index { get; set; }
         [Key(2)] public int required_ap { get; set; }
         [Key(3)] public int required_gold { get; set; }
-        [Key(4)] public int material_item_id_1 { get; set; }
-        [Key(5)] public int material_item_count_1 { get; set; }
-        [Key(6)] public int material_item_id_2 { get; set; }
-        [Key(7)] public int material_item_count_2 { get; set; }
-        [Key(8)] public int material_item_id_3 { get; set; }
-        [Key(9)] public int material_item_count_3 { get; set; }
-        [Key(10)] public int material_item_id_4 { get; set; }
-        [Key(11)] public int material_item_count_4 { get; set; }
+        [Key(4)] public int? material_item_id_1 { get; set; }
+        [Key(5)] public int? material_item_count_1 { get; set; }
+        [Key(6)] public int? material_item_id_2 { get; set; }
+        [Key(7)] public int? material_item_count_2 { get; set; }
+        [Key(8)] public int? material_item_id_3 { get; set; }
+        [Key(9)] public int? material_item_count_3 { get; set; }
+        [Key(10)] public int? material_item_id_4 { get; set; }
+        [Key(11)] public int? material_item_count_4 { get; set; }
         [Key(12)] public int result_consumable_item_id { get; set; }
     }
 
@@ -89,10 +89,10 @@ namespace Gateway.Protocol.Table
         [Key(2)] public ENUM_ItemSub item_sub_type { get; set; }
         [Key(3)] public int grade { get; set; }
         [Key(4)] public ENUM_Elemental elemental_type { get; set; }
-        [Key(5)] public ENUM_Stat stat_type_1 { get; set; }
-        [Key(6)] public int stat_value_1 { get; set; }
-        [Key(7)] public ENUM_Stat stat_type_2 { get; set; }
-        [Key(8)] public int stat_value_2 { get; set; }
+        [Key(5)] public string stat_type_1 { get; set; }
+        [Key(6)] public int? stat_value_1 { get; set; }
+        [Key(7)] public string stat_type_2 { get; set; }
+        [Key(8)] public int? stat_value_2 { get; set; }
     }
 
     [MessagePackObject]
@@ -119,18 +119,18 @@ namespace Gateway.Protocol.Table
     public class ST_TableEquipmentItemOption : I_TableData
     {
         [Key(0)] public int id { get; set; }
-        [Key(1)] public ENUM_Stat stat_type { get; set; }
-        [Key(2)] public int stat_min { get; set; }
-        [Key(3)] public int stat_max { get; set; }
-        [Key(4)] public int skill_id { get; set; }
-        [Key(5)] public int skill_damage_min { get; set; }
-        [Key(6)] public int skill_damage_max { get; set; }
-        [Key(7)] public int skill_chance_min { get; set; }
-        [Key(8)] public int skill_chance_max { get; set; }
+        [Key(1)] public string stat_type { get; set; }
+        [Key(2)] public int? stat_min { get; set; }
+        [Key(3)] public int? stat_max { get; set; }
+        [Key(4)] public int? skill_id { get; set; }
+        [Key(5)] public int? skill_damage_min { get; set; }
+        [Key(6)] public int? skill_damage_max { get; set; }
+        [Key(7)] public int? skill_chance_min { get; set; }
+        [Key(8)] public int? skill_chance_max { get; set; }
     }
 
     [MessagePackObject]
-    public class ST_TableEquipmentItemReceipt : I_TableData
+    public class ST_TableEquipmentItemRecipe : I_TableData
     {
         [Key(0)] public int id { get; set; }
         [Key(1)] public int result_equipment_id { get; set; }
@@ -171,30 +171,30 @@ namespace Gateway.Protocol.Table
     }
 
     [MessagePackObject]
-    public class ST_TableEquipmentItemSubReceipt : I_TableData
+    public class ST_TableEquipmentItemSubRecipe : I_TableData
     {
         [Key(0)] public int id { get; set; }
         [Key(1)] public int required_action_point { get; set; }
         [Key(2)] public int required_gold { get; set; }
         [Key(3)] public int required_block_index { get; set; }
-        [Key(4)] public int material_id { get; set; }
-        [Key(5)] public int material_count { get; set; }
-        [Key(6)] public int material_2_id { get; set; }
-        [Key(7)] public int material_2_count { get; set; }
-        [Key(8)] public int material_3_id { get; set; }
-        [Key(9)] public int material_3_count { get; set; }
-        [Key(10)] public int option_id { get; set; }
-        [Key(11)] public int option_ratio { get; set; }
-        [Key(12)] public int option_1_required_block_index { get; set; }
-        [Key(13)] public int option_2_id { get; set; }
-        [Key(14)] public int option_2_ratio { get; set; }
-        [Key(15)] public int option_2_required_block_index { get; set; }
-        [Key(16)] public int option_3_id { get; set; }
-        [Key(17)] public int option_3_ratio { get; set; }
-        [Key(18)] public int option_3_required_block_index { get; set; }
-        [Key(19)] public int option_4_id { get; set; }
-        [Key(20)] public int option_4_ratio { get; set; }
-        [Key(21)] public int option_4_required_block_index { get; set; }
+        [Key(4)] public int? material_id { get; set; }
+        [Key(5)] public int? material_count { get; set; }
+        [Key(6)] public int? material_2_id { get; set; }
+        [Key(7)] public int? material_2_count { get; set; }
+        [Key(8)] public int? material_3_id { get; set; }
+        [Key(9)] public int? material_3_count { get; set; }
+        [Key(10)] public int? option_id { get; set; }
+        [Key(11)] public int? option_ratio { get; set; }
+        [Key(12)] public int? option_1_required_block_index { get; set; }
+        [Key(13)] public int? option_2_id { get; set; }
+        [Key(14)] public int? option_2_ratio { get; set; }
+        [Key(15)] public int? option_2_required_block_index { get; set; }
+        [Key(16)] public int? option_3_id { get; set; }
+        [Key(17)] public int? option_3_ratio { get; set; }
+        [Key(18)] public int? option_3_required_block_index { get; set; }
+        [Key(19)] public int? option_4_id { get; set; }
+        [Key(20)] public int? option_4_ratio { get; set; }
+        [Key(21)] public int? option_4_required_block_index { get; set; }
     }
 
     [MessagePackObject]
@@ -377,14 +377,14 @@ namespace Gateway.Protocol.Table
     [MessagePackObject]
     public class ST_TableSkill : I_TableData
     {
-        [Key(0)] public int id { get; set; }
+        [Key(0)] public string id { get; set; }
         [Key(1)] public string _name { get; set; }
         [Key(2)] public ENUM_Elemental elemental_type { get; set; }
         [Key(3)] public ENUM_Skill skill_type { get; set; }
         [Key(4)] public ENUM_SkillCategory skill_category { get; set; }
         [Key(5)] public ENUM_Target skill_target_type { get; set; }
         [Key(6)] public int hit_count { get; set; }
-        [Key(7)] public int cooldown { get; set; }
+        [Key(7)] public string cooldown { get; set; }
         
     }
     #endregion
@@ -394,11 +394,11 @@ namespace Gateway.Protocol.Table
     public class ST_TableMimisbrunnr : I_TableData
     {
         [Key(0)] public int id { get; set; }
-        [Key(1)] public ENUM_Elemental elemental_type_1 { get; set; }
-        [Key(2)] public ENUM_Elemental elemental_type_2 { get; set; }
-        [Key(3)] public ENUM_Elemental elemental_type_3 { get; set; }
-        [Key(4)] public ENUM_Elemental elemental_type_4 { get; set; }
-        [Key(5)] public ENUM_Elemental elemental_type_5 { get; set; }
+        [Key(1)] public string elemental_type_1 { get; set; }
+        [Key(2)] public string elemental_type_2 { get; set; }
+        [Key(3)] public string elemental_type_3 { get; set; }
+        [Key(4)] public string elemental_type_4 { get; set; }
+        [Key(5)] public string elemental_type_5 { get; set; }
     }
 
     [MessagePackObject]
@@ -423,68 +423,69 @@ namespace Gateway.Protocol.Table
         [Key(8)] public int spd_option { get; set; }
         [Key(9)] public string background { get; set; }
         [Key(10)] public string bgm { get; set; }
-        [Key(11)] public int item1 { get; set; }
-        [Key(12)] public int item1_ratio { get; set; }
-        [Key(13)] public int item1_min { get; set; }
-        [Key(14)] public int item1_max { get; set; }
-        [Key(15)] public int item2 { get; set; }
-        [Key(16)] public int item2_ratio { get; set; }
-        [Key(17)] public int item2_min { get; set; }
-        [Key(18)] public int item2_max { get; set; }
-        [Key(19)] public int item3 { get; set; }
-        [Key(20)] public int item3_ratio { get; set; }
-        [Key(21)] public int item3_min { get; set; }
-        [Key(22)] public int item3_max { get; set; }
-        [Key(23)] public int item4 { get; set; }
-        [Key(24)] public int item4_ratio { get; set; }
-        [Key(25)] public int item4_min { get; set; }
-        [Key(26)] public int item4_max { get; set; }
-        [Key(27)] public int item5 { get; set; }
-        [Key(28)] public int item5_ratio { get; set; }
-        [Key(29)] public int item5_min { get; set; }
-        [Key(30)] public int item5_max { get; set; }
-        [Key(31)] public int item6 { get; set; }
-        [Key(32)] public int item6_ratio { get; set; }
-        [Key(33)] public int item6_min { get; set; }
-        [Key(34)] public int item6_max { get; set; }
-        [Key(35)] public int item7 { get; set; }
-        [Key(36)] public int item7_ratio { get; set; }
-        [Key(37)] public int item7_min { get; set; }
-        [Key(38)] public int item7_max { get; set; }
-        [Key(39)] public int item8 { get; set; }
-        [Key(40)] public int item8_ratio { get; set; }
-        [Key(41)] public int item8_min { get; set; }
-        [Key(42)] public int item8_max { get; set; }
-        [Key(43)] public int item9 { get; set; }
-        [Key(44)] public int item9_ratio { get; set; }
-        [Key(45)] public int item9_min { get; set; }
-        [Key(46)] public int item9_max { get; set; }
-        [Key(47)] public int item10 { get; set; }
-        [Key(48)] public int item10_ratio { get; set; }
-        [Key(49)] public int item10_min { get; set; }
-        [Key(50)] public int item10_max { get; set; }
-        [Key(51)] public int min_drop { get; set; }
-        [Key(52)] public int max_drop { get; set; }
+        [Key(11)] public int? item1 { get; set; }
+        [Key(12)] public float? item1_ratio { get; set; }
+        [Key(13)] public int? item1_min { get; set; }
+        [Key(14)] public int? item1_max { get; set; }
+        [Key(15)] public int? item2 { get; set; }
+        [Key(16)] public float? item2_ratio { get; set; }
+        [Key(17)] public int? item2_min { get; set; }
+        [Key(18)] public int? item2_max { get; set; }
+        [Key(19)] public int? item3 { get; set; }
+        [Key(20)] public float? item3_ratio { get; set; }
+        [Key(21)] public int? item3_min { get; set; }
+        [Key(22)] public int? item3_max { get; set; }
+        [Key(23)] public int? item4 { get; set; }
+        [Key(24)] public float? item4_ratio { get; set; }
+        [Key(25)] public int? item4_min { get; set; }
+        [Key(26)] public int? item4_max { get; set; }
+        [Key(27)] public int? item5 { get; set; }
+        [Key(28)] public float? item5_ratio { get; set; }
+        [Key(29)] public int? item5_min { get; set; }
+        [Key(30)] public int? item5_max { get; set; }
+        [Key(31)] public int? item6 { get; set; }
+        [Key(32)] public float? item6_ratio { get; set; }
+        [Key(33)] public int? item6_min { get; set; }
+        [Key(34)] public int? item6_max { get; set; }
+        [Key(35)] public int? item7 { get; set; }
+        [Key(36)] public float? item7_ratio { get; set; }
+        [Key(37)] public int? item7_min { get; set; }
+        [Key(38)] public int? item7_max { get; set; }
+        [Key(39)] public int? item8 { get; set; }
+        [Key(40)] public float? item8_ratio { get; set; }
+        [Key(41)] public int? item8_min { get; set; }
+        [Key(42)] public int? item8_max { get; set; }
+        [Key(43)] public int? item9 { get; set; }
+        [Key(44)] public float? item9_ratio { get; set; }
+        [Key(45)] public int? item9_min { get; set; }
+        [Key(46)] public int? item9_max { get; set; }
+        [Key(47)] public int? item10 { get; set; }
+        [Key(48)] public float? item10_ratio { get; set; }
+        [Key(49)] public int? item10_min { get; set; }
+        [Key(50)] public int? item10_max { get; set; }
+        [Key(51)] public int? min_drop { get; set; }
+        [Key(52)] public int? max_drop { get; set; }
     }
 
     [MessagePackObject]
     public class ST_TableStageWave : I_TableData
     {
+        [IgnoreMember] public int id => stage_id * 100 + wave;
         [Key(0)] public int stage_id { get; set; }
         [Key(1)] public int wave { get; set; }
         [Key(2)] public int monster1_id { get; set; }
         [Key(3)] public int monster1_level { get; set; }
         [Key(4)] public int monster1_count { get; set; }
-        [Key(5)] public int monster2_id { get; set; }
-        [Key(6)] public int monster2_level { get; set; }
-        [Key(7)] public int monster2_count { get; set; }
-        [Key(8)] public int monster3_id { get; set; }
-        [Key(9)] public int monster3_level { get; set; }
-        [Key(10)] public int monster3_count { get; set; }
-        [Key(11)] public int monster4_id { get; set; }
-        [Key(12)] public int monster4_level { get; set; }
-        [Key(13)] public int monster4_count { get; set; }
-        [Key(14)] public int has_boss { get; set; }
+        [Key(5)] public int? monster2_id { get; set; }
+        [Key(6)] public int? monster2_level { get; set; }
+        [Key(7)] public int? monster2_count { get; set; }
+        [Key(8)] public int? monster3_id { get; set; }
+        [Key(9)] public int? monster3_level { get; set; }
+        [Key(10)] public int? monster3_count { get; set; }
+        [Key(11)] public int? monster4_id { get; set; }
+        [Key(12)] public int? monster4_level { get; set; }
+        [Key(13)] public int? monster4_count { get; set; }
+        [Key(14)] public int? has_boss { get; set; }
     }
 
     [MessagePackObject]
@@ -535,7 +536,7 @@ namespace Gateway.Protocol.Table
     {
         [Key(0)] public int id { get; set; }
         [Key(1)] public int item_id { get; set; }
-        [Key(2)] public int ratio { get; set; }
+        [Key(2)] public float ratio { get; set; }
         [Key(3)] public int min { get; set; }
         [Key(4)] public int max { get; set; }
         [Key(5)] public int required_level { get; set; }
@@ -565,15 +566,15 @@ namespace Gateway.Protocol.Table
     // Cost
     [Union(11, typeof(ST_TableEnhancementCost))]
     // Item
-    [Union(21, typeof(ST_TableConsumableItemReceipt))]
+    [Union(21, typeof(ST_TableConsumableItemRecipe))]
     [Union(22, typeof(ST_TableConsumableItem))]
     [Union(23, typeof(ST_TableCostumeItem))]
     [Union(24, typeof(ST_TableCostumeStat))]
     [Union(25, typeof(ST_TableEquipmentItemOption))]
-    [Union(26, typeof(ST_TableEquipmentItemReceipt))]
+    [Union(26, typeof(ST_TableEquipmentItemRecipe))]
     [Union(27, typeof(ST_TableEquipmentItemSetEffect))]
     [Union(28, typeof(ST_TableEquipmentItem))]
-    [Union(29, typeof(ST_TableEquipmentItemSubReceipt))]
+    [Union(29, typeof(ST_TableEquipmentItemSubRecipe))]
     [Union(30, typeof(ST_TableItemConfigForGrade))]
     [Union(31, typeof(ST_TableItemRequirement))]
     [Union(32, typeof(ST_TableMaterialItem))]
