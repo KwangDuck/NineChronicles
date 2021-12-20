@@ -265,6 +265,13 @@ namespace Gateway.Protocol
         Item,
     }
 
+    public enum ENUM_Mail
+    {
+        Workshop = 1,
+        Auction,
+        System,
+    }
+
     ///////////////////////////////////////////////////////////////////////////
 
     [MessagePackObject]
@@ -310,7 +317,6 @@ namespace Gateway.Protocol
         [Key(1)] public int Exp { get; set; }
     }
 
-
     // 재화정보
     [MessagePackObject]
     public class ST_AssetInfo
@@ -321,21 +327,136 @@ namespace Gateway.Protocol
         [Key(3)] public int Mana { get; set; }
     }
 
-    // 아바타정보
+    // 아바타 정보
+    [MessagePackObject]
+    public class ST_AvatarInfo
+    {
+        [Key(0)] public int SelectedAvatarIndex { get; set; }
+        [Key(1)] public IReadOnlyDictionary<int, ST_Avatar> AvatarDict { get; set; }
+
+        public bool HasAvatar(int index) => AvatarDict.ContainsKey(index);
+        public ST_Avatar GetAvatar(int index) => AvatarDict[index];
+        public void SelectAvatar(int index)
+        {
+            SelectedAvatarIndex = index;
+        }
+        public ST_Avatar GetSelectedAvatar()
+        {
+            if (!HasAvatar(SelectedAvatarIndex))
+            {
+                return null;
+            }
+            return GetAvatar(SelectedAvatarIndex);
+        }
+    }
+
+    // 아바타
     [MessagePackObject]
     public class ST_Avatar
     {
-        [Key(0)] public int Hair { get; set; }
-        [Key(1)] public int Lens { get; set; }
-        [Key(2)] public int Ear { get; set; }
-        [Key(3)] public int Tail { get; set; }
-        [Key(4)] public string Nickname { get; set; }
+        [Key(0)] public int CharacterId { get; set; }
+        [Key(1)] public int Hair { get; set; }
+        [Key(2)] public int Lens { get; set; }
+        [Key(3)] public int Ear { get; set; }
+        [Key(4)] public int Tail { get; set; }
+        [Key(5)] public string Name { get; set; }
+        [Key(6)] public int ActionPoint { get; set; }
+        [Key(7)] public int Level { get; set; }
+        [Key(8)] public long Exp { get; set; }
     }
 
-    // TODO: 코스튬정보
-    // TODO: 장비정보
-    // TODO: 소비재정보
-    
+    // 인벤토리 정보
+    [MessagePackObject]
+    public class ST_Inventory
+    {
+        [Key(0)] public IReadOnlyDictionary<int, ST_Consumable> ConsumableDict { get; set; }
+        [Key(1)] public IReadOnlyDictionary<int, ST_Costume> CostumeDict { get; set; }
+        [Key(2)] public IReadOnlyDictionary<int, ST_Equipment> EquipmentDict { get; set; }
+        [Key(3)] public IReadOnlyDictionary<int, ST_Material> MaterialDict { get; set; }
+    }
+
+    // 소비재 정보
+    [MessagePackObject]
+    public class ST_Consumable
+    {
+        [Key(0)] public int ItemId { get; set; }
+    }
+
+    // 코스튬 정보
+    [MessagePackObject]
+    public class ST_Costume
+    {
+        [Key(0)] public bool Equipped { get; set; }
+        [Key(1)] public int ItemId { get; set; }
+    }
+
+    // 장비정보
+    [MessagePackObject]
+    public class ST_Equipment
+    {
+        [Key(0)] public bool Equipped { get; set; }
+        [Key(1)] public int ItemId { get; set; }
+        [Key(2)] public int Level { get; set; }
+        [Key(3)] public ST_Stat Stat { get; set; }
+    }
+
+    // 재료정보
+    [MessagePackObject]
+    public class ST_Material
+    {
+        [Key(0)] public int ItemId { get; set; }
+    }
+
+    // 스탯정보
+    [MessagePackObject]
+    public class ST_Stat
+    {
+        [Key(0)] public ENUM_Stat Type { get; set; }
+        [Key(1)] public decimal Value { get; set; }
+    }
+
+    // 월드정보
+    [MessagePackObject]
+    public class ST_WorldInfo
+    {
+        [Key(0)] public int LastWorldId { get; set; }
+        [Key(1)] public int LastStageId { get; set; }
+        [Key(2)] public IReadOnlyDictionary<int, ST_World> WorldDict { get; set; }
+    }
+
+    // 월드
+    public class ST_World
+    {
+        [Key(0)] public IReadOnlyDictionary<int, ST_Stage> StageDict { get; set; }
+    }
+
+    // 스테이지 정보
+    [MessagePackObject]
+    public class ST_Stage
+    {
+        [Key(0)] public bool Cleared { get; set; }
+        [Key(1)] public int StageId { get; set; }
+    }
+
+
+    // 퀘스트
+    [MessagePackObject]
+    public class ST_Quest
+    {
+        [Key(0)] public int QuestId { get; set; }
+    }
+
+
+    // 메일정보
+    [MessagePackObject]
+    public class ST_Mail
+    {
+        [Key(0)] public bool New { get; set; }
+        [Key(1)] public int MailId { get; set; }
+        [Key(2)] public ENUM_Mail MailType { get; set; }        
+    }
+
+
     // 보상정보
     [MessagePackObject]
     public class ST_Reward
@@ -374,13 +495,6 @@ namespace Gateway.Protocol
     [Union(2, typeof(ST_RewardNotification))]
     [Union(3, typeof(ST_SocialNotification))]
     public interface I_Notification
-    {
-
-    }
-
-    // 메일정보
-    [MessagePackObject]
-    public class ST_Mail
     {
 
     }

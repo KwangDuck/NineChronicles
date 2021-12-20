@@ -48,10 +48,11 @@ namespace Nekoyume.UI
             {
                 PlayerFactory.Create();
 
-                if (Util.TryGetStoredAvatarSlotIndex(out var slotIndex) &&
-                    States.Instance.AvatarStates.ContainsKey(slotIndex))
+                // default slot index
+                var slotIndex = 1;
+
+                if (States.Instance.TryGetAvatarState(slotIndex, out var avatarState))
                 {
-                    var avatarState = States.Instance.AvatarStates[slotIndex];
                     if (avatarState?.inventory == null ||
                         avatarState.questList == null ||
                         avatarState.worldInformation == null)

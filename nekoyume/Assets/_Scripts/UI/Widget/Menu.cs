@@ -342,7 +342,7 @@ namespace Nekoyume.UI
         {
             base.OnCompleteOfShowAnimationInternal();
             // TODO: move invocation the PlayTutorial() inside of CoHelpPopup().
-            Find<DialogPopup>().Show(1, PlayTutorial);
+            //Find<DialogPopup>().Show(1, PlayTutorial);
             StartCoroutine(CoHelpPopup());
         }
 

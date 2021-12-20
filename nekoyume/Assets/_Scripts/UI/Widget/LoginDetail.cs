@@ -140,7 +140,7 @@ namespace Nekoyume.UI
         {
             _selectedIndex = index;
             Player player;
-            _isCreateMode = !States.Instance.AvatarStates.ContainsKey(index);
+            _isCreateMode = !States.Instance.HasAvatarState(index);
             TableSheets tableSheets = Game.Game.instance.TableSheets;
 
             if (_isCreateMode)

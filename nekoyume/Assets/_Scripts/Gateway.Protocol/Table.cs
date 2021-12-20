@@ -149,10 +149,10 @@ namespace Gateway.Protocol.Table
     public class ST_TableEquipmentItemSetEffect : I_TableData
     {
         [Key(0)] public int id { get; set; }
-        public int count { get; set; }
-        public ENUM_Stat stat_type { get; set; }
-        public ENUM_Modity modify_type { get; set; }
-        public int modify_value { get; set; }
+        [Key(1)] public int count { get; set; }
+        [Key(2)] public ENUM_Stat stat_type { get; set; }
+        [Key(3)] public ENUM_Modity modify_type { get; set; }
+        [Key(4)] public int modify_value { get; set; }
     }
 
     [MessagePackObject]
@@ -563,25 +563,25 @@ namespace Gateway.Protocol.Table
     [MessagePackObject]
     public class ST_TableLocalization : I_TableData
     {
-        public string Key { get; set; }
-        public string English { get; set; }
-        public string Korean { get; set; }
-        public string PortugueseBrazil { get; set; }
-        public string Portuguese { get; set; }
-        public string Japanese { get; set; }
-        public string German { get; set; }
-        public string Spanish { get; set; }
-        public string Thai { get; set; }
-        public string Polish { get; set; }
-        public string Lithuanian { get; set; }
-        public string Dutch { get; set; }
-        public string Indonesian { get; set; }
-        public string French { get; set; }
-        public string Russian { get; set; }
-        public string Cambodian { get; set; }
-        public string Urdu { get; set; }
-        public string ChineseSimplified { get; set; }
-        public string Hungarian { get; set; }
+        [Key(0)] public string Key { get; set; }
+        [Key(1)] public string English { get; set; }
+        [Key(2)] public string Korean { get; set; }
+        [Key(3)] public string PortugueseBrazil { get; set; }
+        [Key(4)] public string Portuguese { get; set; }
+        [Key(5)] public string Japanese { get; set; }
+        [Key(6)] public string German { get; set; }
+        [Key(7)] public string Spanish { get; set; }
+        [Key(8)] public string Thai { get; set; }
+        [Key(9)] public string Polish { get; set; }
+        [Key(10)] public string Lithuanian { get; set; }
+        [Key(11)] public string Dutch { get; set; }
+        [Key(12)] public string Indonesian { get; set; }
+        [Key(13)] public string French { get; set; }
+        [Key(14)] public string Russian { get; set; }
+        [Key(15)] public string Cambodian { get; set; }
+        [Key(16)] public string Urdu { get; set; }
+        [Key(17)] public string ChineseSimplified { get; set; }
+        [Key(18)] public string Hungarian { get; set; }
     }
 
     // Character
@@ -611,7 +611,6 @@ namespace Gateway.Protocol.Table
     [Union(46, typeof(ST_TableItemEnhancementQuest))]
     [Union(47, typeof(ST_TableItemGradeQuest))]
     [Union(48, typeof(ST_TableItemTypeCollectQuest))]
-    [Union(49, typeof(ST_TableMonsterCollection))]
     [Union(50, typeof(ST_TableQuestItemReward))]
     [Union(51, typeof(ST_TableQuestReward))]
     [Union(52, typeof(ST_TableTradeQuest))]

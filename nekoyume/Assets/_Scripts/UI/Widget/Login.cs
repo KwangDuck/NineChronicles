@@ -5,18 +5,12 @@ using Nekoyume.Game.Controller;
 using Nekoyume.Game.Util;
 using Nekoyume.State;
 using UnityEngine;
-using Nekoyume.L10n;
-using Nekoyume.Model.Mail;
-using Nekoyume.UI.Module;
-using Nekoyume.UI.Scroller;
 
 namespace Nekoyume.UI
 {
     public class Login : Widget
     {
-        [SerializeField]
-        private GameObject[] slots = null;
-
+        [SerializeField] private GameObject[] slots;
         public bool ready;
         public List<Player> players;
 
@@ -39,24 +33,7 @@ namespace Nekoyume.UI
         }
 
         public void SlotClick(int index)
-        {
-            if (!ready)
-            {
-                return;
-            }
-
-            if (States.Instance.AvatarStates.TryGetValue(index, out var avatarState) &&
-                (avatarState.inventory == null ||
-                 avatarState.questList == null ||
-                 avatarState.worldInformation == null))
-            {
-                NotificationSystem.Push(
-                    MailType.System,
-                    L10nManager.Localize("NOTIFICATION_CHARACTER_IS_BEING_RESTORED"),
-                    NotificationCell.NotificationType.Alert);
-                return;
-            }
-
+        {                        
             Game.Event.OnLoginDetail.Invoke(index);
             gameObject.SetActive(false);
             AudioController.PlayClick();
@@ -71,7 +48,7 @@ namespace Nekoyume.UI
                 var slot = slots[i];
                 var playerSlot = slot.GetComponent<LoginPlayerSlot>();
 
-                if (States.Instance.AvatarStates.TryGetValue(i, out var avatarState))
+                if (States.Instance.TryGetAvatarState(i, out var avatarState))
                 {
                     playerSlot.LabelLevel.text = $"LV.{avatarState.level}";
                     playerSlot.LabelName.text = avatarState.NameWithHash;

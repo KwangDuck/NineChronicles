@@ -56,7 +56,26 @@ namespace Nekoyume.Game
 
             var res = new RES_Login
             {
-
+                AvatarInfo = new ST_AvatarInfo
+                {
+                    SelectedAvatarIndex = 0,
+                    AvatarDict = new Dictionary<int, ST_Avatar>
+                    {
+                        {0, new ST_Avatar
+                            {
+                                CharacterId = 100010,
+                                Level = 1,
+                                Exp = 0,
+                                Hair = 1,
+                                Lens = 1,
+                                Ear = 1,
+                                Tail = 1,
+                                Name = string.Empty,
+                                ActionPoint = 100,
+                            }
+                        }
+                    }
+                }
             };
 
             return Observable.Return((req, res));
@@ -83,23 +102,6 @@ namespace Nekoyume.Game
         public IObservable<(REQ_CreateAvatar, RES_CreateAvatar)> CreateAvatarAsync(int index,
             string nickName, int hair = 0, int lens = 0, int ear = 0, int tail = 0)
         {
-
-            // init dummy avatar
-            var avatarState = new AvatarState
-            {
-                characterId = 100010,
-                level = 1,
-                exp = 0,
-                name = nickName,
-                hair = hair,
-                lens = lens,
-                ear = ear,
-                tail = tail,
-            };
-            States.Instance.UpdateCurrentAvatarState(avatarState);
-            States.Instance.AddOrReplaceAvatarState(avatarState, index);
-            States.Instance.SelectAvatar(index);
-
             var req = new REQ_CreateAvatar
             {
                 Header = MakeHeader(),
@@ -110,13 +112,32 @@ namespace Nekoyume.Game
                     Lens = lens,
                     Ear = ear,
                     Tail = tail,
-                    Nickname = nickName
+                    Name = nickName
                 }
             };
 
             // remote request
 
             var res = new RES_CreateAvatar
+            {
+
+            };
+
+            return Observable.Return((req, res));
+        }
+
+        // select avatar
+        public IObservable<(REQ_SelectAvatar, RES_SelectAvatar)> SelectAvatarAsync(int index, ST_Avatar avatar)
+        {
+            var req = new REQ_SelectAvatar
+            {
+                Index = index,
+                Avatar = avatar
+            };
+
+            // remote request
+
+            var res = new RES_SelectAvatar
             {
 
             };

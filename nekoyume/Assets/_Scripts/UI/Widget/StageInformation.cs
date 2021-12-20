@@ -152,9 +152,9 @@ namespace Nekoyume.UI
         {
             var worldInfo = _sharedViewModel.WorldInformation;
             var isSubmittable = false;
-            if (!(worldInfo is null))
+            if (worldInfo.TryGetWorldByStageId(stageId, out var innerWorld))
             {
-                
+                isSubmittable = innerWorld.IsPlayable(stageId);
             }
 
             submitButton.Interactable = isSubmittable;

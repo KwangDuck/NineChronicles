@@ -97,6 +97,9 @@ namespace Nekoyume.Game
             Debug.Log("[Game] Start() AudioController initialized");
             yield return null;
 
+            // NOTE: Create ActionManager after Agent initialized.
+            ActionManager = new ActionManager();
+
             // Initialize Agent
             var agentInitialized = false;
             var agentInitializeSucceed = false;
@@ -112,9 +115,6 @@ namespace Nekoyume.Game
             );
 
             yield return new WaitUntil(() => agentInitialized);
-
-            // NOTE: Create ActionManager after Agent initialized.
-            ActionManager = new ActionManager();
             yield return StartCoroutine(CoSyncTableSheets());
             Debug.Log("[Game] Start() TableSheets synchronized");
             // Initialize MainCanvas second
@@ -312,10 +312,13 @@ namespace Nekoyume.Game
             settings.UpdateSoundSettings();
             settings.UpdatePrivateKey(_options.PrivateKey);
 
-            // assign appProtocolVersion            
+            // login
+            var loginAsync = ActionManager.LoginAsync().ToYieldInstruction();
+            yield return loginAsync;
+            var (req, res) = loginAsync.Result;
 
-            // set state config state
-            States.Instance.SetGameConfigState(new GameConfigState());
+            // init avatar info
+            States.InitAvatarInfo(res.AvatarInfo);
 
             yield return null;
 

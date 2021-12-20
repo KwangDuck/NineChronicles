@@ -107,7 +107,7 @@ namespace Nekoyume.UI
                 }
 
                 var worldId = worldButton.Id;
-                var worldIsUnlocked = false;
+                var worldIsUnlocked = worldInformation.TryGetWorld(worldId, out var worldModel) && worldModel.IsUnlocked;
 
                 UpdateNotificationInfo();
 
@@ -143,7 +143,11 @@ namespace Nekoyume.UI
 
         private void ShowWorld(int worldId)
         {
+            if (!SharedViewModel.WorldInformation.TryGetWorld(worldId, out var world))
+                throw new ArgumentException(nameof(worldId));
+
             Push();
+            ShowWorld(world.Id, world.GetNextStageId(), false);
         }
 
         private void ShowWorld(int worldId, int stageId, bool showWorld, bool callByShow = false)

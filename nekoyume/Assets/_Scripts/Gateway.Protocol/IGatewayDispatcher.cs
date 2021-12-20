@@ -23,7 +23,7 @@ namespace Gateway.Protocol
     {
         [Key(0)] public RES_Header Header { get; set; }
         [Key(1)] public long UserNo { get; set; }
-        [Key(2)] public string Nickname { get; set; }
+        [Key(2)] public ST_AvatarInfo AvatarInfo { get; set; }
     }
 
     [MessagePackObject]
@@ -77,6 +77,20 @@ namespace Gateway.Protocol
 
     [MessagePackObject]
     public class RES_CreateAvatar : IRES
+    {
+        [Key(0)] public RES_Header Header { get; set; }
+    }
+
+    [MessagePackObject]
+    public class REQ_SelectAvatar : IREQ
+    {
+        [Key(0)] public REQ_Header Header { get; set; }
+        [Key(1)] public int Index { get; set; }
+        [Key(2)] public ST_Avatar Avatar { get; set; }
+    }
+
+    [MessagePackObject]
+    public class RES_SelectAvatar : IRES
     {
         [Key(0)] public RES_Header Header { get; set; }
     }
@@ -461,6 +475,7 @@ namespace Gateway.Protocol
         UnaryResult<RES_Login> LoginAsync(REQ_Login req);
         UnaryResult<RES_Logout> LogoutAsync(REQ_Logout req);
         UnaryResult<REQ_CreateAvatar> CreateAvatarAsync(REQ_CreateAvatar req);
+        UnaryResult<REQ_SelectAvatar> SelectAvatarAsync(REQ_SelectAvatar req);
         UnaryResult<RES_RetrieveAllMasterData> RetrieveAllMasterDataAsync(REQ_RetrieveAllMasterData req);
         UnaryResult<RES_RetrieveMasterData> RetrieveMasterDataAsync(REQ_RetrieveMasterData req);
 

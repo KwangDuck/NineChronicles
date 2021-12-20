@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Gateway.Protocol;
 using Nekoyume.Model.State;
-using Nekoyume.State.Subjects;
 using Debug = UnityEngine.Debug;
 
 namespace Nekoyume.State
@@ -14,29 +14,17 @@ namespace Nekoyume.State
     public class States
     {
         public static States Instance => Game.Game.instance.States;
-        public WeeklyArenaState WeeklyArenaState { get; private set; }
-
+        
         public AgentState AgentState { get; private set; }
-
         public GoldBalanceState GoldBalanceState { get; private set; }
-
-        private readonly Dictionary<int, AvatarState> _avatarStates = new Dictionary<int, AvatarState>();
-
-        public IReadOnlyDictionary<int, AvatarState> AvatarStates => _avatarStates;
-
-        public int CurrentAvatarKey { get; private set; }
-
+        private ST_AvatarInfo _avatarInfo { get; set; }
+        public int CurrentAvatarKey => _avatarInfo.SelectedAvatarIndex;
         public AvatarState CurrentAvatarState { get; private set; }
-
-        public GameConfigState GameConfigState { get; private set; }
+        public WeeklyArenaState WeeklyArenaState { get; private set; }
+        public GameConfigState GameConfigState { get; private set; } = new GameConfigState();
 
         private readonly Dictionary<int, CombinationSlotState> _combinationSlotStates =
             new Dictionary<int, CombinationSlotState>();
-
-        public States()
-        {
-            DeselectAvatar();
-        }
 
         #region Setter
 
@@ -87,72 +75,53 @@ namespace Nekoyume.State
             }
         }
 
-        public AvatarState AddOrReplaceAvatarState(string avatarAddress, int index, bool initializeReactiveState = true)
+        public void InitAvatarInfo(ST_AvatarInfo avatarInfo)
         {
-            var (exist, avatarState) = TryGetAvatarState(avatarAddress, true);
-            if (exist)
+            _avatarInfo = avatarInfo;
+            var selectedAvatar = _avatarInfo.GetSelectedAvatar();
+            if (selectedAvatar != null)
             {
-                AddOrReplaceAvatarState(avatarState, index, initializeReactiveState);
+                CurrentAvatarState = new AvatarState(selectedAvatar, Game.TableSheets.Instance.GetAvatarSheets());
             }
-
-            return null;
         }
 
-        public static (bool exist, AvatarState avatarState) TryGetAvatarState(string address, bool allowBrokenState = true)
+        public bool HasAvatarState(int index)
         {
-            return (false, null);
+            return _avatarInfo.HasAvatar(index);
         }
 
-        public AvatarState AddOrReplaceAvatarState(AvatarState state, int index, bool initializeReactiveState = true)
+        public bool TryGetAvatarState(int index, out AvatarState state)
         {
-            if (state is null)
+            var exists = _avatarInfo.HasAvatar(index);
+            state = null;
+            if (exists)
             {
-                Debug.LogWarning($"[{nameof(States)}.{nameof(AddOrReplaceAvatarState)}] {nameof(state)} is null.");
-                return null;
+                state = new AvatarState(_avatarInfo.GetAvatar(index), Game.TableSheets.Instance.GetAvatarSheets());
             }
-
-            if (_avatarStates.ContainsKey(index))
-            {
-                _avatarStates[index] = state;
-            }
-            else
-            {
-                _avatarStates.Add(index, state);
-            }
-            return state;
-        }
-
-        public void RemoveAvatarState(int index)
-        {
-            if (_avatarStates.ContainsKey(index))
-            {
-                _avatarStates.Remove(index);
-            }
-
-            if (index == CurrentAvatarKey)
-            {
-                DeselectAvatar();
-            }
+            return exists;
         }
 
         public AvatarState SelectAvatar(int index, bool initializeReactiveState = true)
         {
-            if (!_avatarStates.ContainsKey(index))
+            if (!_avatarInfo.HasAvatar(index))
             {
                 throw new KeyNotFoundException($"{nameof(index)}({index})");
             }
 
-            var isNew = CurrentAvatarKey != index;
-
-            CurrentAvatarKey = index;
-            var avatarState = _avatarStates[CurrentAvatarKey];
+            _avatarInfo.SelectAvatar(index);
+            CurrentAvatarState = new AvatarState(_avatarInfo.GetAvatar(index), Game.TableSheets.Instance.GetAvatarSheets());
+            UpdateCurrentAvatarState(CurrentAvatarState, initializeReactiveState);
             return CurrentAvatarState;
         }
 
-        public void DeselectAvatar()
+        public void UpdateCurrentAvatarState(AvatarState state, bool initializeReactiveState = true)
         {
-            CurrentAvatarKey = -1;            
-            UpdateCurrentAvatarState(null);
+            CurrentAvatarState = state;
+
+            if (!initializeReactiveState)
+                return;
+
+            ReactiveAvatarState.Initialize(CurrentAvatarState);
         }
 
         private void SetCombinationSlotStates(AvatarState avatarState)
@@ -183,26 +152,6 @@ namespace Nekoyume.State
                 .Where(pair => !pair.Value.Validate(CurrentAvatarState, currentBlockIndex))
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
         }
-
-        public void SetGameConfigState(GameConfigState state)
-        {
-            GameConfigState = state;
-            GameConfigStateSubject.OnNext(state);
-        }
-
         #endregion
-
-        /// <summary>
-        /// `CurrentAvatarKey`에 따라서 `CurrentAvatarState`를 업데이트 한다.
-        /// </summary>
-        public void UpdateCurrentAvatarState(AvatarState state, bool initializeReactiveState = true)
-        {
-            CurrentAvatarState = state;
-
-            if (!initializeReactiveState)
-                return;
-
-            ReactiveAvatarState.Initialize(CurrentAvatarState);
-        }
     }
 }
