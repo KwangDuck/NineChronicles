@@ -81,7 +81,7 @@ namespace Nekoyume.State
             var selectedAvatar = _avatarInfo.GetSelectedAvatar();
             if (selectedAvatar != null)
             {
-                CurrentAvatarState = new AvatarState(selectedAvatar, Game.TableSheets.Instance.GetAvatarSheets());
+                CurrentAvatarState = new AvatarState(selectedAvatar, Game.TableSheets.Instance.GetAvatarSheets(), Game.TableSheets.Instance.WorldSheet);
             }
         }
 
@@ -96,7 +96,7 @@ namespace Nekoyume.State
             state = null;
             if (exists)
             {
-                state = new AvatarState(_avatarInfo.GetAvatar(index), Game.TableSheets.Instance.GetAvatarSheets());
+                state = new AvatarState(_avatarInfo.GetAvatar(index), Game.TableSheets.Instance.GetAvatarSheets(), Game.TableSheets.Instance.WorldSheet);
             }
             return exists;
         }
@@ -109,7 +109,7 @@ namespace Nekoyume.State
             }
 
             _avatarInfo.SelectAvatar(index);
-            CurrentAvatarState = new AvatarState(_avatarInfo.GetAvatar(index), Game.TableSheets.Instance.GetAvatarSheets());
+            CurrentAvatarState = new AvatarState(_avatarInfo.GetAvatar(index), Game.TableSheets.Instance.GetAvatarSheets(), Game.TableSheets.Instance.WorldSheet);
             UpdateCurrentAvatarState(CurrentAvatarState, initializeReactiveState);
             return CurrentAvatarState;
         }
