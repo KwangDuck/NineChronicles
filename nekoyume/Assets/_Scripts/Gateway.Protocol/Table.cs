@@ -560,6 +560,30 @@ namespace Gateway.Protocol.Table
     }
     #endregion
 
+    [MessagePackObject]
+    public class ST_TableLocalization : I_TableData
+    {
+        public string Key { get; set; }
+        public string English { get; set; }
+        public string Korean { get; set; }
+        public string PortugueseBrazil { get; set; }
+        public string Portuguese { get; set; }
+        public string Japanese { get; set; }
+        public string German { get; set; }
+        public string Spanish { get; set; }
+        public string Thai { get; set; }
+        public string Polish { get; set; }
+        public string Lithuanian { get; set; }
+        public string Dutch { get; set; }
+        public string Indonesian { get; set; }
+        public string French { get; set; }
+        public string Russian { get; set; }
+        public string Cambodian { get; set; }
+        public string Urdu { get; set; }
+        public string ChineseSimplified { get; set; }
+        public string Hungarian { get; set; }
+    }
+
     // Character
     [Union(1, typeof(ST_TableCharacter))]
     [Union(2, typeof(ST_TableCharacterLevel))]
@@ -611,6 +635,8 @@ namespace Gateway.Protocol.Table
     [Union(94, typeof(ST_TableWeeklyArenaReward))]
     [Union(95, typeof(ST_TableRedeemCodeList))]
     [Union(96, typeof(ST_TableRedeemReward))]
+    // Localization
+    [Union(100, typeof(ST_TableLocalization))]
     public interface I_TableData
     {
 
