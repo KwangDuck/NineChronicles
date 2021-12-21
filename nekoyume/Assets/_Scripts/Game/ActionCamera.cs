@@ -81,6 +81,8 @@ namespace Nekoyume.Game
         private Transform _targetTemp;
         private float _shakeDuration;
 
+        private bool _chaseImmediateAtFirst = false;
+
         public event Action<Resolution> OnScreenResolutionChange;
         public event Action<Transform> OnTranslate;
 
@@ -134,11 +136,12 @@ namespace Nekoyume.Game
             _shakeDuration = 0f;
         }
 
-        public void ChaseX(Transform target)
+        public void ChaseX(Transform target, bool chaseImmediate = false)
         {
             _target = target;
             _targetTemp = null;
             _shakeDuration = 0f;
+            _chaseImmediateAtFirst = chaseImmediate;
         }
 
         public void Shake()
@@ -179,12 +182,23 @@ namespace Nekoyume.Game
                    _target.gameObject.activeSelf)
             {
                 var pos = Transform.position;
+                float smoothedPosX = 0;
                 var desiredPosX = _target.position.x + data.offsetX;
-                var smoothedPosX = Mathf.Lerp(
-                    pos.x,
-                    desiredPosX,
-                    data.smoothSpeed * Time.deltaTime);
-                pos.x = smoothedPosX;
+
+                if(!_chaseImmediateAtFirst)
+                {   
+                    smoothedPosX = Mathf.Lerp(
+                        pos.x,
+                        desiredPosX,
+                        data.smoothSpeed * Time.deltaTime);
+                    pos.x = smoothedPosX;
+                }
+                else
+                {
+                    pos.x = desiredPosX;
+                    _chaseImmediateAtFirst = false;
+                }                
+                
                 Transform.position = pos;
                 OnTranslate?.Invoke(Transform);
 

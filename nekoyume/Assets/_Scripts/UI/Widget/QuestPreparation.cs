@@ -129,6 +129,8 @@ namespace Nekoyume.UI
             CloseWidget = () => Close(true);
             simulateButton.gameObject.SetActive(GameConfig.IsEditor);
             levelField.gameObject.SetActive(GameConfig.IsEditor);
+
+            Game.Event.OnStageReady.AddListener(OnStageReady);
         }
 
         public override void Initialize()
@@ -878,10 +880,17 @@ namespace Nekoyume.UI
 
         public void GoToStage(BattleLog battleLog)
         {
-            Game.Event.OnStageStart.Invoke(battleLog);
+            Game.Event.OnStageStart.Invoke(battleLog);            
+        }
+
+        public void OnStageReady()
+        {
             Find<LoadingScreen>().Close();
             Close(true);
         }
+
+        public void OnRankingStageReady()
+        {}
 
         public void SimulateBattle()
         {
