@@ -418,11 +418,15 @@ namespace Nekoyume.Game
                 yield break;
 
             _battleResultModel = new BattleResultPopup.Model();
+            
+            RunPlayer();
 
-            zone = data.Background;
+            yield return new WaitForSeconds(1.0f);
+
+            zone = data.Background;            
             LoadBackground(zone, 3.0f);
             PlayBGVFX(false);
-            RunPlayer();
+            
             ReleaseWhiteList.Clear();
             ReleaseWhiteList.Add(_stageRunningPlayer.gameObject);
 
@@ -438,6 +442,8 @@ namespace Nekoyume.Game
 
             AudioController.instance.PlayMusic(data.BGM);
             IsShowHud = true;
+
+            Event.OnStageReady.Invoke();
         }
 
         private IEnumerator CoRankingBattleEnter(BattleLog log)
@@ -1039,7 +1045,7 @@ namespace Nekoyume.Game
             position.y = StageStartPosition;
             playerTransform.position = position;
             if (chasePlayer)
-                RunAndChasePlayer(_stageRunningPlayer);
+                RunAndChasePlayer(_stageRunningPlayer, true);
             else
                 _stageRunningPlayer.StartRun();
             return _stageRunningPlayer;
@@ -1147,10 +1153,10 @@ namespace Nekoyume.Game
             }
         }
 
-        private static void RunAndChasePlayer(Character.CharacterBase player)
+        private static void RunAndChasePlayer(Character.CharacterBase player, bool moveImmediate = false)
         {
             player.StartRun();
-            ActionCamera.instance.ChaseX(player.transform);
+            ActionCamera.instance.ChaseX(player.transform, moveImmediate);
         }
     }
 }

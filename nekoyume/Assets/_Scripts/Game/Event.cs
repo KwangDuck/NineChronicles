@@ -25,6 +25,9 @@ namespace Nekoyume.Game
         public static readonly UnityEvent<BattleLog> OnStageStart = new UnityEvent<BattleLog>();
         public static readonly UnityEvent<BattleLog> OnRankingBattleStart = new UnityEvent<BattleLog>();
 
+        public static readonly UnityEvent OnStageReady = new UnityEvent();
+        public static readonly UnityEvent OnRankingBattleReady = new UnityEvent();
+
         public static readonly UnityEvent<int> OnWaveStart = new UnityEvent<int>();
 
         public static readonly UnityEvent<int> OnPlayerTurnEnd = new UnityEvent<int>();
