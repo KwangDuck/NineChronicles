@@ -25,11 +25,13 @@ namespace Nekoyume.Game
         [SerializeField] private bool useSystemLanguage = true;
         [SerializeField] private LanguageType languageType = default;
         [SerializeField] private Prologue prologue = null;
+        [SerializeField] private GatewayService gatewayService;
 
         public States States { get; private set; }
         public Stage Stage => stage;
         public TableSheets TableSheets { get; private set; }
         public ActionManager ActionManager { get; private set; }
+        public DescriptorContext DescriptorContext { get; private set; }
 
         public bool IsInitialized { get; private set; }
         public int AppProtocolVersion { get; private set; }
@@ -69,6 +71,9 @@ namespace Nekoyume.Game
         {
             Debug.Log("[Game] Start() invoked");
 
+            Debug.Log("[Game] Start() Gateway Connect");
+            yield return StartCoroutine(gatewayService.Connect());
+
 #if UNITY_EDITOR
             if (useSystemLanguage)
             {
@@ -90,7 +95,21 @@ namespace Nekoyume.Game
             Debug.Log("[Game] Start() TableSheets initialized");
 
             // initialize descriptors from tablesheets
+            DescriptorContext = new DescriptorContext();
+            var res = gatewayService.ReqRetrieveAllMasterData();
+            if(res != null)
+            {
+                while(!res.IsCompleted)
+                    yield return null;
 
+                if(res.Result != null)
+                {
+                    var tableMap = res.Result.TableMap.ToDictionary(entry => entry.Key, entry => entry.Value);
+                    yield return StartCoroutine(DescriptorContext.DescriptorLoad(tableMap));
+                    Debug.Log("[Game] Start() Descriptor Load");
+                }
+            }
+            
             yield return StartCoroutine(ResourcesHelper.CoInitialize());
             Debug.Log("[Game] Start() ResourcesHelper initialized");
             AudioController.instance.Initialize();
