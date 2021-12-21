@@ -394,7 +394,7 @@ namespace Nekoyume.Model
             var consumables = Inventory.Items
                 .Select(i => i.item)
                 .OfType<Consumable>()
-                .Where(i => consumableIds.Contains(i.ItemId))
+                //.Where(i => consumableIds.Contains(i.ItemId))
                 .ToList();
             Stats.SetConsumables(consumables);
             foreach (var food in consumables)

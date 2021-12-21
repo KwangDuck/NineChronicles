@@ -34,7 +34,7 @@ namespace Nekoyume.UI
         {
             private readonly List<CountableItem> _rewards = new List<CountableItem>();
 
-            public NextState NextState;
+            public NextState NextState { get; set; }
             public BattleLog.Result State;
             public string WorldName;
             public long Exp;
@@ -237,7 +237,8 @@ namespace Nekoyume.UI
             }
 
             base.Show();
-            closeButton.gameObject.SetActive(model.StageID >= 3 || model.LastClearedStageId >= 3);
+            //closeButton.gameObject.SetActive(model.StageID >= 3 || model.LastClearedStageId >= 3);
+            closeButton.gameObject.SetActive(false);
             repeatButton.gameObject.SetActive(false);
             nextButton.gameObject.SetActive(false);
 

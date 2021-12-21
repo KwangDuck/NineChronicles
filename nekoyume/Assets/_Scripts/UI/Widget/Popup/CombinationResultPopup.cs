@@ -151,7 +151,7 @@ namespace Nekoyume.UI
                 }
 
                 var equipmentRow = equipmentList[Random.Range(0, equipmentList.Count)];
-                var equipment = (Equipment)ItemFactory.CreateItemUsable(equipmentRow, Guid.NewGuid(), 0);
+                var equipment = (Equipment)ItemFactory.CreateItemUsable(equipmentRow);
                 foreach (var statOption in _editorStatOptions)
                 {
                     equipment.StatsMap.AddStatAdditionalValue(statOption.statType, statOption.value);
@@ -182,7 +182,7 @@ namespace Nekoyume.UI
                 }
 
                 var consumableRow = consumableList[Random.Range(0, consumableList.Count)];
-                var consumable = (Consumable)ItemFactory.CreateItemUsable(consumableRow, Guid.NewGuid(), 0);
+                var consumable = (Consumable)ItemFactory.CreateItemUsable(consumableRow);
                 foreach (var statOption in _editorStatOptions)
                 {
                     consumable.StatsMap.AddStatValue(statOption.statType, statOption.value);

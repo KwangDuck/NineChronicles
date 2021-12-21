@@ -906,7 +906,7 @@ namespace Nekoyume.UI
                 throw new KeyNotFoundException(
                     $"WorldSheet.TryGetByStageId() {nameof(stageId)}({stageId})");
 
-            List<Guid> consumables = consumableSlots
+            var consumables = consumableSlots
                 .Where(slot => !slot.IsLock && !slot.IsEmpty)
                 .Select(slot => ((Consumable)slot.Item).ItemId)
                 .ToList();

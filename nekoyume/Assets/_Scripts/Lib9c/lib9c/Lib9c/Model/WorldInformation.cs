@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Gateway.Protocol;
 using Nekoyume.Model.State;
 using Nekoyume.TableData;
 
@@ -93,6 +94,11 @@ namespace Nekoyume.Model
             }
         }
 
+        public WorldInformation(ST_WorldInfo worldInfo, bool openAllOfWorldsAndStages = false)
+        {
+
+        }
+
         public bool TryGetWorld(int worldId, out World world)
         {
             if (!_worlds.ContainsKey(worldId))
@@ -134,7 +140,7 @@ namespace Nekoyume.Model
 
         public bool IsStageCleared(int stageId)
         {
-            return false;
+            return true;
         }
     }
 }

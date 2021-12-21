@@ -11,32 +11,14 @@ namespace Nekoyume.Model.Item
     [Serializable]
     public abstract class ItemUsable : ItemBase
     {
-        public Guid ItemId { get; }
-        public Guid TradableId => ItemId;
-        public Guid NonFungibleId => ItemId;
+        public int ItemId { get; }
         public StatsMap StatsMap { get; }
         public List<Skill.Skill> Skills { get; }
         public List<BuffSkill> BuffSkills { get; }
 
-        public long RequiredBlockIndex
+        protected ItemUsable(ItemSheet.Row data) : base(data)
         {
-            get => _requiredBlockIndex;
-            set
-            {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException(
-                        $"{nameof(RequiredBlockIndex)} must be greater than 0, but {value}");
-                }
-                _requiredBlockIndex = value;
-            }
-        }
-
-        private long _requiredBlockIndex;
-
-        protected ItemUsable(ItemSheet.Row data, Guid id, long requiredBlockIndex) : base(data)
-        {
-            ItemId = id;
+            ItemId = data.Id;
             StatsMap = new StatsMap();
 
             switch (data)
@@ -57,7 +39,6 @@ namespace Nekoyume.Model.Item
 
             Skills = new List<Model.Skill.Skill>();
             BuffSkills = new List<BuffSkill>();
-            RequiredBlockIndex = requiredBlockIndex;
         }
 
         protected bool Equals(ItemUsable other)
@@ -86,11 +67,6 @@ namespace Nekoyume.Model.Item
             return StatsMap.GetAdditionalStats().Count()
                    + Skills.Count
                    + BuffSkills.Count;
-        }
-
-        public void Update(long blockIndex)
-        {
-            RequiredBlockIndex = blockIndex;
         }
     }
 }

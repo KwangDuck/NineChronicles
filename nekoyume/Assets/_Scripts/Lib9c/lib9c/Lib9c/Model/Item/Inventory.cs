@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Gateway.Protocol;
 using Nekoyume.Battle;
 using Nekoyume.Model.State;
 
@@ -72,7 +73,7 @@ namespace Nekoyume.Model.Item
             }
         }
 
-        private readonly List<Item> _items = new List<Item>();
+        private List<Item> _items = new List<Item>();
 
         public IReadOnlyList<Item> Items => _items;
 
@@ -94,6 +95,11 @@ namespace Nekoyume.Model.Item
 
         public Inventory()
         {
+        }
+
+        public Inventory(List<Item> items)
+        {
+            _items = items;
         }
 
         protected bool Equals(Inventory other)
@@ -148,9 +154,7 @@ namespace Nekoyume.Model.Item
             foreach (var (type, slotCount) in availableSlots)
             {
                 var equipments = Equipments
-                    .Where(e =>
-                        e.ItemSubType == type &&
-                        e.RequiredBlockIndex <= blockIndex)
+                    .Where(e => e.ItemSubType == type)
                     .ToList();
                 var current = equipments.Where(e => e.equipped).ToList();
                 // When an equipment slot is empty.

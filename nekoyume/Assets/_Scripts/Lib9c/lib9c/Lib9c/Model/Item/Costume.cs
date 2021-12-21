@@ -10,32 +10,13 @@ namespace Nekoyume.Model.Item
         public bool equipped = false;
         public string SpineResourcePath { get; }
 
-        public Guid ItemId { get; }
-        public Guid TradableId => ItemId;
-        public Guid NonFungibleId => ItemId;
-
-        public long RequiredBlockIndex
-        {
-            get => _requiredBlockIndex;
-            set
-            {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException(
-                        $"{nameof(RequiredBlockIndex)} must be greater than 0, but {value}");
-                }
-                _requiredBlockIndex = value;
-            }
-        }
-
+        public int ItemId { get; }
         public bool Equipped => equipped;
 
-        private long _requiredBlockIndex;
-
-        public Costume(CostumeItemSheet.Row data, Guid itemId) : base(data)
+        public Costume(CostumeItemSheet.Row data) : base(data)
         {
+            ItemId = data.Id;
             SpineResourcePath = data.SpineResourcePath;
-            ItemId = itemId;
         }
 
         protected bool Equals(Costume other)
@@ -70,12 +51,6 @@ namespace Nekoyume.Model.Item
         public void Unequip()
         {
             equipped = false;
-        }
-
-        public void Update(long blockIndex)
-        {
-            Unequip();
-            RequiredBlockIndex = blockIndex;
         }
     }
 }

@@ -73,6 +73,32 @@ namespace Nekoyume.Game
                                 Name = string.Empty,
                                 ActionPoint = 100,
                             }
+                        },
+                        {1, new ST_Avatar
+                            {
+                                CharacterId = 100110,
+                                Level = 1,
+                                Exp = 0,
+                                Hair = 1,
+                                Lens = 1,
+                                Ear = 1,
+                                Tail = 1,
+                                Name = string.Empty,
+                                ActionPoint = 100,
+                            }
+                        },
+                        {2, new ST_Avatar
+                            {
+                                CharacterId = 100210,
+                                Level = 1,
+                                Exp = 0,
+                                Hair = 1,
+                                Lens = 1,
+                                Ear = 1,
+                                Tail = 1,
+                                Name = string.Empty,
+                                ActionPoint = 100,
+                            }
                         }
                     }
                 }
@@ -552,6 +578,8 @@ namespace Nekoyume.Game
             {
                 Header = MakeHeader(),
             };
+
+            // remote request
 
             var res = new RES_HackAndSlash
             {

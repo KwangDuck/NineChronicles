@@ -99,8 +99,6 @@ namespace Nekoyume.UI.Model
             State.SetValueAndForceNotify(State.Value);
         }
 
-        #region Inventory Item Pool
-
         private InventoryItem CreateInventoryItem(ItemBase itemBase, int count)
         {
             var item = new InventoryItem(itemBase, count);
@@ -109,9 +107,6 @@ namespace Nekoyume.UI.Model
             return item;
         }
 
-        #endregion
-
-        #region Add Item
         public void AddItem(ItemBase itemBase, int count = 1)
         {
             if (itemBase is ITradableItem tradableItem)
@@ -158,10 +153,6 @@ namespace Nekoyume.UI.Model
                     throw new ArgumentOutOfRangeException();
             }
         }
-
-        #endregion
-
-        #region Remove Item
 
         public void RemoveItem(ItemBase itemBase, int count = 1)
         {
@@ -239,10 +230,6 @@ namespace Nekoyume.UI.Model
             Equipments.DisposeAllAndClear();
             Materials.DisposeAllAndClear();
         }
-
-        #endregion
-
-        #region Try Get
 
         public bool TryGetItem(ItemBase itemBase, out InventoryItem inventoryItem)
         {
@@ -385,8 +372,6 @@ namespace Nekoyume.UI.Model
             inventoryItem = null;
             return false;
         }
-
-        #endregion
 
         public void SubscribeItemOnClick(InventoryItemView view)
         {

@@ -244,8 +244,7 @@ namespace Nekoyume.UI
 
             var tableSheets = Game.Game.instance.TableSheets;
             var equipmentRow = tableSheets.EquipmentItemRecipeSheet[recipeInfo.RecipeId];
-            var equipment = (Equipment)ItemFactory.CreateItemUsable(
-                equipmentRow.GetResultEquipmentItemRow(), Guid.Empty, default);
+            var equipment = (Equipment)ItemFactory.CreateItemUsable(equipmentRow.GetResultEquipmentItemRow());
             var requiredBlockIndex = equipmentRow.RequiredBlockIndex;
             if (recipeInfo.SubRecipeId.HasValue)
             {
@@ -271,8 +270,7 @@ namespace Nekoyume.UI
             }
 
             var consumableRow = Game.Game.instance.TableSheets.ConsumableItemRecipeSheet[recipeInfo.RecipeId];
-            var consumable = (Consumable)ItemFactory.CreateItemUsable(
-                consumableRow.GetResultConsumableItemRow(), Guid.Empty, default);
+            var consumable = (Consumable)ItemFactory.CreateItemUsable(consumableRow.GetResultConsumableItemRow());
             var requiredBlockIndex = consumableRow.RequiredBlockIndex;
             var slots = Find<CombinationSlotsPopup>();
             slots.SetCaching(slotIndex, true, requiredBlockIndex, itemUsable:consumable);

@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Gateway.Protocol;
+using Nekoyume.Battle;
 using Nekoyume.Model.Item;
 using Nekoyume.Model.Mail;
 using Nekoyume.Model.Quest;
@@ -20,28 +22,100 @@ namespace Nekoyume.Model.State
         public int level => _avatar.Level;
         public long exp => _avatar.Exp;
         public int actionPoint => _avatar.ActionPoint;
-        public int hair;
-        public int lens;
-        public int ear;
-        public int tail;
+        public int hair => _avatar.Hair;
+        public int lens => _avatar.Lens;
+        public int ear => _avatar.Ear;
+        public int tail => _avatar.Tail;
         public Inventory inventory { get; private set; }
         public WorldInformation worldInformation { get; private set; }
-        public QuestList questList;
-        public MailBox mailBox;
-        public long dailyRewardReceivedIndex;
-        
-        public CollectionMap stageMap;
-        public CollectionMap monsterMap;
-        public CollectionMap itemMap;
-        public CollectionMap eventMap;
-        
-        private readonly ST_Avatar _avatar;
+        public QuestList questList { get; private set; }
+        public MailBox mailBox { get; private set; }
+        public long dailyRewardReceivedIndex { get; set; }
+        public CollectionMap stageMap { get; private set; }
+        public CollectionMap monsterMap { get; private set; }
+        public CollectionMap itemMap { get; private set; }
+        public CollectionMap eventMap { get; private set; }
 
-        public AvatarState(ST_Avatar avatar, AvatarSheets avatarSheets, WorldSheet worldSheet)
+        private ST_Avatar _avatar;
+
+        public AvatarState(ST_Avatar avatar)
         {
             _avatar = avatar;
-            inventory = new Inventory();
-            worldInformation = new WorldInformation(worldSheet);
+            inventory = new Inventory();            
+            mailBox = new MailBox();
+            stageMap = new CollectionMap();
+            monsterMap = new CollectionMap();
+            itemMap = new CollectionMap();
+            eventMap = new CollectionMap();
+        }
+
+        public void SetInventory(
+            ST_Inventory inventory,
+            ConsumableItemSheet consumableItemSheets,
+            CostumeItemSheet costumeItemSheet,
+            EquipmentItemSheet equipmentItemSheet,
+            MaterialItemSheet materialItemSheet)
+        {
+            var items = new List<Inventory.Item>();
+            items.AddRange(inventory.ConsumableDict.Values.Select(item => ItemFactory.CreateConsumableItem(consumableItemSheets.GetValue(item.ItemId))).OfType<Inventory.Item>());
+            items.AddRange(inventory.CostumeDict.Values.Select(item => ItemFactory.CreateCostume(costumeItemSheet.GetValue(item.ItemId))).OfType<Inventory.Item>());
+            items.AddRange(inventory.EquipmentDict.Values.Select(item => ItemFactory.CreateItemUsable(equipmentItemSheet.GetValue(item.ItemId))).OfType<Inventory.Item>());
+            items.AddRange(inventory.MaterialDict.Values.Select(item => ItemFactory.CreateMaterial(materialItemSheet.GetValue(item.ItemId))).OfType<Inventory.Item>());
+            this.inventory = new Inventory(items);
+        }
+
+        public void SetWorldAndStage(ST_WorldInfo worldInfo, WorldSheet worldSheet)
+        {
+            worldInformation = new WorldInformation(worldSheet, GameConfig.IsEditor);
+        }
+
+        public void SetQuestList(AvatarSheets avatarSheets)
+        {
+            questList = new QuestList(
+                avatarSheets.QuestSheet,
+                avatarSheets.QuestRewardSheet,
+                avatarSheets.QuestItemRewardSheet,
+                avatarSheets.EquipmentItemRecipeSheet,
+                avatarSheets.EquipmentItemSubRecipeSheet
+            );
+        }
+
+        public void SetMailBox()
+        {
+
+        }
+
+        public void Update(StageSimulator stageSimulator)
+        {
+            var player = stageSimulator.Player;
+            _avatar.Level = player.Level;
+            _avatar.Exp = player.Exp.Current;
+            inventory = player.Inventory;
+            worldInformation = player.worldInformation;
+            foreach (var pair in player.monsterMap)
+            {
+                monsterMap.Add(pair);
+            }
+            foreach (var pair in player.eventMap)
+            {
+                eventMap.Add(pair);
+            }
+            if (stageSimulator.Log.IsClear)
+            {
+                stageMap.Add(new KeyValuePair<int, int>(stageSimulator.StageId, 1));
+            }
+            foreach (var pair in stageSimulator.ItemMap)
+            {
+                itemMap.Add(pair);
+            }
+
+            //UpdateStageQuest(stageSimulator.Reward);
+        }
+
+        public void Update(Mail.Mail mail)
+        {
+            mailBox.Add(mail);
+            mailBox.CleanUp();
         }
 
         public int GetArmorId()

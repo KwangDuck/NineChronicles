@@ -228,7 +228,7 @@ namespace Nekoyume.UI.Scroller
 
             EquipmentRowData = recipeRow;
 
-            var equipment = (Equipment) ItemFactory.CreateItemUsable(row, Guid.Empty, default);
+            var equipment = (Equipment) ItemFactory.CreateItemUsable(row);
             Set(equipment);
 
             StatType = equipment.UniqueStatType;
@@ -326,7 +326,7 @@ namespace Nekoyume.UI.Scroller
 
             ConsumableRowData = recipeRow;
 
-            var consumable = (Consumable)ItemFactory.CreateItemUsable(row, Guid.Empty, default);
+            var consumable = (Consumable)ItemFactory.CreateItemUsable(row);
             Set(consumable);
 
             StatType = consumable.MainStat;

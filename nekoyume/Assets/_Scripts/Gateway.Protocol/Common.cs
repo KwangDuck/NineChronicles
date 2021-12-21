@@ -1,5 +1,6 @@
 using MessagePack;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -425,6 +426,7 @@ namespace Gateway.Protocol
     }
 
     // 월드
+    [MessagePackObject]
     public class ST_World
     {
         [Key(0)] public IReadOnlyDictionary<int, ST_Stage> StageDict { get; set; }
@@ -437,7 +439,6 @@ namespace Gateway.Protocol
         [Key(0)] public bool Cleared { get; set; }
         [Key(1)] public int StageId { get; set; }
     }
-
 
     // 퀘스트
     [MessagePackObject]

@@ -321,13 +321,7 @@ namespace Nekoyume.UI
 
         public bool CheckSubmittable(out string errorMessage, out int slotIndex)
         {
-            slotIndex = -1;
-            if (States.Instance.AgentState is null)
-            {
-                errorMessage = L10nManager.Localize("FAILED_TO_GET_AGENTSTATE");
-                return false;
-            }
-
+            slotIndex = -1;            
             if (States.Instance.CurrentAvatarState is null)
             {
                 errorMessage = L10nManager.Localize("FAILED_TO_GET_AVATARSTATE");

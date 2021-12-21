@@ -127,6 +127,11 @@ namespace Nekoyume.TableData
             return _orderedList.GetEnumerator();
         }
 
+        public TValue GetValue(TKey key)
+        {
+            return _impl[key];
+        }
+
         public bool TryGetValue(TKey key, out TValue value, bool throwException)
         {
             if (_impl.TryGetValue(key, out value))

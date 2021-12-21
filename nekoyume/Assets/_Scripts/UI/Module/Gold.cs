@@ -41,13 +41,7 @@ namespace Nekoyume.UI.Module
         }
 
         private void UpdateGold()
-        {
-            if (States.Instance is null ||
-                States.Instance.GoldBalanceState is null)
-            {
-                return;
-            }
-
+        {            
             //SetGold(States.Instance.GoldBalanceState.Gold);
         }
 

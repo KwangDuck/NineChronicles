@@ -6,7 +6,7 @@ namespace Nekoyume.Model.Item
     [Serializable]
     public class Armor : Equipment
     {
-        public Armor(EquipmentItemSheet.Row data, Guid id, long requiredBlockIndex) : base(data, id, requiredBlockIndex)
+        public Armor(EquipmentItemSheet.Row data) : base(data)
         {
         }
     }

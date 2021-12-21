@@ -318,7 +318,7 @@ namespace Nekoyume.Game
             var (req, res) = loginAsync.Result;
 
             // init avatar info
-            States.InitAvatarInfo(res.AvatarInfo);
+            States.SetAvatarInfo(res.AvatarInfo);
 
             yield return null;
 
