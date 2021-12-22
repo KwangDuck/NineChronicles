@@ -135,6 +135,19 @@ namespace Nekoyume.UI
 
         public static void HelpMe(int id, bool showOnceForEachAgentAddress = default)
         {
+            if (showOnceForEachAgentAddress)
+            {
+                if (PlayerPrefs.HasKey(
+                    $"{nameof(HelpTooltip)}_{id}_{States.Instance.CurrentAvatarKey}"))
+                {
+                    return;
+                }
+
+                PlayerPrefs.SetInt(
+                    $"{nameof(HelpTooltip)}_{id}_{States.Instance.CurrentAvatarKey}",
+                    1);
+            }
+
             if (!Instance.TrySetId(id))
             {
                 return;
