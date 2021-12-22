@@ -127,7 +127,9 @@ namespace Nekoyume.Model.Item
 
         public KeyValuePair<int, int> AddItem(ItemBase itemBase, int count = 1, ILock iLock = null)
         {
-            var item = _items.FirstOrDefault(e => !e.Locked);
+            var item = _items
+                .Where(e => e.item.Id == itemBase.Id)
+                .FirstOrDefault(e => !e.Locked);
             if (item is null)
             {
                 item = new Item(itemBase, count);
@@ -142,7 +144,7 @@ namespace Nekoyume.Model.Item
             {
                 item.LockUp(iLock);
             }
-            _items.Sort();
+            //_items.Sort();
             return new KeyValuePair<int, int>(itemBase.Id, count);
         }
 
