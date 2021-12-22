@@ -110,7 +110,8 @@ namespace Nekoyume.UI
             LoadRecipeModel();
             SharedModel.SelectedRow
                 .Subscribe(SetSubRecipe)
-                .AddTo(gameObject);            
+                .AddTo(gameObject);
+            SharedModel.LoadRecipeVFXSkipList();
 
             recipeScroll.InitializeNotification();
             ReactiveAvatarState.QuestList
@@ -236,12 +237,13 @@ namespace Nekoyume.UI
 
         private void CombinationEquipmentAction(SubRecipeView.RecipeInfo recipeInfo)
         {
-            if (!equipmentSubRecipeView.CheckSubmittable(out var errorMessage, out var slotIndex))
-            {
-                OneLineSystem.Push(MailType.System, errorMessage, NotificationCell.NotificationType.Alert);
-                return;
-            }
+            //if (!equipmentSubRecipeView.CheckSubmittable(out var errorMessage, out var slotIndex))
+            //{
+            //    OneLineSystem.Push(MailType.System, errorMessage, NotificationCell.NotificationType.Alert);
+            //    return;
+            //}
 
+            var slotIndex = 1;
             var tableSheets = Game.Game.instance.TableSheets;
             var equipmentRow = tableSheets.EquipmentItemRecipeSheet[recipeInfo.RecipeId];
             var equipment = (Equipment)ItemFactory.CreateItemUsable(equipmentRow.GetResultEquipmentItemRow());
@@ -263,12 +265,13 @@ namespace Nekoyume.UI
 
         private void CombinationConsumableAction(SubRecipeView.RecipeInfo recipeInfo)
         {
-            if (!consumableSubRecipeView.CheckSubmittable(out var errorMessage, out var slotIndex))
-            {
-                OneLineSystem.Push(MailType.System, errorMessage, NotificationCell.NotificationType.Alert);
-                return;
-            }
+            //if (!consumableSubRecipeView.CheckSubmittable(out var errorMessage, out var slotIndex))
+            //{
+            //    OneLineSystem.Push(MailType.System, errorMessage, NotificationCell.NotificationType.Alert);
+            //    return;
+            //}
 
+            var slotIndex = 1;
             var consumableRow = Game.Game.instance.TableSheets.ConsumableItemRecipeSheet[recipeInfo.RecipeId];
             var consumable = (Consumable)ItemFactory.CreateItemUsable(consumableRow.GetResultConsumableItemRow());
             var requiredBlockIndex = consumableRow.RequiredBlockIndex;

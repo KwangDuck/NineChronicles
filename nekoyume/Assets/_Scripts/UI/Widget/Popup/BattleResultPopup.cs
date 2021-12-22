@@ -148,6 +148,12 @@ namespace Nekoyume.UI
         {
             base.Awake();
 
+            closeButton.OnClickAsObservable().Subscribe(_ =>
+                {
+                    StartCoroutine(OnClickClose());
+                })
+                .AddTo(gameObject);
+
             nextButton.OnClickAsObservable().Subscribe(_ =>
                 {
                     StartCoroutine(OnClickNext());
@@ -237,8 +243,8 @@ namespace Nekoyume.UI
             }
 
             base.Show();
-            //closeButton.gameObject.SetActive(model.StageID >= 3 || model.LastClearedStageId >= 3);
-            closeButton.gameObject.SetActive(false);
+            closeButton.gameObject.SetActive(model.StageID >= 1 || model.LastClearedStageId >= 1);
+            //closeButton.gameObject.SetActive(false);
             repeatButton.gameObject.SetActive(false);
             nextButton.gameObject.SetActive(false);
 
@@ -489,7 +495,7 @@ namespace Nekoyume.UI
                 yield break;
             }
 
-            closeButton.interactable = false;
+            closeButton.interactable = true;
             repeatButton.interactable = false;
             nextButton.interactable = false;
             actionPoint.SetEventTriggerEnabled(false);
@@ -498,7 +504,7 @@ namespace Nekoyume.UI
             StartCoroutine(CoFadeOut());
             var stage = Game.Game.instance.Stage;
             stage.IsRepeatStage = false;
-            stage.IsExitReserved = false;
+            stage.IsExitReserved = true;
             var stageLoadingScreen = Find<StageLoadingEffect>();
             stageLoadingScreen.Show(stage.zone, SharedModel.WorldName,
                 SharedModel.StageID + 1, true, SharedModel.StageID);

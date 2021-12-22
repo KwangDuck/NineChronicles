@@ -85,7 +85,7 @@ namespace Nekoyume.Model.State
 
         }
 
-        public void Update(StageSimulator stageSimulator)
+        public void Update(StageSimulator stageSimulator, MaterialItemSheet materialItemSheet)
         {
             var player = stageSimulator.Player;
             _avatar.Level = player.Level;
@@ -106,10 +106,13 @@ namespace Nekoyume.Model.State
             }
             foreach (var pair in stageSimulator.ItemMap)
             {
+                var row = materialItemSheet.OrderedList.First(itemRow => itemRow.Id == pair.Key);
+                var item = ItemFactory.CreateMaterial(row);
+                var map = inventory.AddItem(item, count: pair.Value);
                 itemMap.Add(pair);
-            }
+            }           
 
-            //UpdateStageQuest(stageSimulator.Reward);
+            UpdateStageQuest(stageSimulator.Reward);
         }
 
         public void Update(Mail.Mail mail)
@@ -122,6 +125,26 @@ namespace Nekoyume.Model.State
         {
             var armor = inventory.Items.Select(i => i.item).OfType<Armor>().FirstOrDefault(e => e.equipped);
             return armor?.Id ?? GameConfig.DefaultAvatarArmorId;
+        }
+
+        private void UpdateStageQuest(IEnumerable<ItemBase> items)
+        {
+            questList.UpdateStageQuest(stageMap);
+            questList.UpdateMonsterQuest(monsterMap);
+            questList.UpdateCollectQuest(itemMap);
+            questList.UpdateItemTypeCollectQuest(items);
+            UpdateGeneralQuest(new[] { QuestEventType.Level, QuestEventType.Die });
+            UpdateCompletedQuest();
+        }
+
+        private void UpdateGeneralQuest(IEnumerable<QuestEventType> types)
+        {
+            eventMap = questList.UpdateGeneralQuest(types, eventMap);
+        }
+
+        private void UpdateCompletedQuest()
+        {
+            eventMap = questList.UpdateCompletedQuest(eventMap);
         }
     }
 }

@@ -15,6 +15,7 @@ using Nekoyume.L10n;
 
 namespace Nekoyume.UI
 {
+    using Gateway.Protocol;
     using UniRx;
 
     public class LoginDetail : Widget
@@ -93,11 +94,9 @@ namespace Nekoyume.UI
 
             Game.Game.instance.ActionManager
                 .CreateAvatarAsync(_selectedIndex, nickName, _hair, _lens, _ear, _tail)
-                .Subscribe(async result =>
+                .Subscribe(result =>
                     {
-                        var avatarState = States.Instance.SelectAvatar(_selectedIndex);
-                        StartCoroutine(CreateAndLoginAnimation(avatarState));
-                        //ActionRenderHandler.RenderQuest(avatarState.address, avatarState.questList.completedQuestIds);
+                        StartCoroutine(CreateAndLoginAnimation(States.Instance.CurrentAvatarState));
                     },
                     e =>
                     {
@@ -120,12 +119,17 @@ namespace Nekoyume.UI
             OnDidAvatarStateLoaded(state);
         }
 
-        public async void LoginClick()
+        public void LoginClick()
         {
             btnLogin.SetActive(false);
-            var avatarState = States.Instance.SelectAvatar(_selectedIndex);
-            OnDidAvatarStateLoaded(avatarState);
-            AudioController.PlayClick();
+
+            ActionManager.Instance.SelectAvatarAsync(_selectedIndex)
+                .Subscribe(result =>
+                {
+                    var avatarState = States.Instance.SelectAvatar(_selectedIndex);
+                    OnDidAvatarStateLoaded(avatarState);
+                    AudioController.PlayClick();
+                });            
         }
 
         public void BackToLogin()

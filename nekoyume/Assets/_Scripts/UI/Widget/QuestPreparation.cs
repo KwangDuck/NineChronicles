@@ -832,49 +832,7 @@ namespace Nekoyume.UI
                 1
             ).Subscribe((result) =>
             {
-                // subscribe stageEnd
-                Game.Game.instance.Stage.onEnterToStageEnd
-                    .First()
-                    .Subscribe(_ =>
-                    {
-                        Game.Game.instance.Stage.IsAvatarStateUpdatedAfterBattle = true;
-                    });
-
-                // make simulator
-                var playCount = 1;
-                var worldId = 1;
-                var stageId = 1;
-                var simulator = new StageSimulator(
-                    new System.Random(),
-                    States.Instance.CurrentAvatarState,
-                    new List<Guid>(),
-                    worldId,
-                    stageId,
-                    Game.Game.instance.TableSheets.GetStageSimulatorSheets(),
-                    Game.Game.instance.TableSheets.CostumeStatSheet,
-                    StageSimulator.ConstructorVersionV100080,
-                    playCount
-                );
-                simulator.Simulate(playCount);
-                var log = simulator.Log;
-                Game.Game.instance.Stage.PlayCount = playCount;
-
-                if (Widget.Find<LoadingScreen>().IsActive())
-                {
-                    if (Widget.Find<QuestPreparation>().IsActive())
-                    {
-                        Widget.Find<QuestPreparation>().GoToStage(log);
-                    }
-                    else if (Widget.Find<Menu>().IsActive())
-                    {
-                        Widget.Find<Menu>().GoToStage(log);
-                    }
-                }
-                else if (Widget.Find<StageLoadingEffect>().IsActive() &&
-                         Widget.Find<BattleResultPopup>().IsActive())
-                {
-                    Widget.Find<BattleResultPopup>().NextStage(log);
-                }
+                
             });
         }
 

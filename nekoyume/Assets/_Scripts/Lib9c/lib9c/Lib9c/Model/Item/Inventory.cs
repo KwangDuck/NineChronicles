@@ -127,16 +127,20 @@ namespace Nekoyume.Model.Item
 
         public KeyValuePair<int, int> AddItem(ItemBase itemBase, int count = 1, ILock iLock = null)
         {
-            switch (itemBase.ItemType)
+            var item = _items.FirstOrDefault(e => !e.Locked);
+            if (item is null)
             {
-                case ItemType.Consumable:
-                case ItemType.Equipment:
-                case ItemType.Costume:
-                    break;
-                case ItemType.Material:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                item = new Item(itemBase, count);
+                _items.Add(item);
+            }
+            else
+            {
+                item.count += count;
+            }
+
+            if (!(iLock is null))
+            {
+                item.LockUp(iLock);
             }
             _items.Sort();
             return new KeyValuePair<int, int>(itemBase.Id, count);
@@ -180,6 +184,19 @@ namespace Nekoyume.Model.Item
             }
 
             return false;
+        }
+
+        public bool TryGetItem(int rowId, out List<Item> outItems)
+        {
+            outItems = new List<Item>();
+            foreach (var item in _items)
+            {
+                if (item.item.Id == rowId)
+                {
+                    outItems.Add(item);
+                }
+            }
+            return outItems.Count > 0;
         }
     }
 }

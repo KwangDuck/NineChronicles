@@ -138,6 +138,40 @@ namespace Nekoyume.Model
             return false;
         }
 
+        public bool TryGetLastClearedStageId(out int stageId)
+        {
+            var clearedStages = _worlds.Values
+                .Where(world => world.Id < GameConfig.MimisbrunnrWorldId &&
+                                world.IsStageCleared)
+                .ToList();
+
+            if (clearedStages.Any())
+            {
+                stageId = clearedStages.Max(world => world.StageClearedId);
+                return true;
+            }
+
+            stageId = default;
+            return false;
+        }
+
+        public bool TryGetLastClearedMimisbrunnrStageId(out int stageId)
+        {
+            var clearedStages = _worlds.Values
+                .Where(world => world.Id == GameConfig.MimisbrunnrWorldId &&
+                                world.IsStageCleared)
+                .ToList();
+
+            if (clearedStages.Any())
+            {
+                stageId = clearedStages.Max(world => world.StageClearedId);
+                return true;
+            }
+
+            stageId = default;
+            return false;
+        }
+
         public bool IsStageCleared(int stageId)
         {
             return true;

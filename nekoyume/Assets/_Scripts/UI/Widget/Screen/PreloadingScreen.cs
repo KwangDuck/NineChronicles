@@ -48,12 +48,15 @@ namespace Nekoyume.UI
             {
                 PlayerFactory.Create();
 
-                // default slot index
-                var slotIndex = 1;
-
-                if (States.Instance.TryGetAvatarState(slotIndex, out var avatarState))
+                // current avatar state
+                var avatarState = States.Instance.CurrentAvatarState;
+                if (avatarState == null)
                 {
-                    if (avatarState?.inventory == null ||
+                    EnterLogin();
+                }
+                else
+                {
+                    if (avatarState.inventory == null ||
                         avatarState.questList == null ||
                         avatarState.worldInformation == null)
                     {
@@ -61,13 +64,8 @@ namespace Nekoyume.UI
                     }
                     else
                     {
-                        States.Instance.SelectAvatar(slotIndex);
                         Game.Event.OnRoomEnter.Invoke(false);
                     }
-                }
-                else
-                {
-                    EnterLogin();
                 }
             }
 

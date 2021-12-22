@@ -183,6 +183,14 @@ namespace Gateway.Protocol
         Percentage,
     }
 
+    public enum ENUM_ItemEnhancementResult
+    {
+        None,
+        Fail,
+        Success,
+        GreatSuccess,
+    }
+
     public enum ENUM_Event
     {
         None,

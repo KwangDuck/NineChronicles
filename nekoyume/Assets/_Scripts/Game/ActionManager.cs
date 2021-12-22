@@ -10,7 +10,11 @@ using Material = Nekoyume.Model.Item.Material;
 namespace Nekoyume.Game
 {
     using Gateway.Protocol;
+    using Nekoyume.Battle;
+    using Nekoyume.L10n;
+    using Nekoyume.Model.Mail;
     using Nekoyume.State;
+    using Nekoyume.UI.Scroller;
     using UniRx;
 
     /// <summary>
@@ -153,19 +157,19 @@ namespace Nekoyume.Game
         }
 
         // select avatar
-        public IObservable<(REQ_SelectAvatar, RES_SelectAvatar)> SelectAvatarAsync(int index, ST_Avatar avatar)
+        public IObservable<(REQ_SelectAvatar, RES_SelectAvatar)> SelectAvatarAsync(int index)
         {
             var req = new REQ_SelectAvatar
             {
+                Header = MakeHeader(),
                 Index = index,
-                Avatar = avatar
             };
 
             // remote request
 
             var res = new RES_SelectAvatar
             {
-
+                Header = new RES_Header { }
             };
 
             return Observable.Return((req, res));
@@ -238,10 +242,21 @@ namespace Nekoyume.Game
 
             var res = new RES_DailyReward
             {
-
+                Header = new RES_Header { },
             };
 
-            return Observable.Return((req, res));
+            return Observable.Return((req, res))
+                .Do(result =>
+                {
+                    var (req, res) = result;
+                    if (res.Header.ErrorCode == ENUM_ErrorCode.ERR_SUCCESS)
+                    {
+                        UI.NotificationSystem.Push(
+                            MailType.System,
+                            L10nManager.Localize("UI_RECEIVED_DAILY_REWARD"),
+                            NotificationCell.NotificationType.Notification);
+                    }
+                });
         }
 
         // charge action point
@@ -256,10 +271,18 @@ namespace Nekoyume.Game
 
             var res = new RES_ChargeActionPoint
             {
-
+                Header = new RES_Header { },
             };
 
-            return Observable.Return((req, res));
+            return Observable.Return((req, res))
+                .Do(result =>
+                {
+                    var (req, res) = result;
+                    if (res.Header.ErrorCode == ENUM_ErrorCode.ERR_SUCCESS)
+                    {
+                        // TODO: implementation
+                    }
+                });
         }
 
         ///////////////////////////////////////////////////////////////////////////
@@ -291,15 +314,31 @@ namespace Nekoyume.Game
                 Header = MakeHeader(),
             };
 
-            // remote request
-
+            // TODO: remote request
 
             var res = new RES_CombinationConsumable
             {
-
+                Header = new RES_Header { }
             };
 
-            return Observable.Return((req, res));
+            return Observable.Return((req, res))
+                .Do(result =>
+                {
+                    var (req, res) = result;
+                    if (res.Header.ErrorCode != ENUM_ErrorCode.ERR_SUCCESS)
+                    {
+                        // TODO: update combination sloot state
+
+                        // TODO: nofity
+                        var format = L10nManager.Localize("NOTIFICATION_COMBINATION_COMPLETE");
+                        UI.NotificationSystem.Reserve(
+                            MailType.Workshop,
+                            string.Format(format, "name"),
+                            0,
+                            new Guid());
+                    }
+                    Widget.Find<CombinationSlotsPopup>().SetCaching(slotIndex, false);
+                });
         }
 
         // combination equipment
@@ -316,10 +355,25 @@ namespace Nekoyume.Game
 
             var res = new RES_CombinationEquipment
             {
-
+                Header = new RES_Header { },
             };
 
-            return Observable.Return((req, res));
+            return Observable.Return((req, res))
+                .Do(result =>
+                {
+                    var (req, res) = result;
+                    if (res.Header.ErrorCode == ENUM_ErrorCode.ERR_SUCCESS)
+                    {
+                        // update combination slot
+                        CombinationSlotState slot = null;
+                        States.Instance.UpdateCombinationSlotState(slotIndex, slot);
+
+                        // find completed quest by result
+                        // notify
+                    }
+
+                    Widget.Find<CombinationSlotsPopup>().SetCaching(slotIndex, false);
+                });
         }
 
         // item enhancement
@@ -338,10 +392,48 @@ namespace Nekoyume.Game
 
             var res = new RES_ItemEnhancement
             {
-
+                Header = new RES_Header { },
+                Result = ENUM_ItemEnhancementResult.GreatSuccess,
             };
 
-            return Observable.Return((req, res));
+            return Observable.Return((req, res))
+                .Do(result =>
+                {
+                    var (req, res) = result;
+                    if (res.Header.ErrorCode == ENUM_ErrorCode.ERR_SUCCESS)
+                    {
+                        // update combination slot state
+                        CombinationSlotState slot = null;
+                        States.Instance.UpdateCombinationSlotState(slotIndex, slot);
+
+                        // notify
+                        string formatKey = string.Empty;
+                        switch (res.Result)
+                        {
+                            case ENUM_ItemEnhancementResult.GreatSuccess:
+                                formatKey = "NOTIFICATION_ITEM_ENHANCEMENT_COMPLETE_GREATER";
+                                break;
+                            case ENUM_ItemEnhancementResult.Success:
+                                formatKey = "NOTIFICATION_ITEM_ENHANCEMENT_COMPLETE";
+                                break;
+                            case ENUM_ItemEnhancementResult.Fail:
+                                formatKey = "NOTIFICATION_ITEM_ENHANCEMENT_COMPLETE_FAIL";
+                                break;
+                            default:
+                                formatKey = "NOTIFICATION_ITEM_ENHANCEMENT_COMPLETE";
+                                break;
+                        }
+
+                        var format = L10nManager.Localize(formatKey);
+                        UI.NotificationSystem.Reserve(
+                            MailType.Workshop,
+                            string.Format(format, "name"),
+                            0,
+                            new Guid());
+                    }
+
+                    Widget.Find<CombinationSlotsPopup>().SetCaching(slotIndex, false);
+                });
         }
 
         // rapid combination
@@ -358,10 +450,20 @@ namespace Nekoyume.Game
 
             var res = new RES_RapidCombination
             {
-
+                Header = new RES_Header { },
             };
 
-            return Observable.Return((req, res));
+            return Observable.Return((req, res))
+                .Do(result =>
+                {
+                    var (req, res) = result;
+                    if (res.Header.ErrorCode == ENUM_ErrorCode.ERR_SUCCESS)
+                    {
+
+                    }
+
+                    Widget.Find<CombinationSlotsPopup>().SetCaching(slotIndex, false);
+                });
         }
 
         ///////////////////////////////////////////////////////////////////////////
@@ -396,12 +498,69 @@ namespace Nekoyume.Game
                 Header = MakeHeader(),
             };
 
+            // TODO: remote request
+
             var res = new RES_RankingBattle
             {
-
+                Header = new RES_Header { }
             };
 
-            return Observable.Return((req, res));
+            return Observable.Return((req, res))
+                .Do(result =>
+                {
+                    var (req, res) = result;
+                    if (res.Header.ErrorCode != ENUM_ErrorCode.ERR_SUCCESS)
+                    {
+                        var showLoadingScreen = false;
+                        if (Widget.Find<ArenaBattleLoadingScreen>().IsActive())
+                        {
+                            Widget.Find<ArenaBattleLoadingScreen>().Close();
+                        }
+
+                        if (Widget.Find<RankingBattleResultPopup>().IsActive())
+                        {
+                            showLoadingScreen = true;
+                            Widget.Find<RankingBattleResultPopup>().Close();
+                        }
+
+                        Game.BackToMain(showLoadingScreen, new Exception());
+                    }
+                    else
+                    {
+                        // subscribe stageEnd
+                        Game.instance.Stage.onEnterToStageEnd
+                            .First()
+                            .Subscribe(_ =>
+                            {
+                                Game.instance.Stage.IsAvatarStateUpdatedAfterBattle = true;
+                            });
+
+                        // ranking simulator
+                        AvatarState enemyAvatarState = null;
+                        ArenaInfo arenaInfo = null;
+                        ArenaInfo enemyInfo = null;
+                        const int stageId = 999999;
+
+                        var simulator = new RankingSimulator(
+                            new Random(),
+                            States.Instance.CurrentAvatarState,
+                            enemyAvatarState,
+                            new List<Guid>(),
+                            Game.instance.TableSheets.GetRankingSimulatorSheets(),
+                            stageId,
+                            arenaInfo,
+                            enemyInfo,
+                            Game.instance.TableSheets.CostumeStatSheet
+                        );
+                        simulator.Simulate();
+                        var log = simulator.Log;
+
+                        if (Widget.Find<ArenaBattleLoadingScreen>().IsActive())
+                        {
+                            Widget.Find<RankingBoard>().GoToStage(log);
+                        }
+                    }
+                });
         }
 
 
@@ -431,15 +590,39 @@ namespace Nekoyume.Game
         {
             var req = new REQ_Sell
             {
-
+                Header = MakeHeader(),
             };
 
             var res = new RES_Sell
             {
-
+                Header = new RES_Header { },
             };
 
-            return Observable.Return((req, res));
+            return Observable.Return((req, res))
+                .Do(result =>
+                {
+                    var (req, res) = result;
+                    if (res.Header.ErrorCode == ENUM_ErrorCode.ERR_SUCCESS)
+                    {
+                        var message = string.Empty;
+                        if (count > 1)
+                        {
+                            message = string.Format(L10nManager.Localize("NOTIFICATION_MULTIPLE_SELL_COMPLETE"), itemSubType, count);
+                        }
+                        else
+                        {
+                            message = string.Format(L10nManager.Localize("NOTIFICATION_SELL_COMPLETE"), itemSubType);
+                        }
+
+                        OneLineSystem.Push(MailType.Auction, message, NotificationCell.NotificationType.Information);
+
+                        var shopSell = Widget.Find<ShopSell>();
+                        if (shopSell.isActiveAndEnabled)
+                        {
+                            shopSell.Refresh();
+                        }
+                    }
+                });
         }
 
         // sell cancellation
@@ -455,13 +638,28 @@ namespace Nekoyume.Game
                 Header = MakeHeader(),
             };
 
+            // TODO: remote request
+
             var res = new RES_SellCancellation
             {
-
+                Header = new RES_Header { },
             };
+            return Observable.Return((req, res))
+                .Do(result =>
+                {
+                    var (req, res) = result;
+                    if (res.Header.ErrorCode == ENUM_ErrorCode.ERR_SUCCESS)
+                    {
+                        var message = string.Format(L10nManager.Localize("NOTIFICATION_SELL_CANCEL_COMPLETE"), itemSubType);
+                        OneLineSystem.Push(MailType.Auction, message, NotificationCell.NotificationType.Information);
 
-
-            return Observable.Return((req, res));
+                        var shopSell = Widget.Find<ShopSell>();
+                        if (shopSell.isActiveAndEnabled)
+                        {
+                            shopSell.Refresh();
+                        }
+                    }
+                });
         }
 
         // update sell
@@ -479,10 +677,25 @@ namespace Nekoyume.Game
 
             var res = new RES_UpdateSell
             {
-
+                Header = new RES_Header { },
             };
 
-            return Observable.Return((req, res));
+            return Observable.Return((req, res))
+                .Do(result =>
+                {
+                    var (req, res) = result;
+                    if (res.Header.ErrorCode == ENUM_ErrorCode.ERR_SUCCESS)
+                    {
+                        var message = string.Format(L10nManager.Localize("NOTIFICATION_REREGISTER_COMPLETE"), itemSubType);
+                        OneLineSystem.Push(MailType.Auction, message, NotificationCell.NotificationType.Information);
+
+                        var shopSell = Widget.Find<ShopSell>();
+                        if (shopSell.isActiveAndEnabled)
+                        {
+                            shopSell.Refresh();
+                        }
+                    }
+                });
         }
 
         // buy
@@ -495,7 +708,7 @@ namespace Nekoyume.Game
 
             var res = new RES_Buy
             {
-
+                Header = new RES_Header { },
             };
 
             return Observable.Return((req, res));
@@ -532,12 +745,80 @@ namespace Nekoyume.Game
                 Header = MakeHeader(),
             };
 
+            // TODO: remote request
+
             var res = new RES_MimisbrunnrBattle
             {
-
+                Header = new RES_Header { }
             };
 
-            return Observable.Return((req, res));
+            return Observable.Return((req, res))
+                .Do(result =>
+                {
+                    var (req, res) = result;
+                    if (res.Header.ErrorCode != ENUM_ErrorCode.ERR_SUCCESS)
+                    {
+                        var showLoadingScreen = false;
+                        if (Widget.Find<StageLoadingEffect>().IsActive())
+                        {
+                            Widget.Find<StageLoadingEffect>().Close();
+                        }
+
+                        if (Widget.Find<BattleResultPopup>().IsActive())
+                        {
+                            showLoadingScreen = true;
+                            Widget.Find<BattleResultPopup>().Close();
+                        }
+
+                        Game.BackToMain(showLoadingScreen, new Exception());
+                    }
+                    else
+                    {
+                        // subscribe stageEnd
+                        Game.instance.Stage.onEnterToStageEnd
+                            .First()
+                            .Subscribe(_ =>
+                            {
+                                Game.instance.Stage.IsAvatarStateUpdatedAfterBattle = true;
+                            });
+
+                        var simulator = new StageSimulator(
+                            new Random(),
+                            States.Instance.CurrentAvatarState,
+                            new List<Guid>(),
+                            worldId,
+                            stageId,
+                            Game.instance.TableSheets.GetStageSimulatorSheets(),
+                            Game.instance.TableSheets.CostumeStatSheet,
+                            StageSimulator.ConstructorVersionV100080,
+                            playCount
+                        );
+                        simulator.Simulate(playCount);
+                        var log = simulator.Log;
+                        Game.instance.Stage.PlayCount = playCount;
+
+                        // update avatar state
+                        var avatarState = States.Instance.CurrentAvatarState;
+                        avatarState.Update(simulator, Game.instance.TableSheets.MaterialItemSheet);
+
+                        if (Widget.Find<LoadingScreen>().IsActive())
+                        {
+                            if (Widget.Find<MimisbrunnrPreparation>().IsActive())
+                            {
+                                Widget.Find<MimisbrunnrPreparation>().GoToStage(log);
+                            }
+                            else if (Widget.Find<Menu>().IsActive())
+                            {
+                                Widget.Find<Menu>().GoToStage(log);
+                            }
+                        }
+                        else if (Widget.Find<StageLoadingEffect>().IsActive() &&
+                                    Widget.Find<BattleResultPopup>().IsActive())
+                        {
+                            Widget.Find<BattleResultPopup>().NextMimisbrunnrStage(log);
+                        }
+                    }
+                });
         }
 
         ///////////////////////////////////////////////////////////////////////////
@@ -583,10 +864,77 @@ namespace Nekoyume.Game
 
             var res = new RES_HackAndSlash
             {
-
+                Header = new RES_Header { }
             };
 
-            return Observable.Return((req, res));
+            return Observable.Return((req, res))
+                .Do(result =>
+                {
+                    var (req, res) = result;
+                    if (res.Header.ErrorCode != ENUM_ErrorCode.ERR_SUCCESS)
+                    {
+                        var showLoadingScreen = false;
+                        if (Widget.Find<StageLoadingEffect>().IsActive())
+                        {
+                            Widget.Find<StageLoadingEffect>().Close();
+                        }
+
+                        if (Widget.Find<BattleResultPopup>().IsActive())
+                        {
+                            showLoadingScreen = true;
+                            Widget.Find<BattleResultPopup>().Close();
+                        }
+
+                        Game.BackToMain(showLoadingScreen, new Exception());
+                    }
+                    else
+                    {
+                        // subscribe stageEnd
+                        Game.instance.Stage.onEnterToStageEnd
+                            .First()
+                            .Subscribe(_ =>
+                            {
+                                Game.instance.Stage.IsAvatarStateUpdatedAfterBattle = true;
+                            });
+
+                        // make simulator
+                        var simulator = new StageSimulator(
+                            new Random(),
+                            States.Instance.CurrentAvatarState,
+                            new List<Guid>(),
+                            worldId,
+                            stageId,
+                            Game.instance.TableSheets.GetStageSimulatorSheets(),
+                            Game.instance.TableSheets.CostumeStatSheet,
+                            StageSimulator.ConstructorVersionV100080,
+                            playCount
+                        );
+                        simulator.Simulate(playCount);
+                        var log = simulator.Log;
+                        Game.instance.Stage.PlayCount = playCount;
+
+                        // update avatar state
+                        var avatarState = States.Instance.CurrentAvatarState;
+                        avatarState.Update(simulator, Game.instance.TableSheets.MaterialItemSheet);
+
+                        if (Widget.Find<LoadingScreen>().IsActive())
+                        {
+                            if (Widget.Find<QuestPreparation>().IsActive())
+                            {
+                                Widget.Find<QuestPreparation>().GoToStage(log);
+                            }
+                            else if (Widget.Find<Menu>().IsActive())
+                            {
+                                Widget.Find<Menu>().GoToStage(log);
+                            }
+                        }
+                        else if (Widget.Find<StageLoadingEffect>().IsActive() &&
+                                 Widget.Find<BattleResultPopup>().IsActive())
+                        {
+                            Widget.Find<BattleResultPopup>().NextStage(log);
+                        }
+                    }
+                });
         }
     }
 }

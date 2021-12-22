@@ -352,15 +352,9 @@ namespace Nekoyume.UI.Model
                 return false;
             }
 
-            inventoryItem = null;
-            return true;
-        }
-
-        public bool TryGetMaterial(int id, out InventoryItem inventoryItem)
-        {
             foreach (var item in Materials)
             {
-                if (item.ItemBase.Value.Id != id)
+                if (item.ItemBase.Value.Id != material.ItemId)
                 {
                     continue;
                 }

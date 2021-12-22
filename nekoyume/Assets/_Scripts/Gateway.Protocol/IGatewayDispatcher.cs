@@ -190,6 +190,7 @@ namespace Gateway.Protocol
     public class RES_ItemEnhancement : IRES
     {
         [Key(0)] public RES_Header Header { get; set; }
+        [Key(1)] public ENUM_ItemEnhancementResult Result { get; set; }
     }
 
     // rapid combination

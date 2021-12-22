@@ -39,7 +39,8 @@ namespace Nekoyume.UI.Module
 
         private readonly List<IDisposable> _disposablesForOnDisable = new List<IDisposable>();
 
-        private bool IsLocked {
+        private bool IsLocked
+        {
             get => lockObject.activeSelf;
             set
             {
@@ -69,8 +70,8 @@ namespace Nekoyume.UI.Module
                             var worldInformation = States.Instance.CurrentAvatarState.worldInformation;
 
                             var unlockStage = equipmentRow.UnlockStage;
-                            var clearedStage = 0;
-                            var diff = unlockStage - clearedStage;
+                            var clearedStage = worldInformation.TryGetLastClearedStageId(out var stageId) ? stageId : 0;
+                            var diff = Math.Abs(unlockStage - clearedStage);
 
                             if (diff > UnlockConditionDisplayRange)
                             {
@@ -164,7 +165,7 @@ namespace Nekoyume.UI.Module
             var worldInformation = States.Instance.CurrentAvatarState.worldInformation;
 
             var unlockStage = equipmentRow.UnlockStage;
-            var clearedStage = 0;
+            var clearedStage = worldInformation.TryGetLastClearedStageId(out var stageId) ? stageId : 0;
 
             var diff = unlockStage - clearedStage;
 

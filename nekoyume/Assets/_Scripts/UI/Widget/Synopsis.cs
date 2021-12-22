@@ -351,7 +351,6 @@ namespace Nekoyume.UI
             {
                 try
                 {
-                    States.Instance.SelectAvatar(slotIndex);
                     Game.Event.OnRoomEnter.Invoke(false);
                 }
                 catch (KeyNotFoundException e)

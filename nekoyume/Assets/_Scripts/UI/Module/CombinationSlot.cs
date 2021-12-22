@@ -227,9 +227,11 @@ namespace Nekoyume.UI.Module
                     : SlotType.WaitingReceive;
             }
 
-            return currentBlockIndex < state.StartBlockIndex + GameConfig.RequiredAppraiseBlock
-                ? SlotType.Appraise
-                : SlotType.Working;
+            return SlotType.Appraise;
+
+            //return currentBlockIndex < state.StartBlockIndex + GameConfig.RequiredAppraiseBlock
+            //    ? SlotType.Appraise
+            //    : SlotType.Working;
         }
 
         private void UpdateRequiredBlockInformation(long unlockBlockIndex, long startBlockIndex, long currentBlockIndex)

@@ -110,6 +110,9 @@ namespace Nekoyume.State
 
         public void UpdateCombinationSlotState(int index, CombinationSlotState state)
         {
+            if (state == null)
+                return;
+
             if (_combinationSlotStates.ContainsKey(index))
             {
                 _combinationSlotStates[index] = state;

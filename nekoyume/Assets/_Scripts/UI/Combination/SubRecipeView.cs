@@ -310,11 +310,11 @@ namespace Nekoyume.UI
 
         private bool CheckMaterialAndSlot()
         {
-            var slots = Widget.Find<CombinationSlotsPopup>();
-            if (!slots.TryGetEmptyCombinationSlot(out var _))
-            {
-                return false;
-            }
+            //var slots = Widget.Find<CombinationSlotsPopup>();
+            //if (!slots.TryGetEmptyCombinationSlot(out var _))
+            //{
+            //    return false;
+            //}
 
             return true;
         }

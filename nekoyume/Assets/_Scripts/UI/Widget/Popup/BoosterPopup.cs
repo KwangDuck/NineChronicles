@@ -139,7 +139,10 @@ namespace Nekoyume.UI
                     _worldId,
                     _stageId,
                     (int)apSlider.value
-                ).Subscribe();
+                ).Subscribe(result =>
+                {
+                    var (req, res) = result;
+                });
             }
         }
 
