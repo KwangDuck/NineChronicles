@@ -198,5 +198,11 @@ namespace Nekoyume.Model.Item
             }
             return outItems.Count > 0;
         }
+
+        public bool RemoveItem(int rowId, int count)
+        {
+            // TODO: implementation
+            return true;
+        }
     }
 }

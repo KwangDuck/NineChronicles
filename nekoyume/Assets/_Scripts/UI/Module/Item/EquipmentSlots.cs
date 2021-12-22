@@ -169,9 +169,8 @@ namespace Nekoyume.UI.Module
                 return false;
             }
 
-            slot = typeSlots.First();
-
-            return true;
+            slot = typeSlots.FirstOrDefault();
+            return slot != null;
         }
 
         /// <summary>
@@ -188,8 +187,7 @@ namespace Nekoyume.UI.Module
                 return false;
             }
 
-            slot = slots.First();
-
+            slot = slots.FirstOrDefault(e => !e.IsLock && !e.IsEmpty && e.Item.Equals(itemBase));  
             return slot;
         }
 

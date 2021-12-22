@@ -106,9 +106,6 @@ namespace Nekoyume.Model.State
             }
             foreach (var pair in stageSimulator.ItemMap)
             {
-                var row = materialItemSheet.OrderedList.First(itemRow => itemRow.Id == pair.Key);
-                var item = ItemFactory.CreateMaterial(row);
-                var map = inventory.AddItem(item, count: pair.Value);
                 itemMap.Add(pair);
             }           
 
@@ -119,6 +116,23 @@ namespace Nekoyume.Model.State
         {
             mailBox.Add(mail);
             mailBox.CleanUp();
+        }
+
+        public void UpdateFromCombination(ItemUsable itemUsable)
+        {
+            // TODO: update quest
+            UpdateFromAddItem(itemUsable, false);
+        }
+
+        public void UpdateFromAddItem(ItemUsable itemUsable, bool canceled)
+        {
+            var pair = inventory.AddItem(itemUsable);
+            itemMap.Add(pair);
+        }
+
+        public void UpdateQuestRewards(MaterialItemSheet materialItemSheet)
+        {
+
         }
 
         public int GetArmorId()

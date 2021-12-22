@@ -543,6 +543,8 @@ namespace Nekoyume.UI
 
         private void LocalStateItemEquipModify(ItemBase itemBase, bool equip)
         {
+            var avatarState = States.Instance.CurrentAvatarState;
+            ReactiveAvatarState.UpdateInventory(avatarState.inventory);
         }
 
         private bool TryToFindSlotAlreadyEquip(ItemBase item, out EquipmentSlot slot)

@@ -51,5 +51,10 @@ namespace Nekoyume.Model.Quest
         {
             return eventMap;
         }
+
+        public void UpdateCombinationEquipmentQuest(int recipeId)
+        {
+
+        }
     }
 }
