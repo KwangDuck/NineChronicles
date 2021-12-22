@@ -318,6 +318,86 @@ namespace Nekoyume.Game
 
             // TODO: remote request
 
+            // TODO: remote request
+            var tableSheets = Game.instance.TableSheets;
+            var avatarState = States.Instance.CurrentAvatarState;
+
+            var recipeId = recipeInfo.RecipeId;
+            var subRecipeId = recipeInfo.SubRecipeId;
+
+            // - validate requred cleared stage
+            // - validate slotindex
+            // - validate work
+            var costActionPoint = 0;
+            var requiredItems = new Dictionary<int, int>();
+
+            // - validate recipeId
+            var consumableItemRecipeSheet = tableSheets.ConsumableItemRecipeSheet;
+            if (!consumableItemRecipeSheet.TryGetValue(recipeId, out var recipeRow))
+            {
+                throw new Exception();
+            }
+
+            // - validate recipe result equipmentId
+            var consumableItemSheet = tableSheets.ConsumableItemSheet;
+            if (!consumableItemSheet.TryGetValue(recipeRow.ResultConsumableItemId, out var consumableRow))
+            {
+                throw new Exception();
+            }
+
+            // - validate recipe material
+            var materialItemSheet = tableSheets.MaterialItemSheet;
+            for (var i = recipeRow.Materials.Count; i > 0; i--)
+            {
+                var materialInfo = recipeRow.Materials[i - 1];
+                if (!materialItemSheet.TryGetValue(materialInfo.Id, out var materialRow))
+                {
+                    throw new Exception();
+                }
+
+                if (requiredItems.ContainsKey(materialRow.Id))
+                {
+                    requiredItems[materialRow.Id] += materialInfo.Count;
+                }
+                else
+                {
+                    requiredItems[materialRow.Id] = materialInfo.Count;
+                }
+            }
+
+            costActionPoint += recipeRow.RequiredActionPoint;
+
+            // - remove required materials
+            var inventory = avatarState.inventory;
+            foreach (var pair in requiredItems.OrderBy(pair => pair.Key))
+            {
+                if (!materialItemSheet.TryGetValue(pair.Key, out var materialRow) ||
+                    !inventory.RemoveItem(materialRow.Id, pair.Value))
+                {
+                    throw new Exception();
+                }
+            }
+
+            // - substract required action point
+            if (costActionPoint > 0)
+            {
+                if (avatarState.actionPoint < costActionPoint)
+                {
+                    throw new Exception();
+                }
+
+                //avatarState.actionPoint -= costActionPoint;
+            }
+
+            // - create consumable
+            var consumable = ItemFactory.CreateItemUsable(consumableRow) as Consumable;
+            avatarState.UpdateFromCombination(consumable);
+            avatarState.UpdateQuestRewards(materialItemSheet);
+
+            // - update slot
+            // - create mail
+
+
             var res = new RES_CombinationConsumable
             {
                 Header = new RES_Header { }
@@ -327,9 +407,8 @@ namespace Nekoyume.Game
                 .Do(result =>
                 {
                     var (req, res) = result;
-                    if (res.Header.ErrorCode != ENUM_ErrorCode.ERR_SUCCESS)
-                    {
-                        // TODO: update combination sloot state
+                    if (res.Header.ErrorCode == ENUM_ErrorCode.ERR_SUCCESS)
+                    {                       
 
                         // TODO: nofity
                         var format = L10nManager.Localize("NOTIFICATION_COMBINATION_COMPLETE");
@@ -371,27 +450,27 @@ namespace Nekoyume.Game
             var equipmentItemReceiptSheet = tableSheets.EquipmentItemRecipeSheet;
             if (!equipmentItemReceiptSheet.TryGetValue(recipeId, out var recipeRow))
             {
-
+                throw new Exception();
             }
 
             // - validate recipe unlocked
             if (!avatarState.worldInformation.IsStageCleared(recipeRow.UnlockStage))
             {
-
+                throw new Exception();
             }
 
             // - validate recipe equipmentId
             var equipmentItemSheet = tableSheets.EquipmentItemSheet;
             if (!equipmentItemSheet.TryGetValue(recipeRow.ResultEquipmentId, out var equipmentRow))
             {
-
+                throw new Exception();
             }
 
             // - validate recipe material
             var materialItemSheet = tableSheets.MaterialItemSheet;
             if (!materialItemSheet.TryGetValue(recipeRow.MaterialId, out var materialRow))
             {
-
+                throw new Exception();
             }
 
             if (requiredItems.ContainsKey(materialRow.Id))
@@ -412,13 +491,13 @@ namespace Nekoyume.Game
                 // - validate sub receiptId
                 if (!recipeRow.SubRecipeIds.Contains(subRecipeId.Value))
                 {
-
+                    throw new Exception();
                 }
 
                 var equipmentItemSubRecipeSheetV2 = tableSheets.EquipmentItemSubRecipeSheetV2;
                 if (!equipmentItemSubRecipeSheetV2.TryGetValue(subRecipeId.Value, out subRecipeRow))
                 {
-
+                    throw new Exception();
                 }
 
                 // - validate subrecipe material
@@ -427,7 +506,7 @@ namespace Nekoyume.Game
                     var materialInfo = subRecipeRow.Materials[i - 1];
                     if (!materialItemSheet.TryGetValue(materialInfo.Id, out materialRow))
                     {
-
+                        throw new Exception();
                     }
 
                     if (requiredItems.ContainsKey(materialRow.Id))
@@ -454,7 +533,7 @@ namespace Nekoyume.Game
                 if (!materialItemSheet.TryGetValue(pair.Key, out materialRow) ||
                     !inventory.RemoveItem(materialRow.Id, pair.Value))
                 {
-
+                    throw new Exception();
                 }
             }
 
@@ -463,10 +542,11 @@ namespace Nekoyume.Game
             {
                 if (avatarState.actionPoint < costActionPoint)
                 {
-
+                    throw new Exception();
                 }
 
                 // TODO: update action point
+                //avatarState.actionPoint -= costActionPoint;
             }
 
             // - subtract required NGC
@@ -479,7 +559,7 @@ namespace Nekoyume.Game
             var equipment = ItemFactory.CreateItemUsable(equipmentRow) as Equipment;
             if (!(subRecipeRow is null))
             {
-
+                // TODO; something
             }
 
             // - add or update equipment
@@ -997,6 +1077,13 @@ namespace Nekoyume.Game
             };
 
             // remote request
+
+            var avatarState = States.Instance.CurrentAvatarState;
+            // - equip costumes
+            avatarState.EquipCostumes(costumes);
+
+            // - equip items
+            avatarState.EquipItems(equipments);
 
             var res = new RES_HackAndSlash
             {

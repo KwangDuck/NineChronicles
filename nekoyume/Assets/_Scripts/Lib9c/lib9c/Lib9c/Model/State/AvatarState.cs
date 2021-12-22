@@ -85,6 +85,56 @@ namespace Nekoyume.Model.State
 
         }
 
+        public void EquipItems(List<Equipment> equipments)
+        {
+            // equippable items
+            var equippableItems = inventory.Items
+                .Select(Item => Item.item)
+                .OfType<Equipment>()
+                .ToList();
+
+            // unequip
+            foreach (var equippableItem in equippableItems.Where(item => item.Equipped))
+            {
+                equippableItem.Unequip();
+            }
+
+            // equip            
+            foreach (var equipment in equipments)
+            {
+                var equippableItem = equippableItems.Where(item => item.Id == equipment.Id).FirstOrDefault();
+                if (equippableItem != null)
+                {
+                    equippableItem.Equip();
+                }
+            }
+        }
+
+        public void EquipCostumes(List<Costume> costumes)
+        {
+            // equipped costumes
+            var equippedCostumes = inventory.Items
+                .Select(item => item.item)
+                .OfType<Costume>()
+                .ToList();
+
+            // unequip
+            foreach (var costume in equippedCostumes.Where(costume => costume.Equipped))
+            {
+                costume.Unequip();
+            }
+
+            // equip
+            foreach (var costume in costumes)
+            {
+                var equippableCostume = equippedCostumes.Where(item => item.Id == costume.Id).FirstOrDefault();
+                if (equippableCostume != null)
+                {
+                    equippableCostume.Unequip();
+                }
+            }
+        }
+
         public void Update(StageSimulator stageSimulator, MaterialItemSheet materialItemSheet)
         {
             var player = stageSimulator.Player;

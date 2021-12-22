@@ -13,8 +13,8 @@ namespace Nekoyume.Model.Item
     public class Equipment : ItemUsable, IEquippableItem
     {
         // FIXME: Whether the equipment is equipped or not has no asset value and must be removed from the state.
-        public bool equipped;
-        public int level;
+        public bool equipped { get; set; }
+        public int level { get; set; }
         public int optionCountFromCombination;
 
         public DecimalStat Stat { get; }
