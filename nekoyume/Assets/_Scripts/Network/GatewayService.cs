@@ -137,6 +137,7 @@ public class GatewayService : MonoBehaviour
 
     public void ConnectGateway()
     {
+        if(channel == null) return;
         GatewayDispatcher = MagicOnionClient.Create<IGatewayDispatcher>(channel);
     }
 

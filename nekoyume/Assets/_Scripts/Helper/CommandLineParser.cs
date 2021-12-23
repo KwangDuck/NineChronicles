@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Nekoyume.L10n;
 using UnityEngine;
+using System.Threading.Tasks;
 
 namespace Nekoyume.Helper
 {
@@ -333,35 +334,43 @@ namespace Nekoyume.Helper
             }
         }
 
-        public static CommandLineOptions Load(string localPath)
+        public static async Task<CommandLineOptions> Load(string localPath)
         {
-            var options = CommandLineParser.GetCommandLineOptions();
-            if (options != null && !options.Empty)
-            {
-                Debug.Log($"Get options from commandline.");
-                return options;
-            }
+            // var options = CommandLineParser.GetCommandLineOptions();
+            // if (options != null && !options.Empty)
+            // {
+            //     Debug.Log($"Get options from commandline.");
+            //     return options;
+            // }
 
-            var jsonOptions = new JsonSerializerOptions
-            {
-                AllowTrailingCommas = true,
-                Converters =
-                {
-                    new StringEnumerableConverter(),
-                },
-                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-                PropertyNameCaseInsensitive = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                ReadCommentHandling = JsonCommentHandling.Skip,
-            };
+            // var jsonOptions = new JsonSerializerOptions
+            // {
+            //     AllowTrailingCommas = true,
+            //     Converters =
+            //     {
+            //         new StringEnumerableConverter(),
+            //     },
+            //     DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+            //     PropertyNameCaseInsensitive = true,
+            //     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            //     ReadCommentHandling = JsonCommentHandling.Skip,
+            // };
 
-            if (File.Exists(localPath))
-            {
-                Debug.Log($"Get options from local: {localPath}");
-                return JsonSerializer.Deserialize<CommandLineOptions>(File.ReadAllText(localPath), jsonOptions);
-            }
+            // if (File.Exists(localPath))
+            // {
+            //     Debug.Log($"Get options from local: {localPath}");
+            // #if UNITY_EDITOR
+            //     string fileText = File.ReadAllText(localPath);
+            // #elif UNITY_ANDROID                
+            //     WWW fileData = new WWW(localPath);
+            //     while(!fileData.isDone) await Task.Yield();
+            //     string fileText = fileData.text;
+            // #endif
 
-            Debug.LogErrorFormat("Failed to find {0}. Using default options.", localPath);
+            //     return JsonSerializer.Deserialize<CommandLineOptions>(fileText, jsonOptions);
+            // }
+
+            // Debug.LogErrorFormat("Failed to find {0}. Using default options.", localPath);
             return new CommandLineOptions();
         }
 

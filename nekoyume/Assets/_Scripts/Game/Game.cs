@@ -49,7 +49,7 @@ namespace Nekoyume.Game
 
         #region Mono & Initialization
 
-        protected override void Awake()
+        protected override async void Awake()
         {
             Debug.Log("[Game] Awake() invoked");
 
@@ -57,7 +57,7 @@ namespace Nekoyume.Game
             Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
             base.Awake();
 
-            _options = CommandLineOptions.Load(
+            _options = await CommandLineOptions.Load(
                 CommandLineOptionsJsonPath
             );
 
@@ -77,14 +77,28 @@ namespace Nekoyume.Game
 #if UNITY_EDITOR
             if (useSystemLanguage)
             {
-                yield return L10nManager.Initialize().ToYieldInstruction();
+                Task task = L10nManager.Initialize();
+                yield return new WaitUntil(() => task.IsCompleted);
+            }
+            else
+            {       
+                Task task = L10nManager.Initialize(languageType);
+                yield return new WaitUntil(() => task.IsCompleted);
+                //yield return L10nManager.Initialize(languageType).Result.ToYieldInstruction();
+            }
+#else
+            Debug.Log("[Game] Start() Before L10nManager initialized");
+            if (useSystemLanguage)
+            {
+                Task task = L10nManager.Initialize();
+                yield return new WaitUntil(() => task.IsCompleted);
             }
             else
             {
-                yield return L10nManager.Initialize(languageType).ToYieldInstruction();
+               Task task = L10nManager.Initialize(languageType);
+                yield return new WaitUntil(() => task.IsCompleted);
             }
-#else
-            yield return L10nManager.Initialize(LanguageTypeMapper.ISO396(_options.Language)).ToYieldInstruction();
+            //yield return L10nManager.Initialize(LanguageTypeMapper.ISO396(_options.Language)).ToYieldInstruction();
 #endif
             Debug.Log("[Game] Start() L10nManager initialized");
 
@@ -243,6 +257,7 @@ namespace Nekoyume.Game
 
         private IEnumerator ClosePreloadingScene(float time)
         {
+            Debug.Log($"[Game] ClosePreloadingScene({time})");
             yield return new WaitForSeconds(time);
             Widget.Find<PreloadingScreen>().Close();
         }
