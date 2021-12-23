@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Nekoyume.L10n;
 using UnityEngine;
+using System.Threading.Tasks;
 
 namespace Nekoyume.Helper
 {
@@ -307,35 +308,69 @@ namespace Nekoyume.Helper
             }
         }
 
-        public static CommandLineOptions Load(string localPath)
+#if UNITY_EDITOR
+        [Option("aws-sink-guid", Required = false, HelpText = "Guid for aws cloudwatch logging.")]
+#else
+        [Option("aws-sink-guid", Required = true, HelpText = "Guid for aws cloudwatch logging.")]
+#endif
+        public string AwsSinkGuid
         {
-            var options = CommandLineParser.GetCommandLineOptions();
-            if (options != null && !options.Empty)
+            get => awsSinkGuid;
+            set
             {
-                Debug.Log($"Get options from commandline.");
-                return options;
+                awsSinkGuid = value;
+                Empty = false;
             }
+        }
 
-            var jsonOptions = new JsonSerializerOptions
+        [Option("api-server-host", Required = false, HelpText = "Host for the internal api client.")]
+        public string ApiServerHost
+        {
+            get => apiServerHost;
+            set
             {
-                AllowTrailingCommas = true,
-                Converters =
-                {
-                    new StringEnumerableConverter(),
-                },
-                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-                PropertyNameCaseInsensitive = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                ReadCommentHandling = JsonCommentHandling.Skip,
-            };
-
-            if (File.Exists(localPath))
-            {
-                Debug.Log($"Get options from local: {localPath}");
-                return JsonSerializer.Deserialize<CommandLineOptions>(File.ReadAllText(localPath), jsonOptions);
+                apiServerHost = value;
+                Empty = false;
             }
+        }
 
-            Debug.LogErrorFormat("Failed to find {0}. Using default options.", localPath);
+        public static async Task<CommandLineOptions> Load(string localPath)
+        {
+            // var options = CommandLineParser.GetCommandLineOptions();
+            // if (options != null && !options.Empty)
+            // {
+            //     Debug.Log($"Get options from commandline.");
+            //     return options;
+            // }
+
+            // var jsonOptions = new JsonSerializerOptions
+            // {
+            //     AllowTrailingCommas = true,
+            //     Converters =
+            //     {
+            //         new StringEnumerableConverter(),
+            //     },
+            //     DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+            //     PropertyNameCaseInsensitive = true,
+            //     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            //     ReadCommentHandling = JsonCommentHandling.Skip,
+            // };
+
+            // if (File.Exists(localPath))
+            // {
+            //     Debug.Log($"Get options from local: {localPath}");
+            // #if UNITY_EDITOR
+            //     string fileText = File.ReadAllText(localPath);
+            // #elif UNITY_ANDROID                
+            //     WWW fileData = new WWW(localPath);
+            //     while(!fileData.isDone) await Task.Yield();
+            //     string fileText = fileData.text;
+            // #endif
+
+            //     return JsonSerializer.Deserialize<CommandLineOptions>(fileText, jsonOptions);
+            // }
+
+            // Debug.LogErrorFormat("Failed to find {0}. Using default options.", localPath);
             return new CommandLineOptions();
         }
 

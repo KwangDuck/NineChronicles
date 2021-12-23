@@ -21,8 +21,10 @@ namespace Nekoyume.UI
         {
             base.Awake();
             indicator.Close();
+        #if UNITY_EDITOR
             videoPlayer.clip = showClip;
             videoPlayer.Prepare();
+        #endif
         }
 
         public override void Show(bool ignoreShowAnimation = false)
@@ -32,26 +34,30 @@ namespace Nekoyume.UI
             {
                 indicator.Show(Message);
             }
-
+        #if UNITY_EDITOR
             videoPlayer.Play();
             videoPlayer.loopPointReached += OnShowVideoEnded;
+        #endif
         }
 
         public override async void Close(bool ignoreCloseAnimation = false)
-        {
-            videoPlayer.Stop();
+        {            
+        #if UNITY_EDITOR
+            videoPlayer.Stop();        
+
             if (!GameConfig.IsEditor)
             {
                 Find<Synopsis>().Show();
             }
             else
+        #endif
             {
                 PlayerFactory.Create();
 
                 // current avatar state
                 var avatarState = States.Instance.CurrentAvatarState;
                 if (avatarState == null)
-                {
+                {                    
                     EnterLogin();
                 }
                 else
@@ -59,16 +65,16 @@ namespace Nekoyume.UI
                     if (avatarState.inventory == null ||
                         avatarState.questList == null ||
                         avatarState.worldInformation == null)
-                    {
+                    {                        
                         EnterLogin();
                     }
                     else
-                    {
+                    {                        
                         Game.Event.OnRoomEnter.Invoke(false);
                     }
                 }
             }
-
+            
             base.Close(ignoreCloseAnimation);
             indicator.Close();
         }

@@ -128,6 +128,7 @@ namespace Nekoyume.Game
 
         public void Initialize()
         {
+            Debug.Log($"{nameof(Stage)}.{nameof(Initialize)}() is called.");
             objectPool.Initialize();
             dropItemFactory.Initialize();
             SkillController = new SkillController(objectPool);
@@ -234,6 +235,7 @@ namespace Nekoyume.Game
 
         private void OnRoomEnter(bool showScreen)
         {
+            Debug.Log("[Stage] OnRoomEnter is called.");
             showLoadingScreen = showScreen;
             gameObject.AddComponent<RoomEntering>();
             IsInStage = false;

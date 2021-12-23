@@ -14,6 +14,7 @@ namespace Nekoyume.Game.Entrance
 
         private IEnumerator Act()
         {
+            Debug.Log("[RoomEntering] Act is called.");
             var stage = Game.instance.Stage;
             if (stage.showLoadingScreen)
             {

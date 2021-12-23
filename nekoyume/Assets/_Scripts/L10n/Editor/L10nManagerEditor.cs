@@ -91,7 +91,7 @@ namespace Nekoyume.L10n.Editor
         }
 
         [MenuItem("Tools/L10n/Generate Unicode Hex Range Files")]
-        public static void GenerateUnicodeHexRangeFiles()
+        public static async void GenerateUnicodeHexRangeFiles()
         {
             PrepareCharacterFilesDirectory();
 
@@ -106,7 +106,7 @@ namespace Nekoyume.L10n.Editor
 
             foreach (var languageType in Enum.GetValues(typeof(LanguageType)).OfType<LanguageType>())
             {
-                var dict = L10nManager.GetDictionary(languageType);
+                var dict = await L10nManager.GetDictionary(languageType);
                 var unicodeHexes = dict.Values
                     .SelectMany(value => value.ToCharArray())
                     .Union(defaultCharacters)

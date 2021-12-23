@@ -137,8 +137,8 @@ public class GatewayService : MonoBehaviour
 
     public void ConnectGateway()
     {
-        if (channel != null)
-            GatewayDispatcher = MagicOnionClient.Create<IGatewayDispatcher>(channel);
+        if(channel == null) return;
+        GatewayDispatcher = MagicOnionClient.Create<IGatewayDispatcher>(channel);
     }
 
     public async Task<RES_RetrieveAllMasterData> ReqRetrieveAllMasterData()

@@ -5,10 +5,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using CsvHelper;
 using UniRx;
 using UnityEngine;
+using System.Threading.Tasks;
 
 namespace Nekoyume.L10n
 {
@@ -91,15 +93,35 @@ namespace Nekoyume.L10n
 
         #endregion
 
+        private static List<string> streamingFiles = new List<string>() {
+            "buff_description.csv",
+            "buff_name.csv",
+            "character_name.csv",
+            "common.csv",
+            "elemental_type.csv",
+            "enum_type.csv",
+            "error.csv",
+            "help_popup.csv",
+            "item_description.csv",
+            "item_name.csv",
+            "notification.csv",
+            "quest.csv",
+            "skill_name.csv",
+            "stage_description.csv",
+            "tutorial.csv",
+            "world_name.csv",
+        };
+
         #region Control
 
-        public static IObservable<LanguageType> Initialize()
+        public static async Task<IObservable<LanguageType>> Initialize()
         {
-            return Initialize(CurrentLanguage);
+            return await Initialize(CurrentLanguage);
         }
 
-        public static IObservable<LanguageType> Initialize(LanguageType languageType)
+        public static async Task<IObservable<LanguageType>> Initialize(LanguageType languageType)
         {
+            Debug.Log($"{nameof(L10nManager)}.{nameof(Initialize)}() state is {CurrentState.ToString()}, LanguageType is {languageType.ToString()}");
 #if TEST_LOG
             Debug.Log($"{nameof(L10nManager)}.{nameof(Initialize)}() called.");
 #endif
@@ -119,20 +141,24 @@ namespace Nekoyume.L10n
             }
 
             CurrentState = State.InInitializing;
-            InitializeInternal(languageType);
+            await InitializeInternal(languageType);
+
+            Debug.Log($"{nameof(L10nManager)}.{nameof(Initialize)}() return");
 
             return CurrentState == State.Initialized
                 ? Observable.Empty(CurrentLanguage)
                 : OnInitialize;
         }
 
-        private static void InitializeInternal(LanguageType languageType)
+        private static async Task InitializeInternal(LanguageType languageType)
         {
-            _dictionary = GetDictionary(languageType);
+            Debug.Log($"{nameof(L10nManager)}.{nameof(InitializeInternal)}()");
+            _dictionary = await GetDictionary(languageType);
             CurrentLanguage = languageType;
             _settings = Resources.Load<L10nSettings>(SettingsAssetPathInResources);
             CurrentState = State.Initialized;
             OnInitializeSubject.OnNext(CurrentLanguage);
+            Debug.Log($"{nameof(L10nManager)}.{nameof(InitializeInternal)}() end");
         }
 
         public static IObservable<LanguageType> SetLanguage(LanguageType languageType)
@@ -165,9 +191,9 @@ namespace Nekoyume.L10n
                 : OnLanguageChange;
         }
 
-        private static void SetLanguageInternal(LanguageType languageType)
+        private static async void SetLanguageInternal(LanguageType languageType)
         {
-            _dictionary = GetDictionary(languageType);
+            _dictionary = await GetDictionary(languageType);
             CurrentLanguage = languageType;
             CurrentState = State.Initialized;
             OnLanguageChangeSubject.OnNext(CurrentLanguage);
@@ -175,14 +201,16 @@ namespace Nekoyume.L10n
 
         #endregion
 
-        public static IReadOnlyDictionary<string, string> GetDictionary(LanguageType languageType)
+        public static async Task<IReadOnlyDictionary<string, string>> GetDictionary(LanguageType languageType)
         {
+            var dictionary = new Dictionary<string, string>();
+
+            #if UNITY_EDITOR
             if (!Directory.Exists(CsvFilesRootDirectoryPath))
             {
                 throw new DirectoryNotFoundException(CsvFilesRootDirectoryPath);
             }
 
-            var dictionary = new Dictionary<string, string>();
             var csvFileInfos = new DirectoryInfo(CsvFilesRootDirectoryPath).GetFiles("*.csv");
             foreach (var csvFileInfo in csvFileInfos)
             {
@@ -232,6 +260,65 @@ namespace Nekoyume.L10n
                     }
                 }
             }
+            #elif UNITY_ANDROID
+            foreach (var fileName in streamingFiles)
+            {
+                var filePath = Path.Combine(CsvFilesRootDirectoryPath, fileName);
+
+                WWW fileData = new WWW(filePath);
+                while(!fileData.isDone) await Task.Yield();
+                var text = fileData.text;
+
+                byte[] byteArray = Encoding.UTF8.GetBytes(text);
+                MemoryStream stream = new MemoryStream(byteArray);
+                
+                using (var streamReader = new StreamReader(stream))
+                using (var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture))
+                {
+                    csvReader.Configuration.PrepareHeaderForMatch =
+                        (header, index) => header.ToLower();
+                    var records = csvReader.GetRecords<L10nCsvModel>();
+                    var recordsIndex = 0;
+                    try
+                    {
+                        foreach (var record in records)
+                        {
+//#if TEST_LOG
+                        Debug.Log($"{fileName}: {recordsIndex}");
+//#endif
+                            var key = record.Key;
+                            if (string.IsNullOrEmpty(key))
+                            {
+                                recordsIndex++;
+                                continue;
+                            }
+
+                            var value = (string) typeof(L10nCsvModel)
+                                .GetProperty(languageType.ToString())?
+                                .GetValue(record);
+
+                            if (string.IsNullOrEmpty(value))
+                            {
+                                value = record.English;
+                            }
+
+                            if (dictionary.ContainsKey(key))
+                            {
+                                throw new L10nAlreadyContainsKeyException(
+                                    $"key: {key}, recordsIndex: {recordsIndex}, csvFileInfo: {fileName}");
+                            }
+
+                            dictionary.Add(key, value);
+                            recordsIndex++;
+                        }
+                    }
+                    catch (CsvHelper.MissingFieldException e)
+                    {
+                        Debug.LogWarning($"`{fileName}` file has empty field.\n{e}");
+                    }
+                }
+            }
+            #endif
 
             return dictionary;
         }
