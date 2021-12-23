@@ -41,7 +41,7 @@ namespace Nekoyume.Game
     public class Stage : MonoBehaviour, IStage
     {
         public const float StageStartPosition = -1.2f;
-        private const float SkillDelay = 0.1f;
+        private const float SkillDelay = 0.1f;        
         public ObjectPool objectPool;
         public NPCFactory npcFactory;
         public DropItemFactory dropItemFactory;
@@ -88,6 +88,7 @@ namespace Nekoyume.Game
         public bool IsRepeatStage { get; set; }
         public bool IsAvatarStateUpdatedAfterBattle { get; set; }
         public int PlayCount { get; set; }
+        public bool IsPlayStage { get; private set; }
 
         public Vector3 SelectPositionBegin(int index) =>
             new Vector3(-2.15f + index * 2.22f, -1.79f, 0.0f);
@@ -103,11 +104,19 @@ namespace Nekoyume.Game
         public IObservable<Stage> onEnterToStageEnd => _onEnterToStageEnd;
 
         public readonly ISubject<Stage> OnRoomEnterEnd = new Subject<Stage>();
-
         #endregion
+        
+        #region Speed
+        public const int DefaultSpeed = 1;
+        public const int MaxSpeed = 4;        
+        private int prevStageSpeed = DefaultSpeed;
+        private IntReactiveProperty stageSpeed = new IntReactiveProperty(DefaultSpeed);
+        public IObservable<int> StageSpeedObservable => stageSpeed;
+        public int StageSpeed { set => stageSpeed.Value = value; get => stageSpeed.Value; }
+        #endregion Speed
 
         protected void Awake()
-        {
+        {            
             _camera = ActionCamera.instance.Cam;
             if (_camera is null)
             {
@@ -124,6 +133,11 @@ namespace Nekoyume.Game
             Event.OnRoomEnter.AddListener(OnRoomEnter);
             Event.OnStageStart.AddListener(OnStageStart);
             Event.OnRankingBattleStart.AddListener(OnRankingBattleStart);
+
+            StageSpeedObservable.Where(_ => IsPlayStage).Subscribe(speed => 
+            {
+                Time.timeScale = (float)speed;
+            });
         }
 
         public void Initialize()
@@ -133,7 +147,7 @@ namespace Nekoyume.Game
             dropItemFactory.Initialize();
             SkillController = new SkillController(objectPool);
             BuffController = new BuffController(objectPool);
-            TutorialController = new TutorialController(MainCanvas.instance.Widgets);
+            TutorialController = new TutorialController(MainCanvas.instance.Widgets);            
         }
 
         private void OnStageStart(BattleLog log)
@@ -314,6 +328,9 @@ namespace Nekoyume.Game
 
         private IEnumerator CoPlayStage(BattleLog log)
         {
+            IsPlayStage = true;
+            StageSpeed = prevStageSpeed;
+            
             var avatarState = States.Instance.CurrentAvatarState;
             prevFood = avatarState.inventory.Items
                 .Select(i => i.item)
@@ -329,7 +346,12 @@ namespace Nekoyume.Game
             {
                 yield return StartCoroutine(e.CoExecute(this));
             }
+                        
+            prevStageSpeed = StageSpeed;
+            StageSpeed = DefaultSpeed;
+            yield return null;            
 
+			IsPlayStage = false;
             yield return StartCoroutine(CoStageEnd(log));
             ClearBattle();
         }
@@ -445,7 +467,7 @@ namespace Nekoyume.Game
             AudioController.instance.PlayMusic(data.BGM);
             IsShowHud = true;
 
-            Event.OnStageReady.Invoke();
+            Event.OnStageReady.Invoke();   
         }
 
         private IEnumerator CoRankingBattleEnter(BattleLog log)
@@ -472,7 +494,7 @@ namespace Nekoyume.Game
         }
 
         private IEnumerator CoStageEnd(BattleLog log)
-        {
+        {            
             IsAvatarStateUpdatedAfterBattle = false;
             // NOTE ActionRenderHandler.Instance.Pending should be false before _onEnterToStageEnd.OnNext() invoked.
             //ActionRenderHandler.Instance.Pending = false;

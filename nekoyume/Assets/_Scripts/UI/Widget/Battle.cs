@@ -27,6 +27,9 @@ namespace Nekoyume.UI
 
         [SerializeField]
         private Toggle exitToggle = null;
+        
+        [SerializeField]
+        private SpeedButton speedButton = null;
 
         [SerializeField]
         private HelpButton helpButton = null;
@@ -50,6 +53,7 @@ namespace Nekoyume.UI
         public BossStatus EnemyPlayerStatus => enemyPlayerStatus;
         public StageProgressBar StageProgressBar => stageProgressBar;
         public ComboText ComboText => comboText;
+        public SpeedButton SpeedButton => speedButton;
         public const int RequiredStageForExitButton = 3;
 
         protected override void Awake()
@@ -78,7 +82,7 @@ namespace Nekoyume.UI
                         NotificationCell.NotificationType.Information);
                     stage.IsRepeatStage = false;
                 }
-            });
+            });            
 
             Game.Event.OnGetItem.AddListener(_ =>
             {
@@ -91,6 +95,9 @@ namespace Nekoyume.UI
                 var target = headerMenu.GetToggle(HeaderMenuStatic.ToggleType.AvatarInfo);
                 VFXController.instance.CreateAndChase<DropItemInventoryVFX>(target, Vector3.zero);
             });
+
+            SpeedButton.SetButtonAction(Game.Game.instance.Stage);
+
             CloseWidget = null;
         }
 
