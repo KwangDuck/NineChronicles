@@ -307,32 +307,6 @@ namespace Nekoyume.Helper
             }
         }
 
-#if UNITY_EDITOR
-        [Option("aws-sink-guid", Required = false, HelpText = "Guid for aws cloudwatch logging.")]
-#else
-        [Option("aws-sink-guid", Required = true, HelpText = "Guid for aws cloudwatch logging.")]
-#endif
-        public string AwsSinkGuid
-        {
-            get => awsSinkGuid;
-            set
-            {
-                awsSinkGuid = value;
-                Empty = false;
-            }
-        }
-
-        [Option("api-server-host", Required = false, HelpText = "Host for the internal api client.")]
-        public string ApiServerHost
-        {
-            get => apiServerHost;
-            set
-            {
-                apiServerHost = value;
-                Empty = false;
-            }
-        }
-
         public static CommandLineOptions Load(string localPath)
         {
             var options = CommandLineParser.GetCommandLineOptions();

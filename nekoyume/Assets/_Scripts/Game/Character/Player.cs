@@ -25,7 +25,7 @@ namespace Nekoyume.Game.Character
         public long EXP = 0;
         public long EXPMax { get; private set; }
 
-        public Inventory Inventory;
+        public Inventory Inventory { get; private set; }
         public TouchHandler touchHandler;
 
         public List<Costume> Costumes =>
@@ -119,6 +119,7 @@ namespace Nekoyume.Game.Character
             var tableSheets = Game.instance.TableSheets;
             Set(new Model.Player(avatarState, tableSheets.CharacterSheet,
                 tableSheets.CharacterLevelSheet, tableSheets.EquipmentItemSetEffectSheet));
+            Inventory = avatarState.inventory;
         }
 
         public override void Set(Model.CharacterBase model, bool updateCurrentHP = false)

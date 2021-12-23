@@ -21,7 +21,8 @@ namespace Nekoyume.Model.Item
 
         public static Costume CreateCostume(CostumeItemSheet.Row row)
         {
-            return new Costume(row);
+            var id = Guid.NewGuid().ToString();
+            return new Costume(id, row);
         }
 
         public static Material CreateMaterial(MaterialItemSheet sheet, int itemId)
@@ -38,33 +39,35 @@ namespace Nekoyume.Model.Item
 
         public static Consumable CreateConsumableItem(ConsumableItemSheet.Row itemRow)
         {
-            return new Consumable(itemRow);
+            var id = Guid.NewGuid().ToString();
+            return new Consumable(itemRow, id);
         }
 
         public static ItemUsable CreateItemUsable(ItemSheet.Row itemRow, int level = 0)
         {
+            var id = Guid.NewGuid().ToString();
             Equipment equipment = null;
 
             switch (itemRow.ItemSubType)
             {
                 // Consumable
                 case ItemSubType.Food:
-                    return new Consumable(itemRow as ConsumableItemSheet.Row);
+                    return new Consumable(itemRow as ConsumableItemSheet.Row, id);
                 // Equipment
                 case ItemSubType.Weapon:
-                    equipment = new Weapon(itemRow as EquipmentItemSheet.Row);
+                    equipment = new Weapon(itemRow as EquipmentItemSheet.Row, id);
                     break;
                 case ItemSubType.Armor:
-                    equipment = new Armor(itemRow as EquipmentItemSheet.Row);
+                    equipment = new Armor(itemRow as EquipmentItemSheet.Row, id);
                     break;
                 case ItemSubType.Belt:
-                    equipment = new Belt(itemRow as EquipmentItemSheet.Row);
+                    equipment = new Belt(itemRow as EquipmentItemSheet.Row, id);
                     break;
                 case ItemSubType.Necklace:
-                    equipment = new Necklace(itemRow as EquipmentItemSheet.Row);
+                    equipment = new Necklace(itemRow as EquipmentItemSheet.Row, id);
                     break;
                 case ItemSubType.Ring:
-                    equipment = new Ring(itemRow as EquipmentItemSheet.Row);
+                    equipment = new Ring(itemRow as EquipmentItemSheet.Row, id);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(itemRow.Id.ToString(CultureInfo.InvariantCulture));

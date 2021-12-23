@@ -386,7 +386,7 @@ namespace Nekoyume.Game
                     throw new Exception();
                 }
 
-                //avatarState.actionPoint -= costActionPoint;
+                avatarState.actionPoint -= costActionPoint;
             }
 
             // - create consumable
@@ -546,7 +546,7 @@ namespace Nekoyume.Game
                 }
 
                 // TODO: update action point
-                //avatarState.actionPoint -= costActionPoint;
+                avatarState.actionPoint -= costActionPoint;
             }
 
             // - subtract required NGC
@@ -605,6 +605,82 @@ namespace Nekoyume.Game
             };
 
             // remote request
+
+            var tableSheets = Game.instance.TableSheets;
+            var avatarState = States.Instance.CurrentAvatarState;
+
+            // - try get non fungible item
+            // - validate required block index
+            // - validate combination slot state
+
+            // - validate enhancement cost
+            var enhancementCostSheet = tableSheets.EnhancementCostSheetV2;
+            var enhancementCostRow = enhancementCostSheet.OrderedList
+                .FirstOrDefault(x => x.Grade == baseEquipment.Grade && x.Level == baseEquipment.level + 1 && x.ItemSubType == baseEquipment.ItemSubType);
+            if (enhancementCostRow is null)
+            {
+                throw new Exception();
+            }
+
+            // - is max level?
+            var maxLevel = enhancementCostSheet.OrderedList
+                .Where(x => x.Grade == baseEquipment.Grade)
+                .Max(x => x.Level);
+            if (baseEquipment.level >= maxLevel)
+            {
+                throw new Exception();
+            }
+
+            // - get material item
+            // - validate material item required bloxk index
+            // - validate material item (id, grade, level, subType)
+
+            // - substract action point
+            var requiredActionPoint = GameConfig.EnhanceEquipmentCostAP;
+            if (avatarState.actionPoint < requiredActionPoint)
+            {
+                throw new Exception();
+            }
+            avatarState.actionPoint -= requiredActionPoint;
+
+            // - substract ngc
+            var requiredNgc = enhancementCostRow.Cost;
+            if (requiredNgc > 0)
+            {
+                // - transfer ngc
+            }
+
+            // - unequip items
+            baseEquipment.Unequip();
+            materialEquipment.Unequip();
+
+            // - execute enhancement
+            ENUM_ItemEnhancementResult _GetEnhancementResult(EnhancementCostSheetV2.Row row, Random random)
+            {
+                var rand = random.Next(1, GameConfig.MaximumProbability + 1);
+                if (rand <= row.GreatSuccessRatio)
+                    return ENUM_ItemEnhancementResult.GreatSuccess;
+                return rand <= row.GreatSuccessRatio + row.SuccessRatio ? ENUM_ItemEnhancementResult.Success : ENUM_ItemEnhancementResult.Fail;
+            }
+            var random = new Random();
+            var enhancementResult = _GetEnhancementResult(enhancementCostRow, random);
+            if (enhancementResult != ENUM_ItemEnhancementResult.Fail)
+            {
+                baseEquipment.LevelUpV2(random, enhancementCostRow, enhancementResult == ENUM_ItemEnhancementResult.GreatSuccess);
+            }
+            // - update required block count
+
+            // - remove material equipment
+            avatarState.inventory.RemoveNonFungibleItem(materialEquipment.ItemId);
+
+            // - send item enhance mail
+            avatarState.inventory.RemoveNonFungibleItem(baseEquipment.ItemId);
+            avatarState.UpdateFromItemEnhancement(baseEquipment);
+
+            // - update quest reward
+
+            // - update slot state
+
 
             var res = new RES_ItemEnhancement
             {

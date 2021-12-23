@@ -9,13 +9,12 @@ namespace Nekoyume.Model.Item
         // FIXME: Whether the equipment is equipped or not has no asset value and must be removed from the state.
         public bool equipped = false;
         public string SpineResourcePath { get; }
-
-        public int ItemId { get; }
+        public override string ItemId { get; }
         public bool Equipped => equipped;
 
-        public Costume(CostumeItemSheet.Row data) : base(data)
+        public Costume(string id, CostumeItemSheet.Row data) : base(data)
         {
-            ItemId = data.Id;
+            ItemId = id;
             SpineResourcePath = data.SpineResourcePath;
         }
 

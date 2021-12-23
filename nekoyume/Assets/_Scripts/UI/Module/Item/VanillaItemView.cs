@@ -67,7 +67,9 @@ namespace Nekoyume.UI.Module
 
             var itemSprite = SpriteHelper.GetItemIcon(itemRow.Id);
             if (itemSprite is null)
-                throw new FailedToLoadResourceException<Sprite>(itemRow.Id.ToString());
+            {
+                //throw new FailedToLoadResourceException<Sprite>(itemRow.Id.ToString());
+            }
 
             iconImage.enabled = true;
             iconImage.overrideSprite = itemSprite;

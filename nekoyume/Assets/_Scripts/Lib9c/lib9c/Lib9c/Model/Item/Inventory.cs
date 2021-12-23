@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Gateway.Protocol;
 using Nekoyume.Battle;
 using Nekoyume.Model.State;
 
@@ -10,12 +9,30 @@ namespace Nekoyume.Model.Item
     [Serializable]
     public class Inventory : IState
     {
-        [Serializable]
-        public class Item : IState, IComparer<Item>
+        public class FungibleItem : Item
         {
+            public FungibleItem(ItemBase itemBase, int count = 1) : base(itemBase, count)
+            {
+                Id = itemBase.ItemId;
+            }
+        }
+
+        public class NonFungibleItem : Item
+        {
+            public NonFungibleItem(ItemBase itemBase, int count = 1) : base(itemBase, count)
+            {
+                Id = itemBase.ItemId;
+            }
+        }
+
+
+        [Serializable]
+        public class Item : IComparer<Item>
+        {
+            public string Id { get; protected set; }
             public ItemBase item { get; private set; }
-            public int count = 0;
-            public ILock Lock;
+            public int count { get; set; }
+            public ILock Lock { get; private set; }
             public bool Locked => !(Lock is null);
 
             public Item(ItemBase itemBase, int count = 1)
@@ -77,6 +94,14 @@ namespace Nekoyume.Model.Item
 
         public IReadOnlyList<Item> Items => _items;
 
+        public IEnumerable<FungibleItem> FungibleItems => _items
+            .Where(item => item is FungibleItem)
+            .OfType<FungibleItem>();
+
+        public IEnumerable<NonFungibleItem> NonfungibleItems => _items
+            .Where(item => item is NonFungibleItem)
+            .OfType<NonFungibleItem>();
+
         public IEnumerable<Consumable> Consumables => _items
             .Select(item => item.item)
             .OfType<Consumable>();
@@ -95,11 +120,6 @@ namespace Nekoyume.Model.Item
 
         public Inventory()
         {
-        }
-
-        public Inventory(List<Item> items)
-        {
-            _items = items;
         }
 
         protected bool Equals(Inventory other)
@@ -125,35 +145,179 @@ namespace Nekoyume.Model.Item
             return (_items != null ? _items.GetHashCode() : 0);
         }
 
-        public KeyValuePair<int, int> AddItem(ItemBase itemBase, int count = 1, ILock iLock = null)
+        #region FungibleItem
+        public FungibleItem AddFungibleItem(ItemBase itemBase, int count = 1, ILock ilock = null)
         {
-            var item = _items
-                .Where(e => e.item.Id == itemBase.Id)
-                .FirstOrDefault(e => !e.Locked);
+            var item = FungibleItems
+                .FirstOrDefault(e => e.item.Equals(itemBase) && !e.Locked);            
             if (item is null)
             {
-                item = new Item(itemBase, count);
+                // add new item
+                item = new FungibleItem(itemBase, count);
                 _items.Add(item);
             }
             else
             {
+                // append count
                 item.count += count;
             }
 
-            if (!(iLock is null))
+            if (!(ilock is null))
             {
-                item.LockUp(iLock);
+                item.LockUp(ilock);
             }
-            //_items.Sort();
+
+            return item;
+        }
+
+        public bool HasFungibleItem(int id, int count)
+        {
+            var totalCount = GetFungibleItemCount(id);
+            return totalCount >= count;
+        }
+
+        public int GetFungibleItemCount(int id)
+        {
+            return FungibleItems
+                .Where(e => e.Id == id.ToString())
+                .DefaultIfEmpty()
+                .Sum(e => e.count);
+        }
+
+        public FungibleItem GetFungibleItem(int id)
+        {
+            return FungibleItems
+                .Where(e => e.Id == id.ToString())
+                .FirstOrDefault();
+        }
+
+        public bool RemoveFungibleItem(int id, int count = 1)
+        {
+            var item = FungibleItems
+                .Where(e => e.Id == id.ToString())
+                .Where(e => !e.Locked)
+                .FirstOrDefault();
+            if (item == null)
+            {
+                return false;
+            }
+
+            if (item.count > count)
+            {
+                item.count -= count;
+            }
+            else
+            {
+                _items.Remove(item);
+            }
+            return true;
+        }
+        #endregion
+
+        #region NonFungibleItem
+        public NonFungibleItem AddNonFungibleItem(ItemBase itemBase, ILock ilock = null)
+        {
+            var item = new NonFungibleItem(itemBase);
+            if (!(ilock is null))
+            {
+                item.LockUp(ilock);
+            }
+            _items.Add(item);
+            return item;
+        }
+
+        public bool HasNonFungibleItem(string id)
+        {
+            var item = GetNonFungibleItem(id);
+            return item != null;
+        }
+
+        public NonFungibleItem GetNonFungibleItem(string id)
+        {
+            return NonfungibleItems
+                .Where(e => e.Id == id)
+                .FirstOrDefault();
+        }
+
+        public bool RemoveNonFungibleItem(string id)
+        {
+            var item = NonfungibleItems
+                .Where(e => e.Id == id)
+                .FirstOrDefault();
+            if (item == null)
+            {
+                return false;
+            }
+
+            _items.Remove(item);
+            return true;
+        }
+        #endregion
+
+        public KeyValuePair<int, int> AddItem(ItemBase itemBase, int count = 1, ILock ilock = null)
+        {
+            if (itemBase.ItemType == ItemType.Material)
+            {
+                AddFungibleItem(itemBase, count, ilock);
+            }
+            else
+            {
+                AddNonFungibleItem(itemBase, ilock);
+            }
             return new KeyValuePair<int, int>(itemBase.Id, count);
         }
 
-        public bool HasItem(int rowId, int count = 1) => _items
-            .Where(item =>
-                item.item.Id == rowId
-            ).Sum(item => item.count) >= count;
+        public bool HasItem(int rowId, int count = 1)
+        {
+            var totalCount = GetItemCount(rowId);
+            return totalCount >= count;
+        }
 
-        public bool HasNotification(int level, long blockIndex)
+        public int GetItemCount(int rowId)
+        {
+            return _items
+                .Where(e => e.item.Id == rowId)
+                .DefaultIfEmpty()
+                .Sum(e => e.count);
+        }
+
+        public bool TryGetItem(int rowId, out Item outItem)
+        {
+            var item = GetItem(rowId);
+            if (item == null)
+            {
+                outItem = default;
+                return false;
+            }
+
+            outItem = item;
+            return true;
+        }
+
+        public Item GetItem(int rowId)
+        {
+            return _items
+                .Where(e => e.item.Id == rowId)
+                .FirstOrDefault();
+        }
+
+        public bool RemoveItem(int rowId, int count = 1)
+        {
+            var item = GetItem(rowId);
+            if (item == null)
+            {
+                return false;
+            }
+
+            item.count -= count;
+            if (item.count <= 0)
+            {
+                _items.Remove(item);
+            }
+            return true;
+        }
+
+        public bool HasNotification(int level)
         {
             var availableSlots = UnlockHelper.GetAvailableEquipmentSlots(level);
 
@@ -188,23 +352,5 @@ namespace Nekoyume.Model.Item
             return false;
         }
 
-        public bool TryGetItem(int rowId, out List<Item> outItems)
-        {
-            outItems = new List<Item>();
-            foreach (var item in _items)
-            {
-                if (item.item.Id == rowId)
-                {
-                    outItems.Add(item);
-                }
-            }
-            return outItems.Count > 0;
-        }
-
-        public bool RemoveItem(int rowId, int count)
-        {
-            // TODO: implementation
-            return true;
-        }
     }
 }

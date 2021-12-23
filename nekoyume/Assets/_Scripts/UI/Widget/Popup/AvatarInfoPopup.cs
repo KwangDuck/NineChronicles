@@ -377,7 +377,6 @@ namespace Nekoyume.UI
                 case Costume costume:
                 {
                     inventoryItem.EquippedEnabled.Value = true;
-                    _player.EquipCostume(costume);
                     player.EquipCostume(costume);
                     UpdateStatViews();
                     if (costume.ItemSubType == ItemSubType.Title)
@@ -400,12 +399,10 @@ namespace Nekoyume.UI
                         {
                             var armor = (Armor)_armorSlot.Item;
                             var weapon = (Weapon)_weaponSlot.Item;
-                            _player.EquipEquipmentsAndUpdateCustomize(armor, weapon);
                             player.EquipEquipmentsAndUpdateCustomize(armor, weapon);
                             break;
                         }
                         case ItemSubType.Weapon:
-                            _player.EquipWeapon(slot.Item as Weapon);
                             player.EquipWeapon((Weapon)slot.Item);
                             break;
                     }

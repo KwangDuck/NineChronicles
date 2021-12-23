@@ -1,19 +1,17 @@
 using System;
-using System.Runtime.Serialization;
 using Nekoyume.TableData;
 
 namespace Nekoyume.Model.Item
 {
     [Serializable]
-    public class Material : ItemBase, ISerializable
+    public class Material : ItemBase
     {
-        public long ItemId { get; }
-
-        public long FungibleId => ItemId;
+        public override string ItemId { get; }
+        public string FungibleId => ItemId;
 
         public Material(MaterialItemSheet.Row data) : base(data)
         {
-            
+            ItemId = data.ItemId;
         }
 
         protected bool Equals(Material other)

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using Nekoyume.L10n;
@@ -163,7 +164,12 @@ namespace Nekoyume.UI
                     materialSlot.RemoveMaterial();
                     _materialItem = null;
                     SetActiveContainer(false);
-                    materialGuideText.text = L10nManager.Localize("UI_SELECT_MATERIAL_TO_UPGRADE");                    
+                    materialGuideText.text = L10nManager.Localize("UI_SELECT_MATERIAL_TO_UPGRADE");
+                    if (TryGetEnhacementCostRow(_costSheet, _baseItem, out var costRow))
+                    {
+                        _costNcg = costRow.Cost;
+                        UpdateInformation(costRow, _baseItem);
+                    }
                     _animator.Play(state == State.RegisterBase ? HashToPostRegisterBase : HashToUnregisterMaterial);
                     break;
 
@@ -284,13 +290,26 @@ namespace Nekoyume.UI
                 return;
             }
 
-            var sheet = Game.Game.instance.TableSheets.EnhancementCostSheetV2;
+            if (TryGetEnhacementCostRow(_costSheet, _baseItem, out var costRow))
+            {
+                slots.SetCaching(slotIndex, true, costRow.SuccessRequiredBlockIndex, itemUsable: _baseItem);
+            }
 
             NotificationSystem.Push(MailType.Workshop,
                 L10nManager.Localize("NOTIFICATION_ITEM_ENHANCEMENT_START"),
                 NotificationCell.NotificationType.Information);
 
             Game.Game.instance.ActionManager.ItemEnhancementAsync(_baseItem, _materialItem, slotIndex, _costNcg).Subscribe();
+            StartCoroutine(CoCombineNPCAnimation(_baseItem, costRow.SuccessRequiredBlockIndex, () => UpdateState(State.Empty)));
+        }
+
+        private bool TryGetEnhacementCostRow(EnhancementCostSheetV2 sheet, Equipment equipment, out EnhancementCostSheetV2.Row row)
+        {
+            var grade = equipment.Grade;
+            var level = equipment.level + 1;
+            var itemSubType = equipment.ItemSubType;
+            row = sheet.OrderedList.FirstOrDefault(x => x.Grade == grade && x.Level == level && x.ItemSubType == itemSubType);
+            return row != null;
         }
 
         private IEnumerator CoCombineNPCAnimation(ItemBase itemBase,

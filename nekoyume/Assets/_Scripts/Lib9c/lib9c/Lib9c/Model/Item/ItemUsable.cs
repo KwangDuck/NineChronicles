@@ -11,14 +11,16 @@ namespace Nekoyume.Model.Item
     [Serializable]
     public abstract class ItemUsable : ItemBase
     {
-        public int ItemId { get; }
+        public override string ItemId { get; }
+        public string TradableId => ItemId;
+        public string NonFungibleId => ItemId;
         public StatsMap StatsMap { get; }
         public List<Skill.Skill> Skills { get; }
         public List<BuffSkill> BuffSkills { get; }
 
-        protected ItemUsable(ItemSheet.Row data) : base(data)
+        protected ItemUsable(ItemSheet.Row data, string id) : base(data)
         {
-            ItemId = data.Id;
+            ItemId = id;
             StatsMap = new StatsMap();
 
             switch (data)

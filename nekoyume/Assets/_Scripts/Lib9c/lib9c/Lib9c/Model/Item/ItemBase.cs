@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.Serialization;
 using Nekoyume.Model.Elemental;
 using Nekoyume.TableData;
 
@@ -8,6 +7,7 @@ namespace Nekoyume.Model.Item
     [Serializable]
     public abstract class ItemBase : IItem
     {
+        public virtual string ItemId { get; }
         public int Id { get; }
         public int Grade { get; }
         public ItemType ItemType { get; }
@@ -20,15 +20,6 @@ namespace Nekoyume.Model.Item
             ItemType = data.ItemType;
             ItemSubType = data.ItemSubType;
             ElementalType = data.ElementalType;
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
-
         }
 
         protected bool Equals(ItemBase other)
@@ -46,16 +37,6 @@ namespace Nekoyume.Model.Item
         public override int GetHashCode()
         {
             return Id;
-        }
-
-        public override string ToString()
-        {
-            return
-                $"{nameof(Id)}: {Id}" +
-                $", {nameof(Grade)}: {Grade}" +
-                $", {nameof(ItemType)}: {ItemType}" +
-                $", {nameof(ItemSubType)}: {ItemSubType}" +
-                $", {nameof(ElementalType)}: {ElementalType}";
         }
     }
 }

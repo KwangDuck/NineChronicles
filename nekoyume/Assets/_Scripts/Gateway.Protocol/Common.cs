@@ -185,10 +185,9 @@ namespace Gateway.Protocol
 
     public enum ENUM_ItemEnhancementResult
     {
-        None,
-        Fail,
+        GreatSuccess = 0,
         Success,
-        GreatSuccess,
+        Fail,                
     }
 
     public enum ENUM_Event
@@ -414,6 +413,7 @@ namespace Gateway.Protocol
     public class ST_Material
     {
         [Key(0)] public int ItemId { get; set; }
+        [Key(1)] public int Count { get; set; }
     }
 
     // 스탯정보

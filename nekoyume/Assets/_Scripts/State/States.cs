@@ -72,10 +72,14 @@ namespace Nekoyume.State
             var tableSheets = Game.Game.instance.TableSheets;
             CurrentAvatarState.SetInventory(new ST_Inventory
                 {
-                    ConsumableDict = new Dictionary<int, ST_Consumable>(),
-                    CostumeDict = new Dictionary<int, ST_Costume>(),
-                    EquipmentDict = new Dictionary<int, ST_Equipment>(),
-                    MaterialDict = new Dictionary<int, ST_Material>()
+                    ConsumableDict = tableSheets.ConsumableItemSheet.Keys
+                        .ToDictionary(id => id, id => new ST_Consumable { ItemId = id }),
+                    CostumeDict = tableSheets.CostumeItemSheet.Keys
+                        .ToDictionary(id => id, id => new ST_Costume { ItemId = id }),
+                    EquipmentDict = tableSheets.EquipmentItemSheet.Keys
+                        .ToDictionary(id => id, id => new ST_Equipment { ItemId = id }),
+                    MaterialDict = tableSheets.MaterialItemSheet.Keys
+                        .ToDictionary(id => id, id => new ST_Material { ItemId = id, Count = 100 })
                 },
                 tableSheets.ConsumableItemSheet,
                 tableSheets.CostumeItemSheet,

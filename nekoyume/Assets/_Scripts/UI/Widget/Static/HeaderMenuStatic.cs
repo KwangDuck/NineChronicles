@@ -306,9 +306,8 @@ namespace Nekoyume.UI.Module
 
         private void SubscribeInventory(Nekoyume.Model.Item.Inventory inventory)
         {
-            var blockIndex = 0;
             var avatarLevel = States.Instance.CurrentAvatarState?.level ?? 0;
-            var hasNotification = inventory?.HasNotification(avatarLevel, blockIndex) ?? false;
+            var hasNotification = inventory?.HasNotification(avatarLevel) ?? false;
             UpdateInventoryNotification(hasNotification);
         }
 

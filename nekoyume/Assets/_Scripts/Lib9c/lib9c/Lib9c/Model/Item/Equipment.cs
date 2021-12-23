@@ -28,7 +28,7 @@ namespace Nekoyume.Model.Item
             return Math.Max(1.0m, StatsMap.GetStat(UniqueStatType, true) * 0.1m);
         }
 
-        public Equipment(EquipmentItemSheet.Row data) : base(data)
+        public Equipment(EquipmentItemSheet.Row data, string id) : base(data, id)
         {
             Stat = data.Stat;
             SetId = data.SetId;

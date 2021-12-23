@@ -21,7 +21,11 @@ namespace Nekoyume.Model.State
         public int characterId => _avatar.CharacterId;
         public int level => _avatar.Level;
         public long exp => _avatar.Exp;
-        public int actionPoint => _avatar.ActionPoint;
+        public int actionPoint
+        {
+            get => _avatar.ActionPoint;
+            set => _avatar.ActionPoint = value;
+        }
         public int hair => _avatar.Hair;
         public int lens => _avatar.Lens;
         public int ear => _avatar.Ear;
@@ -56,12 +60,38 @@ namespace Nekoyume.Model.State
             EquipmentItemSheet equipmentItemSheet,
             MaterialItemSheet materialItemSheet)
         {
-            var items = new List<Inventory.Item>();
-            items.AddRange(inventory.ConsumableDict.Values.Select(item => ItemFactory.CreateConsumableItem(consumableItemSheets.GetValue(item.ItemId))).OfType<Inventory.Item>());
-            items.AddRange(inventory.CostumeDict.Values.Select(item => ItemFactory.CreateCostume(costumeItemSheet.GetValue(item.ItemId))).OfType<Inventory.Item>());
-            items.AddRange(inventory.EquipmentDict.Values.Select(item => ItemFactory.CreateItemUsable(equipmentItemSheet.GetValue(item.ItemId))).OfType<Inventory.Item>());
-            items.AddRange(inventory.MaterialDict.Values.Select(item => ItemFactory.CreateMaterial(materialItemSheet.GetValue(item.ItemId))).OfType<Inventory.Item>());
-            this.inventory = new Inventory(items);
+            // consumable
+            foreach (var entry in inventory.ConsumableDict)
+            {
+                var itemId = entry.Key;
+                var item = ItemFactory.CreateConsumableItem(consumableItemSheets.GetValue(itemId));
+                this.inventory.AddNonFungibleItem(item);
+            }
+
+            // costume
+            foreach (var entry in inventory.CostumeDict)
+            {
+                var itemId = entry.Key;
+                var item = ItemFactory.CreateCostume(costumeItemSheet.GetValue(itemId));
+                this.inventory.AddNonFungibleItem(item);
+            }
+
+            // equipment
+            foreach (var entry in inventory.EquipmentDict)
+            {
+                var itemId = entry.Key;
+                var item = ItemFactory.CreateItemUsable(equipmentItemSheet.GetValue(itemId));
+                this.inventory.AddNonFungibleItem(item);
+            }
+
+            // material
+            foreach (var entry in inventory.MaterialDict)
+            {
+                var itemId = entry.Key;
+                var count = entry.Value.Count;
+                var item = ItemFactory.CreateMaterial(materialItemSheet.GetValue(itemId));
+                this.inventory.AddFungibleItem(item, count);
+            }
         }
 
         public void SetWorldAndStage(ST_WorldInfo worldInfo, WorldSheet worldSheet)
@@ -172,6 +202,12 @@ namespace Nekoyume.Model.State
         {
             // TODO: update quest
             UpdateFromAddItem(itemUsable, false);
+        }
+
+        public void UpdateFromItemEnhancement(Equipment equipment)
+        {
+            // TODO: update quest
+            UpdateFromAddItem(equipment, false);
         }
 
         public void UpdateFromAddItem(ItemUsable itemUsable, bool canceled)

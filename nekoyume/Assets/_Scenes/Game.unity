@@ -1239,7 +1239,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 726280532f2275f479ed16c6668bbd6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  entryTarget: http://100.70.0.184:4005
+  entryTarget: http://100.70.0.184:4005/api/retrieve/gateway
   targetAddress: 100.70.0.184
   targetPort: 5005
   entryRequestTimeout: 5

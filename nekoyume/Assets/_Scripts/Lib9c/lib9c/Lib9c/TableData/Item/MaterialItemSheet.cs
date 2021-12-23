@@ -10,6 +10,7 @@ namespace Nekoyume.TableData
         [Serializable]
         public class Row : ItemSheet.Row
         {
+            public string ItemId => $"{Id}:{Grade}";
             public override ItemType ItemType => ItemType.Material;
         }
 

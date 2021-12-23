@@ -68,6 +68,9 @@ namespace Nekoyume.UI
 
         public bool TryGetEmptyCombinationSlot(out int slotIndex)
         {
+            slotIndex = default;
+            return true;
+
             // TOOD...
             UpdateSlots(0);
             for (var i = 0; i < slots.Count; i++)

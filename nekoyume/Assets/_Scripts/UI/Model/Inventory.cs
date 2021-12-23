@@ -353,8 +353,8 @@ namespace Nekoyume.UI.Model
             }
 
             foreach (var item in Materials)
-            {
-                if (item.ItemBase.Value.Id != material.ItemId)
+            {                
+                if ((item.ItemBase.Value as Material).ItemId.Equals(material.ItemId))
                 {
                     continue;
                 }

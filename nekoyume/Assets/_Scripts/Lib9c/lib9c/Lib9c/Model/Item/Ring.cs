@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.Serialization;
 using Nekoyume.TableData;
 
 namespace Nekoyume.Model.Item
@@ -7,7 +6,7 @@ namespace Nekoyume.Model.Item
     [Serializable]
     public class Ring : Equipment
     {
-        public Ring(EquipmentItemSheet.Row data) : base(data)
+        public Ring(EquipmentItemSheet.Row data, string id) : base(data, id)
         {
         }
     }

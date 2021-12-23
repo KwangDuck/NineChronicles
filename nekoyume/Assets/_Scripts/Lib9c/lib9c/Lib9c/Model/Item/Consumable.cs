@@ -13,7 +13,7 @@ namespace Nekoyume.Model.Item
 
         public List<StatMap> Stats { get; }
 
-        public Consumable(ConsumableItemSheet.Row data) : base(data)
+        public Consumable(ConsumableItemSheet.Row data, string id) : base(data, id)
         {
             Stats = data.Stats;
         }

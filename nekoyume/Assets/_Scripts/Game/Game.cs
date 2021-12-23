@@ -40,12 +40,12 @@ namespace Nekoyume.Game
 
         public const string AddressableAssetsContainerPath = nameof(AddressableAssetsContainer);
 
-        private CommandLineOptions _options;
+        //private CommandLineOptions _options;
 
         private string _msg;
 
-        private static readonly string CommandLineOptionsJsonPath =
-            Path.Combine(Application.streamingAssetsPath, "clo.json");
+        //private static readonly string CommandLineOptionsJsonPath =
+        //    Path.Combine(Application.streamingAssetsPath, "clo.json");
 
         #region Mono & Initialization
 
@@ -57,9 +57,9 @@ namespace Nekoyume.Game
             Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
             base.Awake();
 
-            _options = CommandLineOptions.Load(
-                CommandLineOptionsJsonPath
-            );
+            //_options = CommandLineOptions.Load(
+            //    CommandLineOptionsJsonPath
+            //);
 
             Debug.Log("[Game] Awake() CommandLineOptions loaded");
 
@@ -74,18 +74,7 @@ namespace Nekoyume.Game
             Debug.Log("[Game] Start() Gateway Connect");
             yield return StartCoroutine(gatewayService.Connect());
 
-#if UNITY_EDITOR
-            if (useSystemLanguage)
-            {
-                yield return L10nManager.Initialize().ToYieldInstruction();
-            }
-            else
-            {
-                yield return L10nManager.Initialize(languageType).ToYieldInstruction();
-            }
-#else
-            yield return L10nManager.Initialize(LanguageTypeMapper.ISO396(_options.Language)).ToYieldInstruction();
-#endif
+            yield return L10nManager.Initialize(languageType).ToYieldInstruction();
             Debug.Log("[Game] Start() L10nManager initialized");
 
             // Initialize MainCanvas first
@@ -329,7 +318,7 @@ namespace Nekoyume.Game
         {
             var settings = Widget.Find<UI.SettingPopup>();
             settings.UpdateSoundSettings();
-            settings.UpdatePrivateKey(_options.PrivateKey);
+            //settings.UpdatePrivateKey(_options.PrivateKey);
 
             // login
             var loginAsync = ActionManager.LoginAsync().ToYieldInstruction();
@@ -338,6 +327,7 @@ namespace Nekoyume.Game
 
             // init avatar info
             States.SetAvatarInfo(res.AvatarInfo);
+            States.SelectAvatar(States.CurrentAvatarKey);
 
             yield return null;
 
@@ -358,13 +348,7 @@ namespace Nekoyume.Game
                 {
                     return;
                 }
-
-                var keyPath = _options.KeyStorePath;
-                if (Directory.Exists(keyPath))
-                {
-                    Directory.Delete(keyPath, true);
-                }
-
+                
 #if UNITY_EDITOR
                 UnityEditor.EditorApplication.ExitPlaymode();
 #else
