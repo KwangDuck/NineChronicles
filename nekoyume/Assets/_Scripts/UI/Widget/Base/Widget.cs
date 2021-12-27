@@ -139,7 +139,7 @@ namespace Nekoyume.UI
             }
 
             var widgetType = res.GetComponent<T>().WidgetType;
-            var go = Instantiate(res, MainCanvas.instance.GetLayerRootTransform(widgetType));
+            var go = Instantiate(res, MainCanvas.instance.GetLayerRootTransform(widgetType, activate));
             var widget = go.GetComponent<T>();
             switch (widget.WidgetType)
             {
@@ -165,18 +165,24 @@ namespace Nekoyume.UI
             }
 
             go.SetActive(activate);
+            widget.Initialize();
             return widget;
         }
 
         public static T Find<T>() where T : Widget
         {
             var type = typeof(T);
-            if (!Pool.TryGetValue(type, out var model))
+            Widget widget = null;
+            if (Pool.TryGetValue(type, out var model))
             {
-                throw new WidgetNotFoundException(type.Name);
+                widget = model.widget;
+            }
+            else
+            {
+                widget = Create<T>();
             }
 
-            return (T) model.widget;
+            return (T) widget;
         }
 
         public static bool TryFind<T>(out T widget) where T : Widget
@@ -264,6 +270,7 @@ namespace Nekoyume.UI
 
         public virtual void Show(bool ignoreShowAnimation = false)
         {
+            SetRootLayer();
             if (!(_coClose is null))
             {
                 StopCoroutine(_coClose);
@@ -311,6 +318,7 @@ namespace Nekoyume.UI
                 OnCompleteOfCloseAnimation();
                 gameObject.SetActive(false);
                 AnimationState.Value = AnimationStateType.Closed;
+                SetRootLayer(false);
                 return;
             }
 
@@ -377,6 +385,7 @@ namespace Nekoyume.UI
 
             gameObject.SetActive(false);
             AnimationState.Value = AnimationStateType.Closed;
+            SetRootLayer(false);
         }
 
         private IEnumerator CoCompleteCloseAnimation()
@@ -456,6 +465,13 @@ namespace Nekoyume.UI
                 WidgetHandler.Instance.HideAllMessageCat();
                 CloseWidget?.Invoke();
             }
+        }
+
+        private void SetRootLayer(bool activate = true)
+        {
+            var root = MainCanvas.instance.GetLayerRootTransform(WidgetType, activate);
+            transform.SetParent(root);
+            transform.SetAsLastSibling();
         }
     }
 }

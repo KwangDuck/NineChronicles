@@ -72,6 +72,9 @@ namespace Nekoyume.UI
         [SerializeField]
         private CanvasLayer developmentLayer = default;
 
+        [SerializeField]
+        private CanvasLayer poolingLayer = default;
+
 
 
         private List<CanvasLayer> _layers;
@@ -117,9 +120,9 @@ namespace Nekoyume.UI
             }
         }
 
-        public Transform GetLayerRootTransform(WidgetType widgetType)
+        public Transform GetLayerRootTransform(WidgetType widgetType, bool activate = true)
         {
-            return GetLayer(widgetType).root.transform;
+            return activate ? GetLayer(widgetType).root.transform : poolingLayer.root.transform;
         }
 
         protected override void Awake()
@@ -146,6 +149,7 @@ namespace Nekoyume.UI
                     systemLayer,
                     developmentLayer,
                     tutorialMaskLayer,
+                    poolingLayer,
                 };
             }
 
@@ -203,23 +207,23 @@ namespace Nekoyume.UI
             var secondWidgets = new List<Widget>();
 
             // 일반.
-            secondWidgets.Add(Widget.Create<Synopsis>());
-            yield return null;
+            // secondWidgets.Add(Widget.Create<Synopsis>());
+            // yield return null;
             secondWidgets.Add(Widget.Create<Login>());
             yield return null;
-            secondWidgets.Add(Widget.Create<LoginDetail>());
-            yield return null;
+            // secondWidgets.Add(Widget.Create<LoginDetail>());
+            // yield return null;
             secondWidgets.Add(Widget.Create<Menu>());
             yield return null;
-            secondWidgets.Add(Widget.Create<RankingBattleLoadingScreen>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<ArenaBattleLoadingScreen>());
-            yield return null;
+            // secondWidgets.Add(Widget.Create<RankingBattleLoadingScreen>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<ArenaBattleLoadingScreen>());
+            // yield return null;
             // 메뉴보단 더 앞에 나와야 합니다.
-            secondWidgets.Add(Widget.Create<Battle>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<Blind>());
-            yield return null;
+            // secondWidgets.Add(Widget.Create<Battle>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<Blind>());
+            // yield return null;
             secondWidgets.Add(Widget.Create<ShopSell>());
             yield return null;
             secondWidgets.Add(Widget.Create<ShopBuy>());
@@ -232,104 +236,104 @@ namespace Nekoyume.UI
             yield return null;
             secondWidgets.Add(Widget.Create<Status>());
             yield return null;
-            secondWidgets.Add(Widget.Create<RankingBoard>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<MimisbrunnrPreparation>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<EventBanner>());
-            yield return null;
+            // secondWidgets.Add(Widget.Create<RankingBoard>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<MimisbrunnrPreparation>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<EventBanner>());
+            // yield return null;
 
             // loading
             secondWidgets.Add(Widget.Create<StageLoadingEffect>());
             yield return null;
 
             // module
-            secondWidgets.Add(Widget.Create<StageTitle>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<CombinationMain>());
-            yield return null;
+            // secondWidgets.Add(Widget.Create<StageTitle>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<CombinationMain>());
+            // yield return null;
             secondWidgets.Add(Widget.Create<Craft>());
             yield return null;
-            secondWidgets.Add(Widget.Create<UpgradeEquipment>());
-            yield return null;
+            // secondWidgets.Add(Widget.Create<UpgradeEquipment>());
+            // yield return null;
 
             // header menu
-            secondWidgets.Add(Widget.Create<HeaderMenuStatic>());
-            yield return null;
+            // secondWidgets.Add(Widget.Create<HeaderMenuStatic>());
+            // yield return null;
 
             // Popup included in header menu
-            secondWidgets.Add(Widget.Create<MailPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<QuestPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<AvatarInfoPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<CombinationSlotsPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<RankPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<ChatPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<QuitSystem>());
-            yield return null;
+            // secondWidgets.Add(Widget.Create<MailPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<QuestPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<AvatarInfoPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<CombinationSlotsPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<RankPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<ChatPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<QuitSystem>());
+            // yield return null;
 
             // Over than HeaderMenu
-            secondWidgets.Add(Widget.Create<RankingBattleResultPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<ItemCountAndPricePopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<Alert>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<InputBoxPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<MonsterCollectionRewardsPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<CombinationResultPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<EnhancementResultPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<BattleResultPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<ItemCountableAndPricePopup>());
-            yield return null;
+            // secondWidgets.Add(Widget.Create<RankingBattleResultPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<ItemCountAndPricePopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<Alert>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<InputBoxPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<MonsterCollectionRewardsPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<CombinationResultPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<EnhancementResultPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<BattleResultPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<ItemCountableAndPricePopup>());
+            // yield return null;
 
             // popup
-            secondWidgets.Add(Widget.Create<CombinationSlotPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<BuyItemInformationPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<DialogPopup>());
-            yield return null;
-            //secondWidgets.Add(Widget.Create<CodeRewardPopup>());
+            // secondWidgets.Add(Widget.Create<CombinationSlotPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<BuyItemInformationPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<DialogPopup>());
+            // yield return null;
+            
             //yield return null;
-            secondWidgets.Add(Widget.Create<DailyRewardItemPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<PrologueDialogPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<CombinationLoadingScreen>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<ConfirmPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<BoosterPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<CelebratesPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<FriendInfoPopup>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<LevelUpCelebratePopup>());
-            yield return null;
+            // secondWidgets.Add(Widget.Create<DailyRewardItemPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<PrologueDialogPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<CombinationLoadingScreen>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<ConfirmPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<BoosterPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<CelebratesPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<FriendInfoPopup>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<LevelUpCelebratePopup>());
+            // yield return null;
 
             // tooltip
-            secondWidgets.Add(Widget.Create<ItemInformationTooltip>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<AvatarTooltip>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<HelpTooltip>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<VanilaTooltip>());
-            yield return null;
-            secondWidgets.Add(Widget.Create<MessageCatTooltip>(true));
-            yield return null;
+            // secondWidgets.Add(Widget.Create<ItemInformationTooltip>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<AvatarTooltip>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<HelpTooltip>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<VanilaTooltip>());
+            // yield return null;
+            // secondWidgets.Add(Widget.Create<MessageCatTooltip>(true));
+            // yield return null;
 
             // tutorial
             secondWidgets.Add(Widget.Create<Tutorial>());
