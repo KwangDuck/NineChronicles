@@ -122,6 +122,8 @@ namespace Nekoyume.UI
             _sharedViewModel = viewModel;
             UpdateStageInformation(_sharedViewModel.SelectedStageId.Value, States.Instance.CurrentAvatarState.level);
             
+            _sharedViewModel.WorldInformation.TryGetWorld(worldRow.Id, out var worldModel);
+
             _sharedViewModel.SelectedStageId
                 .Subscribe(stageId => UpdateStageInformation(
                     stageId,
@@ -141,7 +143,22 @@ namespace Nekoyume.UI
             _stageType = stageType;
 
             world.Set(worldRow);
-            LockWorld();
+
+            if(worldModel.IsUnlocked)
+            {
+                var openedStageId = worldModel.GetNextStageIdForPlay();
+                if(worldModel.StageEnd < worldRow.StageEnd &&
+                    openedStageId == worldModel.StageEnd && 
+                    openedStageId == worldModel.StageClearedId)
+                {
+                    openedStageId += 1;
+                }
+                UnlockWorld(openedStageId, worldModel.GetNextStageId());
+            }
+            else
+            {
+                LockWorld();
+            }            
 
             base.Show(true);
             

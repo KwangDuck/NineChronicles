@@ -96,7 +96,7 @@ namespace Nekoyume.Model.State
 
         public void SetWorldAndStage(ST_WorldInfo worldInfo, WorldSheet worldSheet)
         {
-            worldInformation = new WorldInformation(worldSheet, GameConfig.IsEditor);
+            worldInformation = new WorldInformation(worldSheet, worldInfo.LastWorldId, worldInfo.LastStageId, GameConfig.IsEditor);
         }
 
         public void SetQuestList(AvatarSheets avatarSheets)

@@ -1108,7 +1108,7 @@ namespace Nekoyume.Game
                                     Widget.Find<BattleResultPopup>().IsActive())
                         {
                             Widget.Find<BattleResultPopup>().NextMimisbrunnrStage(log);
-                        }
+                        }                        
                     }
                 });
         }
@@ -1211,6 +1211,9 @@ namespace Nekoyume.Game
                         simulator.Simulate(playCount);
                         var log = simulator.Log;
                         Game.instance.Stage.PlayCount = playCount;
+
+                        if(log.IsClear)                        
+                            simulator.Player.worldInformation.ClearStage(worldId, stageId, Game.instance.TableSheets.WorldSheet, Game.instance.TableSheets.WorldUnlockSheet);
 
                         // update avatar state
                         var avatarState = States.Instance.CurrentAvatarState;
