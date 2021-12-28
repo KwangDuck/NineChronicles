@@ -17,6 +17,7 @@ namespace Nekoyume.Game.Util
         void ReleaseAll();
 
         GameObject Get(string objName, bool create, Vector3 position = default);
+        
     }
 
     [Serializable]
@@ -32,6 +33,7 @@ namespace Nekoyume.Game.Util
         public class Impl : IObjectPool
         {
             private Transform _parent;
+            private Transform _parentOfDisables;
 
             private readonly Dictionary<string, PoolData> _dict =
                 new Dictionary<string, PoolData>();
@@ -48,6 +50,8 @@ namespace Nekoyume.Game.Util
 
                 _parent = parent;
 
+                SetPoolParent();
+
                 if (list is null)
                 {
                     return;
@@ -60,12 +64,22 @@ namespace Nekoyume.Game.Util
                 }
             }
 
+            private void SetPoolParent()
+            {
+                GameObject go = new GameObject("pool");
+                go.transform.SetParent(_parent);
+                _parentOfDisables = go.transform;
+            }
+
             public GameObject Add(GameObject prefab, int count)
             {
                 GameObject first = null;
                 for (int i = 0; i < count; ++i)
                 {
-                    var go = Instantiate(prefab, _parent);
+                    var go = Instantiate(prefab, _parentOfDisables);
+                    var pooled = go.AddComponent<PooledObject>();
+                    if(pooled != null)
+                        pooled.onDispose = OnDispose;
                     if (!first)
                     {
                         first = go;
@@ -92,6 +106,7 @@ namespace Nekoyume.Game.Util
                 {
                     foreach (var go in list.Where(go => !go.activeSelf))
                     {
+                        go.transform.SetParent(_parent);
                         go.transform.position = position;
                         go.SetActive(true);
                         return go.GetComponent<T>();
@@ -101,6 +116,8 @@ namespace Nekoyume.Game.Util
                 if (_dict.TryGetValue(name, out var poolData))
                 {
                     var go = Add(poolData.Prefab, poolData.AddCount);
+
+                    go.transform.SetParent(_parent);
                     go.transform.position = position;
                     go.SetActive(true);
                     return go.GetComponent<T>();
@@ -182,11 +199,18 @@ namespace Nekoyume.Game.Util
                     return null;
                 }
 
-                var go = Instantiate(objectsList.First(), _parent);
+                var go = Instantiate(objectsList.First(), _parentOfDisables);
+                var pooled = go.AddComponent<PooledObject>();
+                    if(pooled != null)
+                        pooled.onDispose = OnDispose;
                 go.name = prefabName;
                 go.SetActive(false);
                 objectsList.Add(go);
                 return go;
+            }
+
+            private void OnDispose(GameObject target) {
+                target.transform.parent = _parentOfDisables;
             }
         }
 

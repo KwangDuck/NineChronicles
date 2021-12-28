@@ -18,6 +18,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Nekoyume.UI.Scroller;
+using Nekoyume.Game.Util;
 
 namespace Nekoyume.UI
 {
@@ -347,9 +348,10 @@ namespace Nekoyume.UI
                 ignoreCloseAnimation ? 0f : .3f,
                 true,
                 () =>
-                {
-                    _npc.gameObject.SetActive(false);
-                        _npc = null;
+                {                    
+                    // _npc.gameObject.SetActive(false);
+                    _npc?.gameObject.Despawn();
+                    _npc = null;
                 });
         }
 

@@ -16,6 +16,7 @@ using UnityEngine.Rendering;
 
 namespace Nekoyume.Game.Character
 {
+    using Util;
     public abstract class CharacterBase : MonoBehaviour
     {
         protected const float AnimatorTimeScale = 1.2f;
@@ -282,7 +283,8 @@ namespace Nekoyume.Game.Character
         protected virtual void OnDeadEnd()
         {
             Animator.Idle();
-            gameObject.SetActive(false);
+            //gameObject.SetActive(false);
+            gameObject.Despawn();
             actions.Clear();
         }
 

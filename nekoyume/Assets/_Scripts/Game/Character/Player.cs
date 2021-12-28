@@ -15,6 +15,7 @@ namespace Nekoyume.Game.Character
     // System.IDisposable Subscribe<T>(this IObservable<T>, Action<T>)
     // System.ObservableExtensions and UniRx.ObservableExtensions
     using UniRx;
+    using Util;
 
     // todo: 경험치 정보를 `CharacterBase`로 옮기는 것이 좋겠음.
     public class Player : CharacterBase
@@ -173,7 +174,8 @@ namespace Nekoyume.Game.Character
 
         protected override void OnDeadEnd()
         {
-            gameObject.SetActive(false);
+            //gameObject.SetActive(false);
+            gameObject.Despawn();
             Event.OnPlayerDead.Invoke();
         }
 

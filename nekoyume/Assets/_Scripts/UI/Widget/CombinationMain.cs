@@ -5,6 +5,7 @@ using Nekoyume.Game.Character;
 using Nekoyume.Game.Controller;
 using UnityEngine;
 using UnityEngine.UI;
+using Nekoyume.Game.Util;
 
 namespace Nekoyume.UI
 {
@@ -100,8 +101,9 @@ namespace Nekoyume.UI
             base.Close(ignoreCloseAnimation);
 
             if (_npc)
-            {
-                _npc.SpineController.SkeletonAnimation.skeleton.A = 0;
+            {                
+                // _npc.SpineController.SkeletonAnimation.skeleton.A = 0;
+                _npc?.gameObject.Despawn();
                 _npc = null;
             }
         }

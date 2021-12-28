@@ -1,6 +1,7 @@
 using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
+using Nekoyume.Game.Util;
 
 namespace Nekoyume.Game.VFX
 {
@@ -105,7 +106,8 @@ namespace Nekoyume.Game.VFX
 
         public virtual void Stop()
         {
-            gameObject.SetActive(false);
+            //gameObject.SetActive(false);
+            gameObject.Despawn();
             _isPlaying = false;
         }
 

@@ -13,6 +13,7 @@ using Nekoyume.UI.Scroller;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Nekoyume.Game.Util;
 
 namespace Nekoyume.UI
 {
@@ -173,7 +174,8 @@ namespace Nekoyume.UI
         {
             _disposablesFromShow.DisposeAllAndClear();
             base.Close(ignoreCloseAnimation);
-            _npc?.gameObject.SetActive(false);
+            //_npc?.gameObject.SetActive(false);
+            _npc?.gameObject.Despawn();
             speechBubble.Hide();
         }
 

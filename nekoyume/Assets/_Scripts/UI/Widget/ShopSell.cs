@@ -15,6 +15,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 using ShopItem = Nekoyume.UI.Model.ShopItem;
+using Nekoyume.Game.Util;
 
 namespace Nekoyume.UI
 {
@@ -58,7 +59,8 @@ namespace Nekoyume.UI
                 Find<ItemCountableAndPricePopup>().Close();
                 Find<ShopBuy>().gameObject.SetActive(true);
                 Find<ShopBuy>().Open();
-                _npc?.gameObject.SetActive(false);
+                //_npc?.gameObject.SetActive(false);
+                _npc?.gameObject.Despawn();
                 gameObject.SetActive(false);
             });
 
@@ -140,6 +142,7 @@ namespace Nekoyume.UI
             shopItems.Close();
             Find<TwoButtonSystem>().Close();
             Find<ItemCountableAndPricePopup>().Close();
+            _npc?.gameObject.Despawn();
             speechBubble.gameObject.SetActive(false);
             Find<ShopBuy>().ForceClose();
             base.Close(ignoreCloseAnimation);

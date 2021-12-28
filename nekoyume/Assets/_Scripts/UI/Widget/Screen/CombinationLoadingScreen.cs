@@ -12,6 +12,7 @@ using Nekoyume.UI.Module;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Nekoyume.Game.Util;
 
 namespace Nekoyume.UI
 {
@@ -174,7 +175,9 @@ namespace Nekoyume.UI
             }
 
             yield return new WaitForSeconds(.5f);
-            _npc.gameObject.SetActive(false);
+            //_npc.gameObject.SetActive(false);
+            _npc.gameObject.Despawn();
+
             speechBubble.Hide();
             OnDisappear?.Invoke();
             _closeAction?.Invoke();

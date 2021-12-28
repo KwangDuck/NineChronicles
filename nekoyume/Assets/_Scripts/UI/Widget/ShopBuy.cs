@@ -13,6 +13,7 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 using ShopItem = Nekoyume.UI.Model.ShopItem;
+using Nekoyume.Game.Util;
 
 namespace Nekoyume.UI
 {
@@ -58,7 +59,8 @@ namespace Nekoyume.UI
                     Find<ItemCountAndPricePopup>().Close();
                     Find<ShopSell>().gameObject.SetActive(true);
                     Find<ShopSell>().Show();
-                    _npc?.gameObject.SetActive(false);
+                    // _npc?.gameObject.SetActive(false);
+                    _npc?.gameObject.Despawn();
                     gameObject.SetActive(false);
                 });
             });
@@ -135,7 +137,8 @@ namespace Nekoyume.UI
                 return;
             }
 
-            _npc?.gameObject.SetActive(false);
+            //_npc?.gameObject.SetActive(false);
+            _npc?.gameObject.Despawn();
             shopItems.Close();
             Find<ItemCountAndPricePopup>().Close();
             Game.Event.OnRoomEnter.Invoke(true);
@@ -144,7 +147,8 @@ namespace Nekoyume.UI
 
         public void ForceClose()
         {
-            _npc?.gameObject.SetActive(false);
+            // _npc?.gameObject.SetActive(false);
+            _npc?.gameObject.Despawn();
             shopItems.Close();
             Find<ItemCountAndPricePopup>().Close();
             Close(true);

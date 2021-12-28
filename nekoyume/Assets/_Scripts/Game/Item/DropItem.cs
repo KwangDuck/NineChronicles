@@ -6,6 +6,7 @@ using Nekoyume.UI;
 using UnityEngine;
 using Nekoyume.UI.Module;
 using Nekoyume.Model.Item;
+using Nekoyume.Game.Util;
 
 namespace Nekoyume.Game.Item
 {
@@ -111,7 +112,8 @@ namespace Nekoyume.Game.Item
             headerMenu.PlayVFX(ItemMoveAnimation.EndPoint.Inventory);
 
             Event.OnGetItem.Invoke(this);
-            gameObject.SetActive(false);
+            //gameObject.SetActive(false);
+            gameObject.Despawn();
         }
 
         private void UpdateInventoryPosition()
