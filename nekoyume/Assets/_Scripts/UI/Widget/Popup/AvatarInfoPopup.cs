@@ -544,6 +544,23 @@ namespace Nekoyume.UI
         private void LocalStateItemEquipModify(ItemBase itemBase, bool equip)
         {
             var avatarState = States.Instance.CurrentAvatarState;
+
+            IEquippableItem equippableItem = null;
+            equippableItem = itemBase.ItemType switch
+            {
+                ItemType.Equipment => avatarState.inventory.Equipments.Where(item => item.ItemId == itemBase.ItemId).FirstOrDefault(),
+                ItemType.Costume => avatarState.inventory.Costumes.Where(item => item.ItemId == itemBase.ItemId).FirstOrDefault(),
+                _ => null,                
+            };
+                        
+            if(equippableItem != null)
+            {
+                if(equip)
+                    equippableItem.Equip();            
+                else            
+                    equippableItem.Unequip();            
+            }                                        
+            
             ReactiveAvatarState.UpdateInventory(avatarState.inventory);
         }
 

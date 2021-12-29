@@ -338,20 +338,7 @@ namespace Nekoyume.UI
             // tutorial
             secondWidgets.Add(Widget.Create<Tutorial>());
             yield return null;
-
-            Widget last = null;
-            foreach (var value in secondWidgets)
-            {
-                if (value is null)
-                {
-                    Debug.LogWarning($"value is null. last is {last.name}");
-                    continue;
-                }
-
-                value.Initialize();
-                yield return null;
-                last = value;
-            }
+            
             Widgets.AddRange(secondWidgets);
             UpdateLayers();
 

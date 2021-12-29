@@ -160,7 +160,7 @@ namespace Nekoyume.Model.State
                 var equippableCostume = equippedCostumes.Where(item => item.Id == costume.Id).FirstOrDefault();
                 if (equippableCostume != null)
                 {
-                    equippableCostume.Unequip();
+                    equippableCostume.Equip();
                 }
             }
         }
